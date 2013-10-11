@@ -279,7 +279,7 @@ var engine = function() {
          TR_STATUS_DOWNLOAD       = 4, // Downloading
          TR_STATUS_SEED_WAIT      = 5, // Queued to seed
          TR_STATUS_SEED           = 6  // Seeding
-        */
+         */
         if (code === 0) {
             uCode = 136;
             Status = "Stopped";
@@ -362,7 +362,13 @@ var engine = function() {
                 for (var i = 0; i < l; i++) {
                     var field = value[i];
                     var item = ["", 0, "", 0, 0, 0, 0, 0, 0, 0, 0, "", 0, 0, 0, 0, 0, 0, 0, "", "", "", "", 0, 0, "", "", 0];
-                    var utStatus = readTransmStatus(field.status);
+                    var utStatus = [];
+                    if (field.error > 0) {
+                        utStatus[0] = 144;
+                        utStatus[1] = field.errorString;
+                    } else {
+                        utStatus = readTransmStatus(field.status);
+                    }
                     item[0] = field.id;
                     item[1] = utStatus[0];
                     item[2] = field.name;
@@ -418,8 +424,8 @@ var engine = function() {
                             file[1] = f_item.length;
                             file[2] = f_item.bytesCompleted;
                             file[3] = s_item.priority;
+                            ut['files'][1].push(file);
                         }
-                        ut['files'][1].push(file);
                     }
                     ut[type].push(item);
                 }
@@ -472,12 +478,48 @@ var engine = function() {
             var val = key_val[1];
             params[key] = val;
         }
-        console.log(params);
+        console.log("url params", params);
         var data = {};
         if ('action' in params && params.action === 'getfiles') {
             var id = parseInt(params.hash);
             data['method'] = "torrent-get";
-            data['arguments'] = {fields: ["id", "name", "totalSize", "percentDone", 'downloadedEver', 'uploadedEver', 'rateUpload', 'rateDownload', 'eta', 'peersSendingToUs', 'peersGettingFromUs', 'queuePosition', 'addedDate', 'doneDate', 'downloadDir', 'recheckProgress', 'status', 'files', 'fileStats']};
+            data['arguments'] = {fields: ["id", "name", "totalSize", "percentDone", 'downloadedEver', 'uploadedEver', 'rateUpload', 'rateDownload', 'eta', 'peersSendingToUs', 'peersGettingFromUs', 'queuePosition', 'addedDate', 'doneDate', 'downloadDir', 'recheckProgress', 'status', 'error', 'errorString', 'files', 'fileStats']};
+            data.arguments['ids'] = [id];
+        } else
+        if ('action' in params && params.action === 'start') {
+            var id = parseInt(params.hash);
+            data['method'] = "torrent-start";
+            data['arguments'] = {};
+            data.arguments['ids'] = [id];
+        } else
+        if ('action' in params && params.action === 'forcestart') {
+            var id = parseInt(params.hash);
+            data['method'] = "torrent-start-now";
+            data['arguments'] = {};
+            data.arguments['ids'] = [id];
+        } else
+        if ('action' in params && params.action === 'stop') {
+            var id = parseInt(params.hash);
+            data['method'] = "torrent-stop";
+            data['arguments'] = {};
+            data.arguments['ids'] = [id];
+        } else
+        if ('action' in params && params.action === 'recheck') {
+            var id = parseInt(params.hash);
+            data['method'] = "torrent-verify";
+            data['arguments'] = {};
+            data.arguments['ids'] = [id];
+        } else
+        if ('action' in params && (params.action === 'remove' || params.action === 'removetorrent')) {
+            var id = parseInt(params.hash);
+            data['method'] = "torrent-remove";
+            data['arguments'] = {};
+            data.arguments['ids'] = [id];
+        } else
+        if ('action' in params && (params.action === 'removedata' || params.action === 'removedatatorrent')) {
+            var id = parseInt(params.hash);
+            data['method'] = "torrent-remove";
+            data['arguments'] = {"delete-local-data": true};
             data.arguments['ids'] = [id];
         } else
         if ('action' in params && params.action === 'getsettings') {
@@ -485,7 +527,7 @@ var engine = function() {
         } else
         if ('list' in params) {
             data['method'] = "torrent-get";
-            data['arguments'] = {fields: ["id", "name", "totalSize", "percentDone", 'downloadedEver', 'uploadedEver', 'rateUpload', 'rateDownload', 'eta', 'peersSendingToUs', 'peersGettingFromUs', 'queuePosition', 'addedDate', 'doneDate', 'downloadDir', 'recheckProgress', 'status']};
+            data['arguments'] = {fields: ["id", "name", "totalSize", "percentDone", 'downloadedEver', 'uploadedEver', 'rateUpload', 'rateDownload', 'eta', 'peersSendingToUs', 'peersGettingFromUs', 'queuePosition', 'addedDate', 'doneDate', 'downloadDir', 'recheckProgress', 'status', 'error', 'errorString']};
             if ('cid' in params && parseInt(params.cid) !== 0) {
                 data.arguments['ids'] = "recently-active";
             }

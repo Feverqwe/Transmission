@@ -1017,7 +1017,7 @@ var manager = function() {
                     }
                     break;
                 case ('inacive'):
-                    if (param[9] == 0 || param[8] == 0) {
+                    if (param[9] == 0 && param[8] == 0) {
                         tr_table_controller.show(id);
                     } else
                     if (display) {
@@ -1310,7 +1310,6 @@ var manager = function() {
             //transmission
             sel_en[4] = 0;
             sel_en[5] = 0;
-            sel_en[2] = 0;
             //<<<<<<<<<<<
             return {'start': sel_en[1], 'force_start': sel_en[2], 'stop': sel_en[3], 'pause': sel_en[4], 'unpause': sel_en[5], 'recheck': sel_en[6]};
         };
