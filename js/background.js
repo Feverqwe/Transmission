@@ -2,15 +2,15 @@ var engine = function() {
     var def_settings = {
         ssl: {"v": 0, "t": "checkbox"},
         ut_ip: {"v": "127.0.0.1", "t": "text"},
-        ut_port: {"v": 8080, "t": "number"},
-        ut_path: {"v": "gui/", "t": "text"},
+        ut_port: {"v": 9091, "t": "number"},
+        ut_path: {"v": "transmission/rpc", "t": "text"},
         show_active_tr_on_icon: {"v": 1, "t": "checkbox"},
         notify_on_dl_comp: {"v": 1, "t": "checkbox"},
         bg_update_interval: {"v": 60000 * 2, "t": "number"},
         mgr_update_interval: {"v": 2000, "t": "number"},
         notify_visbl_interval: {"v": 5000, "t": "number"},
-        login: {"v": null, "t": "text"},
-        password: {"v": null, "t": "password"},
+        login: {"v": "", "t": "text"},
+        password: {"v": "", "t": "password"},
         hide_seeding: {"v": 0, "t": "checkbox"},
         hide_finished: {"v": 0, "t": "checkbox"},
         graph: {"v": 0, "t": "checkbox"},
@@ -19,7 +19,7 @@ var engine = function() {
         auto_order: {"v": 0, "t": "checkbox"},
         context_menu_trigger: {"v": 1, "t": "checkbox"},
         folders_array: {"v": [], "t": "array"}
-    }
+    };
     var settings = null;
     var settings_load = function() {
         settings = {
@@ -113,11 +113,11 @@ var engine = function() {
         };
     }();
     var tmp_vars = {
-        'token_reconnect_counter': 0,
-        'get': {},
-        'last_complite_time': 0,
-        'active_torrent': 0,
-        'get_repeat': 0
+        token_reconnect_counter: 0,
+        get: {},
+        last_complite_time: 0,
+        active_torrent: 0,
+        get_repeat: 0
     };
     var status = function() {
         var storage = {};
@@ -264,24 +264,84 @@ var engine = function() {
             });
         }
     };
-    var get = function(action, cid, callback)
-    {
-        if (!tmp_vars.get['token']) {
-            getToken(function() {
-                tmp_vars['get_repeat'] += 1;
-                get(action, cid, callback);
-            });
-            return 0;
+    var InuTorrentAPI = function(data) {
+        /*
+         
+         addedDate: 1381471416 //время добавления
+         downloadDir: "C:/Users/Anton/Documents/Downloads" //папка
+         error: 0 //ошибка
+         errorString: "" //строчка ошибки
+         eta: 474 //ETA
+         id: 1 //ID
+         isFinished: false //Завершено
+         isStalled: false //???
+         leftUntilDone: 2978054144 //осталось загрузить
+         metadataPercentComplete: 1 //????
+         name: "Shturm.belogo.doma.2013.D.BDRip.720p.mkv" //название
+         peersConnected: 50 //пирова подключено
+         peersGettingFromUs: 15 //пиры получающие у нас
+         peersSendingToUs: 24 //пиры раздающие нам
+         percentDone: 0.4915 //роцентов завершено
+         queuePosition: 0 //позиция ожидания
+         rateDownload: 6355968 //???
+         rateUpload: 893952 //???
+         recheckProgress: 0 //???
+         seedRatioLimit: 2 //???
+         seedRatioMode: 0 //???
+         sizeWhenDone: 5856884296 //размер для завершения
+         status: 4 //статус
+         totalSize: 5856884296 //общий размер
+         trackers: [{announce:udp://bt.rutor.org:2710, id:0, scrape:udp://bt.rutor.org:2710, tier:0},…] //трекеры
+         uploadRatio: 0.2694 //???
+         uploadedEver: 775791685 //всего отдано
+         webseedsSendingToUs: 0 //????
+         
+         */
+
+        ut = {};
+        arguments = data['arguments'] || [];
+        if ('torrents' in arguments) {
+            ut['torrents'] = [];
+            var l = arguments.torrents.length;
+            for (var i = 0; i < l; i++) {
+                var field = arguments.torrents[i];
+                var item = ["", 0, "", 0, 0, 0, 0, 0, 0, 0, 0, "", 0, 0, 0, 0, 0, 0, 0, "", "", "", "", 0, 0, "", "", 0];
+                item[0] = field.id;
+                item[2] = field.name;
+                item[3] = field.totalSize;
+                item[4] = field.percentDone;
+                item[5] = field.sizeWhenDone - field.leftUntilDone;
+                item[6] = field.uploadedEver;
+                item[7] = item[5] / item[6];
+                item[8] = field.rateUpload;
+                item[9] = field.rateDownload;
+                item[10] = field.eta;
+                item[12] = field.peersConnected;
+                item[17] = field.queuePosition;
+                item[18] = field.uploadedEver;
+                item[23] = field.addedDate;
+                item[26] = field.downloadDir;
+                ut['torrents'].push(item);
+            }
         }
+
+        return ut;
+    };
+    var get = function(action, callback) {
         $.ajax({
-            type: "GET",
+            type: "POST",
             cache: 0,
             url: settings.ut_url + "?token=" + tmp_vars.get['token'] + action + ((!cid) ? "&cid=" + tmp_vars.get['torrentc'] : ''),
             beforeSend: function(xhr) {
-                xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password) + "=");
+                xhr.setRequestHeader("X-Transmission-Session-Id", tmp_vars.get['token'] || "");
             },
             success: function(data) {
-                var obj = $.parseJSON(data);
+                console.log("success", data);
+                var obj = data;
+                if (typeof(data) === "String") {
+                    obj = $.parseJSON(obj);
+                }
+                obj = InuTorrentAPI(data);
                 if (callback) {
                     callback(obj);
                 }
@@ -290,10 +350,6 @@ var engine = function() {
                     if ('build' in tmp_vars.get && obj['build'] != tmp_vars.get['build']) {
                         tmp_vars.get['build'] = obj['build'];
                     }
-                }
-                if ('torrentc' in obj) {
-                    //get CID
-                    tmp_vars.get['torrentc'] = obj['torrentc'];
                 }
                 if ('torrentm' in obj) {
                     //remove torrent
@@ -313,7 +369,6 @@ var engine = function() {
                     }
                 }
                 if ('torrentp' in obj) {
-                    //update with CID
                     addons_notify(tmp_vars.get['torrents'], obj['torrentp']);
                     tmp_vars.get['torrentp'] = obj['torrentp'];
                     var cs = tmp_vars.get['torrents'].length;
@@ -364,7 +419,7 @@ var engine = function() {
                     if ('label' in tmp_vars.get === false || String(tmp_vars.get['label']) !== String(obj['label'])) {
                         tmp_vars.get['label'] = obj['label'];
                         if (popup.chk()) {
-                            tmp_vars.popup.manager.setLabels( clone_obj(tmp_vars.get['label']) );
+                            tmp_vars.popup.manager.setLabels(clone_obj(tmp_vars.get['label']));
                         }
                     }
                 }
@@ -387,7 +442,7 @@ var engine = function() {
                 var error_desk = (xhr.status === 0) ? 36 : (xhr.status === 400) ? 38 :
                         lang_arr[71] + xhr.status + ' ' + thrownError;
                 status.connection(1, error_desk);
-                if (xhr.status === 400 && tmp_vars['get_repeat'] <= 3) {
+                if (xhr.status === 409 && tmp_vars['get_repeat'] <= 3) {
                     tmp_vars.get['token'] = null;
                     getToken(function() {
                         tmp_vars['get_repeat'] += 1;
@@ -424,9 +479,10 @@ var engine = function() {
             if (!response) {
                 link_note(lang_arr[103], null, 1);
                 return;
-            };
+            }
+            ;
             if (response.error) {
-                link_note(lang_arr[23], (response.error)?response.error:'', 1);
+                link_note(lang_arr[23], (response.error) ? response.error : '', 1);
             } else {
                 tmp_vars.new_file_monitoring = function(name, e) {
                     if (e) {
@@ -529,7 +585,8 @@ var engine = function() {
         return {
             'load': function() {
                 chrome.contextMenus.removeAll();
-                if (!settings.context_menu_trigger) return;
+                if (!settings.context_menu_trigger)
+                    return;
                 var parentID = chrome.contextMenus.create({
                     "title": lang_arr[104],
                     "contexts": ["link"],
@@ -567,13 +624,13 @@ var engine = function() {
     var sendAction = function(action, cid, callback) {
         get(action, cid, callback);
     };
-    var clone_obj = function (obj) {
+    var clone_obj = function(obj) {
         return JSON.parse(JSON.stringify(obj));
     };
     return {
         begin: function() {
             timer.start();
-            context_menu_obj.load();
+            //context_menu_obj.load();
         },
         getTorrentList: function(t) {
             return getTorrentList(t);
@@ -589,9 +646,6 @@ var engine = function() {
                 }
             }
             return 0;
-        },
-        getToken: function(a,b) {
-            return getToken(a,b);
         },
         getSettings: function() {
             return clone_obj(settings);
@@ -640,7 +694,6 @@ var engine = function() {
             settings_load();
             tmp_vars.active_torrent = 0;
             tmp_vars.get_repeat = 0;
-            tmp_vars.token_reconnect_counter = 0;
             context_menu_obj.load();
             tmp_vars.get = {};
         },

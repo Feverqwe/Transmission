@@ -28,18 +28,19 @@ var manager = function() {
         'body_width': 0
     };
     var chk_settings = function() {
-        if (settings === null ||
-                settings['login'] == null ||
-                settings['password'] == null) {
-            return 0;
-        }
+        //не работает!
         tmp_vars.lp_path = lp_path();
         return 1;
     };
     var lp_path = function() {
-        return ((settings.ssl) ? 'https' : 'http') + "://" +
-                settings.login + ":" + settings.password + "@" +
-                settings.ut_ip + ":" + settings.ut_port + "/";
+        if (settings.login.length > 0) {
+            return ((settings.ssl) ? 'https' : 'http') + "://" +
+                    settings.login + ":" + settings.password + "@" +
+                    settings.ut_ip + ":" + settings.ut_port + "/";
+        } else {
+            return ((settings.ssl) ? 'https' : 'http') + "://" +
+                    settings.ut_ip + ":" + settings.ut_port + "/";
+        }
     };
     var write_language = function() {
         tables['menu'].find('a.refresh').attr('title', lang_arr[24]);
