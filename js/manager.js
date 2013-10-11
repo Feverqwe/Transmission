@@ -44,7 +44,7 @@ var manager = function() {
     };
     var write_language = function() {
         tables['menu'].find('a.refresh').attr('title', lang_arr[24]);
-        tables['menu'].find('a.wui').attr('title', lang_arr[26]).attr('href', tmp_vars.lp_path + settings.ut_path);
+        tables['menu'].find('a.wui').attr('title', lang_arr[26]).attr('href', tmp_vars.lp_path + settings.ut_path.replace("/rpc",""));
         tables['menu'].find('a.add_file').attr('title', lang_arr[118]);
         tables['menu'].find('a.start_all').attr('title', lang_arr[68]);
         tables['menu'].find('a.pause_all').attr('title', lang_arr[67]);
