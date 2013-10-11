@@ -41,8 +41,6 @@ var options = function() {
             }
         });
         write_sortable_tables();
-        $('select[name="folder_arr"]').empty().on('click', get_dir_list);
-        $('input[name="add_folder"]')[0].disabled = true;
     };
     var saveAll = function() {
         localStorage['lang'] = $('select[name="language"]').val();
@@ -195,18 +193,6 @@ var options = function() {
                 $(this).parent().children('div').children("div").eq(1).children('label').html(ui.size.width);
          }});
     };
-    var get_dir_list = function() {
-        _engine.sendAction("&action=list-dirs", 1, function(arr) {
-            if ('download-dirs' in arr === false)
-                return;
-            $('input[name="add_folder"]')[0].disabled = false;
-            $('select[name="folder_arr"]').empty();
-            $(this).unbind('click');
-            $.each(arr['download-dirs'], function(key, value) {
-                $('select[name="folder_arr"]').append(new Option('[' + bytesToSize(value['available'] * 1024 * 1024) + ' ' + lang_arr[107][1] + '] ' + value['path'], key));
-            });
-        });
-    };
     var bytesToSize = function(bytes, nan) {
         //переводит байты в строчки
         var sizes = lang_arr[59];
@@ -287,7 +273,7 @@ var options = function() {
                 reset_table($("ul.fl_colums"), _engine.getDefFlColums());
             });
             $('input[name="add_folder"]').on('click', function() {
-                var arr = [$('select[name="folder_arr"]').val(), $(this).parent().children('input[type=text]').val()];
+                var arr = ["", $(this).parent().children('input[type=text]').val()];
                 if (arr[1].length < 1)
                     return;
                 $('select[name="folders"]').append(new Option(arr[1], JSON.stringify(arr)));

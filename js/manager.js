@@ -619,7 +619,7 @@ var manager = function() {
                     return '<td class="' + key + '" data-value="' + v[24] + '"><div title="' + str_time + '">' + str_time + '</div></td>';
                     break;
                 case 'controls':
-                    return '<td class="' + key + '"><div class="btns"><a href="#start" title="' + lang_arr[0] + '" class="start"></a><a href="#pause" class="pause" title="' + lang_arr[1] + '"></a><a href="#stop" class="stop" title="' + lang_arr[2] + '"></a></div></td>';
+                    return '<td class="' + key + '"><div class="btns"><a href="#start" title="' + lang_arr[0] + '" class="start"></a><a href="#stop" class="stop" title="' + lang_arr[2] + '"></a></div></td>';
                     break;
             }
             return '';
@@ -1082,6 +1082,8 @@ var manager = function() {
         }
     };
     var update_labels_context_menu = function(id) {
+        //Transmission
+        return;
         var current_label = null;
         if (id) {
             current_label = tr_table_controller.get(id);
@@ -1108,7 +1110,7 @@ var manager = function() {
         tmp_vars['label'] = arr;
         tmp_vars['label_obj'] = {};
         var c = arr.length;
-        var costum = ['all', 'download', 'seeding', 'complite', 'active', 'inacive', 'no label'];
+        var costum = ['all', 'download', 'seeding', 'complite', 'active', 'inacive'];
         var cc = costum.length;
         var options = '';
         var num = 0;
@@ -1867,7 +1869,7 @@ var manager = function() {
                             if (isNaN(r)) {
                                 return;
                             }
-                            var folder = "&download_dir=" + encodeURIComponent(settings.folders_array[r][0]) + "&path=" + encodeURIComponent(settings.folders_array[r][1]);
+                            var folder = settings.folders_array[r][1];
                             for (var i = 0; i < inp.files.length; i++) {
                                 _engine.upload_file(inp.files[i], folder);
                             }
@@ -1902,13 +1904,15 @@ var manager = function() {
                 var hash = $(this).parents().eq(2).attr('id');
                 var param = '&list=1&action=start' + '&hash=' + hash;
                 _engine.sendAction(param);
-            });
+            });/*
+                Transmission
             tables['table-body'].on('click', 'a.pause', function(e) {
                 e.preventDefault();
                 var hash = $(this).parents().eq(2).attr('id');
                 var param = '&list=1&action=pause' + '&hash=' + hash;
                 _engine.sendAction(param);
             });
+            */
             tables['table-body'].on('click', 'a.stop', function(e) {
                 e.preventDefault();
                 var hash = $(this).parents().eq(2).attr('id');
@@ -2063,12 +2067,13 @@ var manager = function() {
                             var id = this[0].id;
                             contextActions(key, id);
                         }
-                    },
+                    },/*
+                    Transmission
                     labels: {
                         name: lang_arr[11],
                         className: "labels",
                         items: get_label_context_menu()
-                    }
+                    }*/
                 }
             });
             tmp_vars['torrent_context_menu'] = $(".context-menu-list.context-menu-root.torrent");
@@ -2187,7 +2192,8 @@ var manager = function() {
                             tmp_vars.fl_file_selected = 1;
                             tables['fl-body'].find('input:checked').trigger('click');
                         }
-                    },
+                    },/*
+                        Transmission
                     s1: '-',
                     download: {
                         name: lang_arr[90],
@@ -2208,7 +2214,7 @@ var manager = function() {
                             tmp_vars.fl_file_selected = 1;
                             tables['fl-body'].find('input:checked').trigger('click');
                         }
-                    }
+                    }*/
                 }
             });
             $.contextMenu({

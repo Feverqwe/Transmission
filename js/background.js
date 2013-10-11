@@ -588,6 +588,27 @@ var engine = function() {
             data.arguments['files-unwanted'] = files;
             data.arguments['ids'] = id;
         } else
+        if ('action' in params && params.action === 'setsetting') {
+            var speed = parseInt(params.v);
+            data['method'] = "torrent-set";
+            data['arguments'] = {};
+            if (params.s === "max_dl_rate") {
+                if (speed === 0) {
+                    data.arguments['downloadLimited'] = false;
+                } else {
+                    data.arguments['downloadLimited'] = true;
+                    data.arguments['downloadLimit'] = speed;
+                }
+            }
+            if (params.s === "max_ul_rate") {
+                if (speed === 0) {
+                    data.arguments['uploadLimited'] = false;
+                } else {
+                    data.arguments['uploadLimited'] = true;
+                    data.arguments['uploadLimit'] = speed;
+                }
+            }
+        } else
         if ('list' in params) {
             sh_list = 1;
             data['method'] = "torrent-get";
@@ -626,6 +647,9 @@ var engine = function() {
             data: data,
             beforeSend: function(xhr) {
                 xhr.setRequestHeader("X-Transmission-Session-Id", tmp_vars.get['token'] || "");
+                if (settings.login.length > 0) {
+                    xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password) + "=");
+                }
             },
             success: function(data) {
                 console.log("success", data);
@@ -803,7 +827,13 @@ var engine = function() {
             xhr.overrideMimeType("text/plain; charset=x-user-defined");
             xhr.responseType = "blob";
             xhr.onload = function() {
-                callback(xhr.response);
+                var reader = new FileReader();
+                reader.onload = function() {
+                    var dataUrl = reader.result;
+                    var base64 = dataUrl.split(',')[1];
+                    callback(base64);
+                };
+                reader.readAsDataURL(xhr.response);
             };
             xhr.send(null);
         };
@@ -811,28 +841,44 @@ var engine = function() {
             if (dir_url === undefined) {
                 dir_url = '';
             }
-            var formdata = new FormData();
-            formdata.append("torrent_file", file);
             var xhr = new XMLHttpRequest();
-            xhr.open("POST", settings.ut_url + "?token=" + tmp_vars.get['token'] + "&action=add-file" + dir_url, true);
-            xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password) + "=");
+            xhr.open("POST", settings.ut_url, true);
+            xhr.setRequestHeader('X-Transmission-Session-Id', tmp_vars.get['token']);
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
                     handleResponse(xhr.responseText);
                 }
             };
-            xhr.send(formdata);
+            params = {
+                method: "torrent-add",
+                arguments: {
+                    metainfo: file
+                }
+            };
+            if (dir_url && dir_url.length > 0) {
+                params.arguments['download-dir'] = dir_url;
+            }
+            xhr.send(JSON.stringify(params));
         };
         var uploadMagnet = function(url, dir_url) {
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", settings.ut_url + "?token=" + tmp_vars.get['token'] + "&action=add-url&s=" + url + dir_url, true);
-            xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password) + "=");
+            xhr.open("POST", settings.ut_url, true);
+            xhr.setRequestHeader('X-Transmission-Session-Id', tmp_vars.get['token']);
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
                     handleResponse(xhr.responseText);
                 }
             };
-            xhr.send(null);
+            params = {
+                method: "torrent-add",
+                arguments: {
+                    filename: url
+                }
+            };
+            if (dir_url && dir_url.length > 0) {
+                params.arguments['download-dir'] = dir_url;
+            }
+            xhr.send(JSON.stringify(params));
         };
         var link_note = function(a, b, e)
         {
@@ -867,11 +913,11 @@ var engine = function() {
             var dir_url = '';
             if (context_menu) {
                 var context = context_menu[a.menuItemId];
-                dir_url = "&download_dir=" + encodeURIComponent(context.key) + "&path=" + encodeURIComponent(context.val);
+                dir_url = context.val;
             }
             chrome.tabs.getSelected(null, function(tab) {
                 if (a.linkUrl.substr(0, 7).toLowerCase() === 'magnet:')
-                    uploadMagnet(encodeURIComponent(a.linkUrl), dir_url);
+                    uploadMagnet(a.linkUrl, dir_url);
                 else
                     downloadFile(a.linkUrl, function(file) {
                         uploadTorrent(file, dir_url);
@@ -926,7 +972,7 @@ var engine = function() {
     return {
         begin: function() {
             timer.start();
-            //context_menu_obj.load();
+            context_menu_obj.load();
         },
         getTorrentList: function(t) {
             return getTorrentList(t);
@@ -942,6 +988,9 @@ var engine = function() {
                 }
             }
             return 0;
+        },
+        getToken: function(a, b) {
+            return getToken(a, b);
         },
         getSettings: function() {
             return clone_obj(settings);
@@ -1005,3 +1054,4 @@ $(document).ready(function() {
     });
     engine.begin();
 });
+var tt = null;
