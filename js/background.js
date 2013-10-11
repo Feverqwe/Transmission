@@ -159,22 +159,26 @@ var engine = function() {
     var getToken = function(callback, callbackfail) {
         status.connection(-1);
         $.ajax({
-            type: "GET",
-            url: settings.ut_url + "token.html",
+            type: "POST",
+            url: settings.ut_url,
             beforeSend: function(xhr) {
-                xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password) + "=");
-            },
-            success: function(data) {
-                status.connection(0);
-                tmp_vars.get = {};
-                tmp_vars.get['token'] = $(data).text();
-                tmp_vars.get['torrentc'] = 0;
-                tmp_vars.token_reconnect_counter = 0;
-                if (typeof(callback) === 'function') {
-                    callback();
+                if (settings.login.length > 0) {
+                    xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password) + "=");
                 }
             },
+            data: '{"method":"session-get"}',
             error: function(xhr, ajaxOptions, thrownError) {
+                if (xhr.status === 409) {
+                    status.connection(0);
+                    tmp_vars.get = {};
+                    tmp_vars.get['token'] = xhr.getResponseHeader("X-Transmission-Session-Id");
+                    tmp_vars.get['torrentc'] = 0;
+                    tmp_vars.token_reconnect_counter = 0;
+                    if (typeof(callback) === 'function') {
+                        callback();
+                    }
+                    return;
+                }
                 var error_desk = (xhr.status === 0) ? 36 : (xhr.status === 404) ? 35 :
                         (xhr.status === 401) ? 34 : (xhr.status === 400) ? 38 :
                         lang_arr[71] + xhr.status + ' ' + thrownError;
@@ -267,34 +271,32 @@ var engine = function() {
     var InuTorrentAPI = function(data) {
         /*
          
-         addedDate: 1381471416 //время добавления
-         downloadDir: "C:/Users/Anton/Documents/Downloads" //папка
-         error: 0 //ошибка
-         errorString: "" //строчка ошибки
-         eta: 474 //ETA
-         id: 1 //ID
-         isFinished: false //Завершено
-         isStalled: false //???
-         leftUntilDone: 2978054144 //осталось загрузить
-         metadataPercentComplete: 1 //????
-         name: "Shturm.belogo.doma.2013.D.BDRip.720p.mkv" //название
-         peersConnected: 50 //пирова подключено
-         peersGettingFromUs: 15 //пиры получающие у нас
-         peersSendingToUs: 24 //пиры раздающие нам
-         percentDone: 0.4915 //роцентов завершено
-         queuePosition: 0 //позиция ожидания
-         rateDownload: 6355968 //???
-         rateUpload: 893952 //???
-         recheckProgress: 0 //???
-         seedRatioLimit: 2 //???
-         seedRatioMode: 0 //???
-         sizeWhenDone: 5856884296 //размер для завершения
-         status: 4 //статус
-         totalSize: 5856884296 //общий размер
-         trackers: [{announce:udp://bt.rutor.org:2710, id:0, scrape:udp://bt.rutor.org:2710, tier:0},…] //трекеры
-         uploadRatio: 0.2694 //???
-         uploadedEver: 775791685 //всего отдано
-         webseedsSendingToUs: 0 //????
+     ,arr[i][0] /* ХЭШ = id                          
+     ,arr[i][1] /* STATUS CODE
+     ,arr[i][2] /* ИМЯ = name
+     ,arr[i][3] /* РАЗМЕР = totalSize
+     ,arr[i][4] /* ПРОЦЕНТ ВЫПОЛНЕНИЯ = percentDone
+     ,arr[i][5]/*  загружено = sizeWhenDone - leftUntilDone
+     ,arr[i][6]/*  РОЗДАНО = uploadedEver
+     ,arr[i][7]/*  КОЭФФИЦИЕНТ = item[5] / item[6]
+     ,arr[i][8] /* СКОРОСТЬ РАЗДАЧИ = rateUpload 
+     ,arr[i][9] /* СКОРОСТЬ ЗАГРУЗКИ = rateDownload
+     ,arr[i][10] /*ETA = eta
+     ,arr[i][11] /*МЕТКА
+     ,arr[i][12] /*ПОДКЛЮЧЕНО ПИРОВ = peersConnected
+     ,arr[i][13] /*ПИРЫ В РОЕ
+     ,arr[i][14] /*ПОДКЛЮЧЕНО СИДОВ
+     ,arr[i][15] /*СИДЫ В РОЕ 
+     ,arr[i][16]/* ДОСТУПНОСТЬ 
+     ,arr[i][17] /*ПОРЯДОК ОЧЕРЕДИ ТОРРЕНТОВ = queuePosition
+     ,arr[i][18]/* отдано
+     ,arr[i][19]/* ?
+     ,arr[i][20]/* ? 
+     ,arr[i][21] /*статус тескстом
+     ,arr[i][22]/* sid 
+     ,arr[i][23]/* время старта = addedDate
+     ,arr[i][24]/* время завершения = doneDate
+     ,arr[i][26]/* path_to_file = downloadDir
          
          */
 
@@ -309,29 +311,63 @@ var engine = function() {
                 item[0] = field.id;
                 item[2] = field.name;
                 item[3] = field.totalSize;
-                item[4] = field.percentDone;
+                item[4] = parseInt(field.percentDone * 1000);
                 item[5] = field.sizeWhenDone - field.leftUntilDone;
                 item[6] = field.uploadedEver;
-                item[7] = item[5] / item[6];
+                item[7] = Math.round(item[5] / item[6] * 1000) / 10;
                 item[8] = field.rateUpload;
                 item[9] = field.rateDownload;
                 item[10] = field.eta;
                 item[12] = field.peersConnected;
                 item[17] = field.queuePosition;
-                item[18] = field.uploadedEver;
                 item[23] = field.addedDate;
+                item[24] = field.doneDate;
                 item[26] = field.downloadDir;
                 ut['torrents'].push(item);
             }
         }
+        console.log(ut);
 
         return ut;
     };
-    var get = function(action, callback) {
+    var ParseuTorrentUrl = function(url) {
+        url = url.split('&');
+        var url_l = url.length;
+        var params = {};
+        for (var i = 0; i < url_l; i++) {
+            var item = url[i];
+            if (item.length === 0) {
+                continue;
+            }
+            var key_val = item.replace(/([^=]*)=(.*)/, "$1&$2").split('&');
+            var key = key_val[0];
+            var val = key_val[1];
+            params[key] = val;
+        }
+        console.log(params);
+        var data = {};
+        if ('list' in params) {
+            data['method'] = "torrent-get";
+            data['arguments'] = {fields: ["id", "name", "totalSize", "percentDone", "sizeWhenDone", 'leftUntilDone', 'uploadedEver', 'rateUpload', 'rateDownload', 'eta', 'peersConnected', 'queuePosition', 'addedDate', 'doneDate', 'downloadDir']};
+        }
+        return JSON.stringify(data);
+    };
+    var get = function(action, cid, callback)
+    {
+        if (!tmp_vars.get['token']) {
+            getToken(function() {
+                tmp_vars['get_repeat'] += 1;
+                get(action, cid, callback);
+            });
+            return 0;
+        }
+        var url = settings.ut_url;
+        var data = ParseuTorrentUrl(action + ((!cid) ? "&cid=" + tmp_vars.get['torrentc'] : ''));
         $.ajax({
             type: "POST",
             cache: 0,
-            url: settings.ut_url + "?token=" + tmp_vars.get['token'] + action + ((!cid) ? "&cid=" + tmp_vars.get['torrentc'] : ''),
+            url: settings.ut_url,
+            data: data,
             beforeSend: function(xhr) {
                 xhr.setRequestHeader("X-Transmission-Session-Id", tmp_vars.get['token'] || "");
             },

@@ -406,7 +406,7 @@ var manager = function() {
                         upd_list['9.3'] = 1;
                         if (!item)
                             item = $('#' + v[0]);
-                        var val = v[3] - v[9];
+                        var val = v[3] - v[5];
                         if (val < 0)
                             val = 0;
                         var cell = item.children('td.ostalos');
@@ -578,7 +578,7 @@ var manager = function() {
                     return '<td class="' + key + '"><div>' + val + '</div></td>';
                     break;
                 case 'ostalos':
-                    var val = v[3] - v[9];
+                    var val = v[3] - v[5];
                     if (val < 0)
                         val = 0;
                     return '<td class="' + key + '" data-value="' + val + '"><div>' + (bytesToSize(val, 0)) + '</div></td>';
