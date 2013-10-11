@@ -2073,7 +2073,7 @@ var manager = function() {
                             var id = this[0].id;
                             contextActions(key, id);
                         }
-                    }, /*
+                    }/*, 
                      Transmission
                      labels: {
                      name: lang_arr[11],
@@ -2198,7 +2198,7 @@ var manager = function() {
                             tmp_vars.fl_file_selected = 1;
                             tables['fl-body'].find('input:checked').trigger('click');
                         }
-                    }, /*
+                    }/*, 
                      Transmission
                      s1: '-',
                      download: {
