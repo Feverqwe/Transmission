@@ -420,6 +420,9 @@ var engine = function() {
                             if (s_item.priority === -1) {
                                 s_item.priority = 1;
                             }
+                            if (s_item.wanted === false) {
+                                s_item.priority = 0;
+                            }
                             file[0] = f_item.name;
                             file[1] = f_item.length;
                             file[2] = f_item.bytesCompleted;
@@ -460,11 +463,22 @@ var engine = function() {
             ut['settings'].push(['max_dl_rate', '', dl_limit]);
             ut['settings'].push(['max_ul_rate', '', up_limit]);
         }
-        console.log("utapi", ut);
-
         return ut;
     };
     var ParseuTorrentUrl = function(url) {
+        var IntStrOrArrInArray = function(strORarr) {
+            if (strORarr === undefined) {
+                return strORarr;
+            }
+            var arr = [parseInt(strORarr)];
+            if (typeof(strORarr) === "object") {
+                arr = [];
+                strORarr.forEach(function(itm) {
+                    arr.push(parseInt(itm));
+                });
+            }
+            return arr;
+        };
         url = url.split('&');
         var url_l = url.length;
         var params = {};
@@ -476,63 +490,119 @@ var engine = function() {
             var key_val = item.replace(/([^=]*)=(.*)/, "$1&$2").split('&');
             var key = key_val[0];
             var val = key_val[1];
-            params[key] = val;
+            if (key in params) {
+                if (typeof(params[key]) !== "object") {
+                    params[key] = [params[key]];
+                }
+                params[key].push(val);
+            } else {
+                params[key] = val;
+            }
         }
         console.log("url params", params);
+        var sh_list = 0;
         var data = {};
+        var cb = function() {
+        };
         if ('action' in params && params.action === 'getfiles') {
-            var id = parseInt(params.hash);
+            var id = IntStrOrArrInArray(params.hash);
             data['method'] = "torrent-get";
             data['arguments'] = {fields: ["id", "name", "totalSize", "percentDone", 'downloadedEver', 'uploadedEver', 'rateUpload', 'rateDownload', 'eta', 'peersSendingToUs', 'peersGettingFromUs', 'queuePosition', 'addedDate', 'doneDate', 'downloadDir', 'recheckProgress', 'status', 'error', 'errorString', 'files', 'fileStats']};
-            data.arguments['ids'] = [id];
+            data.arguments['ids'] = id;
         } else
-        if ('action' in params && params.action === 'start') {
-            var id = parseInt(params.hash);
+        if ('action' in params && (params.action === 'start' || params.action === 'unpause')) {
+            if (params.hash === undefined) {
+                var id = "recently-active";
+            } else {
+                var id = IntStrOrArrInArray(params.hash);
+            }
             data['method'] = "torrent-start";
             data['arguments'] = {};
-            data.arguments['ids'] = [id];
+            data.arguments['ids'] = id;
         } else
         if ('action' in params && params.action === 'forcestart') {
-            var id = parseInt(params.hash);
+            var id = IntStrOrArrInArray(params.hash);
             data['method'] = "torrent-start-now";
             data['arguments'] = {};
-            data.arguments['ids'] = [id];
+            data.arguments['ids'] = id;
         } else
-        if ('action' in params && params.action === 'stop') {
-            var id = parseInt(params.hash);
+        if ('action' in params && (params.action === 'stop' || params.action === 'pause')) {
+            var id = IntStrOrArrInArray(params.hash);
             data['method'] = "torrent-stop";
             data['arguments'] = {};
-            data.arguments['ids'] = [id];
+            data.arguments['ids'] = id;
         } else
         if ('action' in params && params.action === 'recheck') {
-            var id = parseInt(params.hash);
+            var id = IntStrOrArrInArray(params.hash);
             data['method'] = "torrent-verify";
             data['arguments'] = {};
-            data.arguments['ids'] = [id];
+            data.arguments['ids'] = id;
         } else
         if ('action' in params && (params.action === 'remove' || params.action === 'removetorrent')) {
-            var id = parseInt(params.hash);
+            var id = IntStrOrArrInArray(params.hash);
             data['method'] = "torrent-remove";
             data['arguments'] = {};
-            data.arguments['ids'] = [id];
+            data.arguments['ids'] = id;
         } else
         if ('action' in params && (params.action === 'removedata' || params.action === 'removedatatorrent')) {
-            var id = parseInt(params.hash);
+            var id = IntStrOrArrInArray(params.hash);
             data['method'] = "torrent-remove";
             data['arguments'] = {"delete-local-data": true};
-            data.arguments['ids'] = [id];
+            data.arguments['ids'] = id;
         } else
         if ('action' in params && params.action === 'getsettings') {
             data['method'] = "session-get";
         } else
+        if ('action' in params && params.action === 'setprio' && params.p === "2") {
+            var id = IntStrOrArrInArray(params.hash);
+            var files = IntStrOrArrInArray(params.f);
+            data['method'] = "torrent-set";
+            data['arguments'] = {};
+            data.arguments['priority-normal'] = files;
+            data.arguments['files-wanted'] = files;
+            data.arguments['ids'] = id;
+        } else
+        if ('action' in params && params.action === 'setprio' && params.p === "1") {
+            var id = IntStrOrArrInArray(params.hash);
+            var files = IntStrOrArrInArray(params.f);
+            data['method'] = "torrent-set";
+            data['arguments'] = {};
+            data.arguments['priority-low'] = files;
+            data.arguments['files-wanted'] = files;
+            data.arguments['ids'] = id;
+        } else
+        if ('action' in params && params.action === 'setprio' && params.p === "3") {
+            var id = IntStrOrArrInArray(params.hash);
+            var files = IntStrOrArrInArray(params.f);
+            data['method'] = "torrent-set";
+            data['arguments'] = {};
+            data.arguments['priority-high'] = files;
+            data.arguments['files-wanted'] = files;
+            data.arguments['ids'] = id;
+        } else
+        if ('action' in params && params.action === 'setprio' && params.p === "0") {
+            var id = IntStrOrArrInArray(params.hash);
+            var files = IntStrOrArrInArray(params.f);
+            data['method'] = "torrent-set";
+            data['arguments'] = {};
+            data.arguments['files-unwanted'] = files;
+            data.arguments['ids'] = id;
+        } else
         if ('list' in params) {
+            sh_list = 1;
             data['method'] = "torrent-get";
             data['arguments'] = {fields: ["id", "name", "totalSize", "percentDone", 'downloadedEver', 'uploadedEver', 'rateUpload', 'rateDownload', 'eta', 'peersSendingToUs', 'peersGettingFromUs', 'queuePosition', 'addedDate', 'doneDate', 'downloadDir', 'recheckProgress', 'status', 'error', 'errorString']};
             if ('cid' in params && parseInt(params.cid) !== 0) {
                 data.arguments['ids'] = "recently-active";
             }
         }
-        return JSON.stringify(data);
+        if (sh_list === 0 && 'list' in params) {
+            cb = function() {
+                get('&list=1');
+            };
+        }
+        //console.log("res", data);
+        return [JSON.stringify(data), cb];
     };
     var get = function(action, cid, callback)
     {
@@ -545,6 +615,10 @@ var engine = function() {
         }
         var url = settings.ut_url;
         var data = ParseuTorrentUrl(action + ((!cid) ? "&cid=" + tmp_vars.get['torrentc'] : ''));
+        if (callback === undefined) {
+            callback = data[1];
+        }
+        data = data[0];
         $.ajax({
             type: "POST",
             cache: 0,
