@@ -268,65 +268,193 @@ var engine = function() {
             });
         }
     };
+    var readTransmStatus = function(code) {
+        var uCode = 0;
+        var Status = "";
+        /*
+         TR_STATUS_STOPPED        = 0, // Torrent is stopped
+         TR_STATUS_CHECK_WAIT     = 1, // Queued to check files
+         TR_STATUS_CHECK          = 2, // Checking files
+         TR_STATUS_DOWNLOAD_WAIT  = 3, // Queued to download
+         TR_STATUS_DOWNLOAD       = 4, // Downloading
+         TR_STATUS_SEED_WAIT      = 5, // Queued to seed
+         TR_STATUS_SEED           = 6  // Seeding
+        */
+        if (code === 0) {
+            uCode = 136;
+            Status = "Stopped";
+        } else
+        if (code === 1) {
+            uCode = 233;
+            Status = "Queued to check files";
+        } else
+        if (code === 2) {
+            uCode = 130;
+            Status = "Checking";
+        } else
+        if (code === 3) {
+            uCode = 233;
+            Status = "Queued to download";
+        } else
+        if (code === 4) {
+            uCode = 201;
+            Status = "Downloading";
+        } else
+        if (code === 5) {
+            uCode = 233;
+            Status = "Queued to seed";
+        } else
+        if (code === 6) {
+            uCode = 201;
+            Status = "Seeding";
+        }
+        return [uCode, Status];
+    };
     var InuTorrentAPI = function(data) {
         /*
          
-     ,arr[i][0] /* ХЭШ = id                          
-     ,arr[i][1] /* STATUS CODE
-     ,arr[i][2] /* ИМЯ = name
-     ,arr[i][3] /* РАЗМЕР = totalSize
-     ,arr[i][4] /* ПРОЦЕНТ ВЫПОЛНЕНИЯ = percentDone
-     ,arr[i][5]/*  загружено = sizeWhenDone - leftUntilDone
-     ,arr[i][6]/*  РОЗДАНО = uploadedEver
-     ,arr[i][7]/*  КОЭФФИЦИЕНТ = item[5] / item[6]
-     ,arr[i][8] /* СКОРОСТЬ РАЗДАЧИ = rateUpload 
-     ,arr[i][9] /* СКОРОСТЬ ЗАГРУЗКИ = rateDownload
-     ,arr[i][10] /*ETA = eta
-     ,arr[i][11] /*МЕТКА
-     ,arr[i][12] /*ПОДКЛЮЧЕНО ПИРОВ = peersConnected
-     ,arr[i][13] /*ПИРЫ В РОЕ
-     ,arr[i][14] /*ПОДКЛЮЧЕНО СИДОВ
-     ,arr[i][15] /*СИДЫ В РОЕ 
-     ,arr[i][16]/* ДОСТУПНОСТЬ 
-     ,arr[i][17] /*ПОРЯДОК ОЧЕРЕДИ ТОРРЕНТОВ = queuePosition
-     ,arr[i][18]/* отдано
-     ,arr[i][19]/* ?
-     ,arr[i][20]/* ? 
-     ,arr[i][21] /*статус тескстом
-     ,arr[i][22]/* sid 
-     ,arr[i][23]/* время старта = addedDate
-     ,arr[i][24]/* время завершения = doneDate
-     ,arr[i][26]/* path_to_file = downloadDir
+         ,arr[i][0] /* ХЭШ = id                          
+         ,arr[i][1] /* STATUS CODE
+         ,arr[i][2] /* ИМЯ = name
+         ,arr[i][3] /* РАЗМЕР = totalSize
+         ,arr[i][4] /* ПРОЦЕНТ ВЫПОЛНЕНИЯ = percentDone
+         ,arr[i][5]/*  загружено = sizeWhenDone - leftUntilDone
+         ,arr[i][6]/*  РОЗДАНО = uploadedEver
+         ,arr[i][7]/*  КОЭФФИЦИЕНТ = item[5] / item[6]
+         ,arr[i][8] /* СКОРОСТЬ РАЗДАЧИ = rateUpload 
+         ,arr[i][9] /* СКОРОСТЬ ЗАГРУЗКИ = rateDownload
+         ,arr[i][10] /*ETA = eta
+         ,arr[i][11] /*МЕТКА
+         ,arr[i][12] /*ПОДКЛЮЧЕНО ПИРОВ = peersSendingToUs
+         ,arr[i][13] /*ПИРЫ В РОЕ
+         ,arr[i][14] /*ПОДКЛЮЧЕНО СИДОВ = webseedsSendingToUs
+         ,arr[i][15] /*СИДЫ В РОЕ 
+         ,arr[i][16]/* ДОСТУПНОСТЬ 
+         ,arr[i][17] /*ПОРЯДОК ОЧЕРЕДИ ТОРРЕНТОВ = queuePosition
+         ,arr[i][18]/* отдано
+         ,arr[i][19]/* ?
+         ,arr[i][20]/* ? 
+         ,arr[i][21] /*статус тескстом
+         ,arr[i][22]/* sid 
+         ,arr[i][23]/* время старта = addedDate
+         ,arr[i][24]/* время завершения = doneDate
+         ,arr[i][26]/* path_to_file = downloadDir
          
          */
 
         ut = {};
+        ut['label'] = [];
         arguments = data['arguments'] || [];
-        if ('torrents' in arguments) {
-            ut['torrents'] = [];
-            var l = arguments.torrents.length;
-            for (var i = 0; i < l; i++) {
-                var field = arguments.torrents[i];
-                var item = ["", 0, "", 0, 0, 0, 0, 0, 0, 0, 0, "", 0, 0, 0, 0, 0, 0, 0, "", "", "", "", 0, 0, "", "", 0];
-                item[0] = field.id;
-                item[2] = field.name;
-                item[3] = field.totalSize;
-                item[4] = parseInt(field.percentDone * 1000);
-                item[5] = field.sizeWhenDone - field.leftUntilDone;
-                item[6] = field.uploadedEver;
-                item[7] = Math.round(item[5] / item[6] * 1000) / 10;
-                item[8] = field.rateUpload;
-                item[9] = field.rateDownload;
-                item[10] = field.eta;
-                item[12] = field.peersConnected;
-                item[17] = field.queuePosition;
-                item[23] = field.addedDate;
-                item[24] = field.doneDate;
-                item[26] = field.downloadDir;
-                ut['torrents'].push(item);
+        var up_limit = -1;
+        var dl_limit = -1;
+        $.each(arguments, function(key, value) {
+            if (key === 'torrents') {
+                var fileMode = 0;
+                if (value.length === 1 && 'fileStats' in value[0]) {
+                    fileMode = 1;
+                }
+                var type = 'torrents';
+                if (fileMode || (tmp_vars.get['torrentc'] !== undefined && parseInt(tmp_vars.get['torrentc']) !== 0)) {
+                    type = 'torrentp';
+                }
+                ut[type] = [];
+                var l = value.length;
+                for (var i = 0; i < l; i++) {
+                    var field = value[i];
+                    var item = ["", 0, "", 0, 0, 0, 0, 0, 0, 0, 0, "", 0, 0, 0, 0, 0, 0, 0, "", "", "", "", 0, 0, "", "", 0];
+                    var utStatus = readTransmStatus(field.status);
+                    item[0] = field.id;
+                    item[1] = utStatus[0];
+                    item[2] = field.name;
+                    item[3] = field.totalSize;
+                    if (field.recheckProgress !== 0) {
+                        item[4] = parseInt(field.recheckProgress * 1000);
+                    } else {
+                        item[4] = parseInt(field.percentDone * 1000);
+                    }
+                    item[5] = field.downloadedEver;
+                    item[6] = field.uploadedEver;
+                    item[7] = Math.round(field.uploadedEver / field.downloadedEver * 1000);
+                    item[8] = field.rateUpload;
+                    item[9] = field.rateDownload;
+                    item[10] = field.eta;
+                    item[12] = field.peersGettingFromUs;
+                    item[13] = field.peersGettingFromUs;
+                    item[14] = field.peersSendingToUs;
+                    item[15] = field.peersSendingToUs;
+                    item[17] = field.queuePosition;
+
+                    item[21] = utStatus[1];
+
+                    item[23] = field.addedDate;
+                    item[24] = field.doneDate;
+                    item[26] = field.downloadDir;
+                    if (fileMode) {
+                        ut['files'] = [];
+                        ut['files'][0] = item[0];
+                        ut['files'][1] = [];
+                        var fn = field.files.length;
+                        for (var n = 0; n < fn; n++) {
+                            var f_item = field.files[n];
+                            var s_item = field.fileStats[n] || {priority: 0};
+                            var file = ["", 0, 0, 0, 0, 0, false, -1, -1, -1, -1, -1, 0];
+                            /*
+                             * name = 0
+                             * size = 1
+                             * dwnload = 2
+                             * dune = 2
+                             * prio = 3
+                             */
+                            if (s_item.priority === 0) {
+                                s_item.priority = 2;
+                            }
+                            if (s_item.priority === 1) {
+                                s_item.priority = 3;
+                            }
+                            if (s_item.priority === -1) {
+                                s_item.priority = 1;
+                            }
+                            file[0] = f_item.name;
+                            file[1] = f_item.length;
+                            file[2] = f_item.bytesCompleted;
+                            file[3] = s_item.priority;
+                        }
+                        ut['files'][1].push(file);
+                    }
+                    ut[type].push(item);
+                }
+                ut['torrentc'] = 1;
+            } else
+            if (key === 'removed') {
+                if (value.length > 0) {
+                    ut['torrentm'] = value;
+                }
+            } else
+            if (key === 'speed-limit-down') {
+                if (dl_limit === -1) {
+                    dl_limit = value;
+                }
+            } else
+            if (key === 'speed-limit-down-enabled' && value === false) {
+                dl_limit = 0;
+            } else
+            if (key === 'speed-limit-up') {
+                if (up_limit === -1) {
+                    up_limit = value;
+                }
+            } else
+            if (key === 'speed-limit-up-enabled' && value === false) {
+                up_limit = 0;
+            } else {
+                console.log("unk", key, value);
             }
+        });
+        if (up_limit !== -1 && dl_limit !== -1) {
+            ut['settings'] = [];
+            ut['settings'].push(['max_dl_rate', '', dl_limit]);
+            ut['settings'].push(['max_ul_rate', '', up_limit]);
         }
-        console.log(ut);
+        console.log("utapi", ut);
 
         return ut;
     };
@@ -346,9 +474,21 @@ var engine = function() {
         }
         console.log(params);
         var data = {};
+        if ('action' in params && params.action === 'getfiles') {
+            var id = parseInt(params.hash);
+            data['method'] = "torrent-get";
+            data['arguments'] = {fields: ["id", "name", "totalSize", "percentDone", 'downloadedEver', 'uploadedEver', 'rateUpload', 'rateDownload', 'eta', 'peersSendingToUs', 'peersGettingFromUs', 'queuePosition', 'addedDate', 'doneDate', 'downloadDir', 'recheckProgress', 'status', 'files', 'fileStats']};
+            data.arguments['ids'] = [id];
+        } else
+        if ('action' in params && params.action === 'getsettings') {
+            data['method'] = "session-get";
+        } else
         if ('list' in params) {
             data['method'] = "torrent-get";
-            data['arguments'] = {fields: ["id", "name", "totalSize", "percentDone", "sizeWhenDone", 'leftUntilDone', 'uploadedEver', 'rateUpload', 'rateDownload', 'eta', 'peersConnected', 'queuePosition', 'addedDate', 'doneDate', 'downloadDir']};
+            data['arguments'] = {fields: ["id", "name", "totalSize", "percentDone", 'downloadedEver', 'uploadedEver', 'rateUpload', 'rateDownload', 'eta', 'peersSendingToUs', 'peersGettingFromUs', 'queuePosition', 'addedDate', 'doneDate', 'downloadDir', 'recheckProgress', 'status']};
+            if ('cid' in params && parseInt(params.cid) !== 0) {
+                data.arguments['ids'] = "recently-active";
+            }
         }
         return JSON.stringify(data);
     };
@@ -386,6 +526,10 @@ var engine = function() {
                     if ('build' in tmp_vars.get && obj['build'] != tmp_vars.get['build']) {
                         tmp_vars.get['build'] = obj['build'];
                     }
+                }
+                if ('torrentc' in obj) {
+                    //get CID
+                    tmp_vars.get['torrentc'] = obj['torrentc'];
                 }
                 if ('torrentm' in obj) {
                     //remove torrent

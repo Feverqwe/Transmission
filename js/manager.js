@@ -1307,6 +1307,11 @@ var manager = function() {
             /*
              start,force_start,stop,pause,unpause,recheck
              */
+            //transmission
+            sel_en[4] = 0;
+            sel_en[5] = 0;
+            sel_en[2] = 0;
+            //<<<<<<<<<<<
             return {'start': sel_en[1], 'force_start': sel_en[2], 'stop': sel_en[3], 'pause': sel_en[4], 'unpause': sel_en[5], 'recheck': sel_en[6]};
         };
         var status = tr_table_controller.get(id);
