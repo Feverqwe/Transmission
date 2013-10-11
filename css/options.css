@@ -1,0 +1,242 @@
+body {
+    background-color: #f1f2f1;
+    font-family: Verdana, sans-serif;
+    font-size: 0.84em;
+}
+div.title {
+    width: 720px;
+    margin: 0 auto;
+    font-size: 1.1em;
+}
+ul.menu {
+    width: 720px;
+    margin: 0 auto;
+    background-color: #fff;
+}
+ul.menu li {
+    display: inline-block;
+    font-size: 1.1em;
+}
+ul.menu li {
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+ul.menu li a {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    color: #025EB3;
+}
+ul.menu li a.active {
+    border-left: 2px solid #c40005;
+    background-color: #d1f09d;
+    color: #000;
+    text-decoration: none;
+}
+div.page {
+    width: 720px;
+    margin: 0 auto;
+    display: none;
+}
+div.page.save {
+    display: block;
+    margin-top: 10px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+div.page.save > div.status {
+    height: 30px;
+    margin-bottom: -12px;
+}
+div.page.active {
+    display: block;
+}
+ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+input {
+    font-size: 1em;
+}
+select {
+    font-size: 1em;
+}
+select[name="folders"] {
+    font-size: 1em;
+    height: 110px;
+}
+select[name="folder_arr"] {
+    width: 250px;
+}
+textarea {
+    font-size: 1em;
+}
+input[type="number"] {
+    width: 60px;
+    margin-left: 3px;
+    margin-right: 3px;
+}
+input[name="ut_port"] {
+    width: 70px;
+}
+input[type="button"] {
+    font-size: 1em;
+}
+fieldset {
+    margin-top: 15px;
+    border: 1px solid #c0c0c0;
+}
+fieldset > ul > li > ul.item > li {
+    display: inline-block;
+}
+div.page.setup fieldset > ul > li > ul.item > li:first-child {
+    min-width: 200px;
+}
+ul.item > li {
+    margin-top: 2px;
+}
+
+div.backup_form { 
+    padding-top: 10px;
+}
+div.backup_form > div { 
+    margin-bottom: -3px;
+}
+div.backup_form > div.restore, div.backup_form > div.backup {
+    background-color:#dddddd;
+    margin-top: 4px;
+    border: 1px solid #c0c0c0;
+    overflow: hidden;
+    padding-bottom: 2px;
+    text-align: center;
+}
+div.backup_form > textarea, div.backup_form textarea {
+    width: 99.2%;
+    height: 400px;
+    margin-top: 2px;
+}
+div.backup_form a.backup_tab, div.backup_form a.restore_tab {
+    border-top-left-radius: 4px; 
+    border-top-right-radius: 4px; 
+    padding:5px; 
+    padding-bottom: 2px; 
+    margin-right: 10px; 
+    text-decoration: none;
+    border: 1px solid #c0c0c0;
+    border-bottom: 0px;
+    background-color:#f2f2f2; 
+    color: #82838e;
+}
+div.backup_form a.backup_tab.active, div.backup_form a.restore_tab.active {
+    background-color:#dddddd; 
+    color: #2f5be1;	
+}
+div.backup_form div.backup input, div.backup_form div.restore input {
+    margin: 5px;
+}
+li.default {
+    text-align: center;
+    margin-top: 7px;
+}
+ul.sortable li div.info {
+    margin-bottom: -2px;
+}
+ul.sortable li div.info div {
+    display: inline-block;
+    margin-right: 3px;
+}
+ul.sortable {
+    background-color: #fff;
+    padding: 10px;
+}
+ul.sortable li {
+    height: 20px;
+    background-color: #ccc;
+    border-radius: 4px;
+    margin: 2px;
+    padding: 1px;
+    padding-left: 5px;
+    border: 1px solid #82838e;
+    white-space: nowrap;
+    cursor: default;
+    background-image: url(/images/draggable.png);
+    background-position: center right 1%;
+    background-repeat: no-repeat;
+}
+ul.sortable li.ui-state-highlight {
+    background-color: #f1f2f1;
+    border: 1px dotted #82838e;
+    background-image: none;
+}
+ul.sortable li.ui-sortable-helper {
+    opacity: 0.8;
+}
+ul.sortable li {
+    height: 26px;
+}
+ul.sortable div.size {
+    background-color: #fff;
+    border-radius: 5px;
+    height: 8px;
+}
+div.ui-resizable-e {
+    width: 8px;
+    height: 8px;
+    background-color: #fff;
+    border-radius: 4px;
+    right: -10px;
+    cursor: e-resize;
+}
+div.ui-resizable {
+    position: relative;
+}
+div.ui-resizable-handle {
+    position: absolute;
+    font-size: 0.1px;
+    display: block;
+}
+fieldset.folders li.list select {
+    width: 100%;
+}
+div.author a {
+    color: #333333;
+}
+div.bottom {
+    width: 720px;
+    margin: 0 auto;
+    font-size: 0.8em;
+}
+div.bottom div {
+    display: inline-block;
+}
+div.author {
+    float: right;
+    text-align: right;
+    color: #82838e;
+    margin-top: 2px;
+}
+div.donate img {
+    margin-bottom: -7px;
+}
+.lang div {
+    text-align: center;
+}
+div.help {
+    display: none;
+}
+div.help div.img {
+    text-align: center;
+}
+div.help div.img img {
+    border: 1px solid #82838e;
+}
+div.help ul {
+    margin: 14px;
+    padding-left: 19px;
+    list-style-type: decimal;
+}
+div.help ul li {
+    margin-bottom: 8px;
+}

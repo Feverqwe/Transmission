@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>uTorrent manager</title>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" type="text/css" href="css/stylesheet.css"> 
+        <link rel="stylesheet" type="text/css" href="js/jquery.contextmenu.css"> 
+        <link rel="stylesheet" type="text/css" href="js/jquery.selectbox.css"> 
+        <link rel="stylesheet" type="text/css" href="css/apprise.min.css">
+        <script src="js/jquery-1.9.1.min.js"></script>
+        <script src="js/apprise-1.5.min.js"></script>
+        <script src="js/jquery.selectbox.js"></script>
+        <script src="js/jquery.contextMenu.js"></script>
+        <script src="js/jquery.tablesorter.js"></script>
+        <script src="js/graph.js"></script>
+        <script src="js/lang.js"></script>
+        <script src="js/manager.js"></script>
+    </head>
+    <body>
+        <ul class="menu">
+            <li><a class="btn refresh" target="_blank" href="#refresh"></a></li>
+            <li><a class="btn wui" target="_blank" href="#wui"></a></li>
+            <li><a class="btn add_file" href="#add_file"></a></li>
+            <li class="separate"></li>
+            <li><a class="btn start_all" href="#start_all"></a></li>
+            <li><a class="btn pause_all" href="#pause_all"></a></li>
+            <li class="graph"></li>
+            <li class="select"><select></select></li>
+        </ul>
+        <div class="torrent-list-layer">
+            <table class="torrent-table-head" border="0" cellspacing="0" cellpadding="0"><thead></thead></table>
+            <table class="torrent-table-body" border="0" cellspacing="0" cellpadding="0" >
+                <thead></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <table class="status-panel" width="100%" border="0" cellspacing="0" cellpadding="0" >
+            <tfoot>
+                <tr>
+                    <td class="status"></td>
+                    <td class="speed download"></td>
+                    <td class="speed upload"></td>
+                </tr>
+            </tfoot>
+        </table>
+        <div class="file-list">
+            <div class="fl-layer">
+                <table class="fl-table-head" border="0" cellspacing="0" cellpadding="0"><thead></thead></table>
+                <table class="fl-table-body" border="0" cellspacing="0" cellpadding="0">
+                    <thead></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <ul class="bottom-menu">
+                <li class="path"><input type="text" readonly="readonly"/></li>
+                <li class="btn"><a class="close"></a></li>
+                <li class="btn"><a class="update"></a></li>
+            </ul>
+        </div>
+        <input type="file" multiple accept="application/x-bittorrent" name="torrent_file"/>
+    </body>
+</html>
