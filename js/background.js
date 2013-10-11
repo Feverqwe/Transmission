@@ -1054,4 +1054,3 @@ $(document).ready(function() {
     });
     engine.begin();
 });
-var tt = null;

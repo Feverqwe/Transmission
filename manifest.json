@@ -3,7 +3,7 @@
     "browser_action": {
         "default_icon": "images/icon.png",
         "default_popup": "manager.html",
-        "default_title": "Transmissin"
+        "default_title": "Transmission"
     },
     "background": {
         "scripts": ["js/jquery-1.9.1.min.js","js/lang.js","js/background.js"]
@@ -12,9 +12,9 @@
         "128": "images/icon_128.png"
     },
     "permissions": [ "http://*/*", "https://*/*", "storage", "notifications", "tabs", "contextMenus" ],
-    "name": "Transmissin easy client",
+    "name": "Transmission easy client",
     "description": "__MSG_appDesc__",
     "default_locale": "en",
     "options_page": "options.html",
-    "version": "2.0.34"
+    "version": "1.0"
 }

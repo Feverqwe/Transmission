@@ -1,7 +1,7 @@
 --- manager.html	2013-03-23 12:20:26.000000000 +0600
 +++ m_manager.html	2013-03-23 13:06:14.000000000 +0600
 @@ -4,16 +4,7 @@
-         <title>uTorrent manager</title>
+         <title>Transmission manager</title>
          <meta charset="utf-8" />
          <link rel="stylesheet" type="text/css" href="css/stylesheet.css"> 
 -        <link rel="stylesheet" type="text/css" href="js/jquery.contextmenu.css"> 

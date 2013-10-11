@@ -1871,7 +1871,13 @@ var manager = function() {
                             }
                             var folder = settings.folders_array[r][1];
                             for (var i = 0; i < inp.files.length; i++) {
-                                _engine.upload_file(inp.files[i], folder);
+                                var reader = new FileReader();
+                                reader.onload = function() {
+                                    var dataUrl = reader.result;
+                                    var base64 = dataUrl.split(',')[1];
+                                    _engine.upload_file(base64, folder);
+                                };
+                                reader.readAsDataURL(inp.files[i]);
                             }
                             tables.file_select.get(0).value = '';
                         }
@@ -1905,14 +1911,14 @@ var manager = function() {
                 var param = '&list=1&action=start' + '&hash=' + hash;
                 _engine.sendAction(param);
             });/*
-                Transmission
-            tables['table-body'].on('click', 'a.pause', function(e) {
-                e.preventDefault();
-                var hash = $(this).parents().eq(2).attr('id');
-                var param = '&list=1&action=pause' + '&hash=' + hash;
-                _engine.sendAction(param);
-            });
-            */
+             Transmission
+             tables['table-body'].on('click', 'a.pause', function(e) {
+             e.preventDefault();
+             var hash = $(this).parents().eq(2).attr('id');
+             var param = '&list=1&action=pause' + '&hash=' + hash;
+             _engine.sendAction(param);
+             });
+             */
             tables['table-body'].on('click', 'a.stop', function(e) {
                 e.preventDefault();
                 var hash = $(this).parents().eq(2).attr('id');
@@ -2067,13 +2073,13 @@ var manager = function() {
                             var id = this[0].id;
                             contextActions(key, id);
                         }
-                    },/*
-                    Transmission
-                    labels: {
-                        name: lang_arr[11],
-                        className: "labels",
-                        items: get_label_context_menu()
-                    }*/
+                    }, /*
+                     Transmission
+                     labels: {
+                     name: lang_arr[11],
+                     className: "labels",
+                     items: get_label_context_menu()
+                     }*/
                 }
             });
             tmp_vars['torrent_context_menu'] = $(".context-menu-list.context-menu-root.torrent");
@@ -2192,29 +2198,29 @@ var manager = function() {
                             tmp_vars.fl_file_selected = 1;
                             tables['fl-body'].find('input:checked').trigger('click');
                         }
-                    },/*
-                        Transmission
-                    s1: '-',
-                    download: {
-                        name: lang_arr[90],
-                        callback: function(key, opt) {
-                            function ui_url(file_number)
-                            {
-                                return 'proxy?sid=' +
-                                        (tr_table_controller.get(torrent_file_list.getID()))[22] + '&file=' + file_number +
-                                        '&disposition=ATTACHMENT&service=DOWNLOAD&qos=0';
-                            }
-                            var c = tmp_vars.fl_select_array.length;
-                            for (var n = 0; n < c; n++) {
-                                chrome.tabs.create({
-                                    url: tmp_vars.lp_path + ui_url(tmp_vars.fl_select_array[n])
-                                });
-                            }
-                            ;
-                            tmp_vars.fl_file_selected = 1;
-                            tables['fl-body'].find('input:checked').trigger('click');
-                        }
-                    }*/
+                    }, /*
+                     Transmission
+                     s1: '-',
+                     download: {
+                     name: lang_arr[90],
+                     callback: function(key, opt) {
+                     function ui_url(file_number)
+                     {
+                     return 'proxy?sid=' +
+                     (tr_table_controller.get(torrent_file_list.getID()))[22] + '&file=' + file_number +
+                     '&disposition=ATTACHMENT&service=DOWNLOAD&qos=0';
+                     }
+                     var c = tmp_vars.fl_select_array.length;
+                     for (var n = 0; n < c; n++) {
+                     chrome.tabs.create({
+                     url: tmp_vars.lp_path + ui_url(tmp_vars.fl_select_array[n])
+                     });
+                     }
+                     ;
+                     tmp_vars.fl_file_selected = 1;
+                     tables['fl-body'].find('input:checked').trigger('click');
+                     }
+                     }*/
                 }
             });
             $.contextMenu({
