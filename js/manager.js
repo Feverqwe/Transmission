@@ -486,18 +486,6 @@ var manager = function() {
                         }
                         break;
                     }
-                case 16:
-                    if (colums['dostupno'].a) {
-                        if (!item)
-                            item = $('#' + v[0]);
-                        var val = Math.round((v[16] / 65535) * 1000) / 1000;
-                        var cell = item.children('td.dostupno');
-                        cell.attr('data-value', v[16]).children('div').html(val);
-                        if (tmp_vars.tr_auto_order_cell) {
-                            tables['table-main'].trigger('updateCell', [cell[0], tmp_vars.tr_auto_order]);
-                        }
-                        break;
-                    }
                 case 11:
                     if (!item)
                         item = $('#' + v[0]);
@@ -598,8 +586,7 @@ var manager = function() {
                     return '<td class="' + key + '" data-value="' + v[7] + '"><div>' + val + '</div></td>';
                     break;
                 case 'dostupno':
-                    var val = Math.round((v[16] / 65535) * 1000) / 1000;
-                    return '<td class="' + key + '" data-value="' + v[16] + '"><div>' + val + '</div></td>';
+                    return '';
                     break;
                 case 'metka':
                     return '<td class="' + key + '"><div title="' + v[11] + '">' + v[11] + '</div></td>';

@@ -63,7 +63,6 @@ var engine = function() {
         'otdano': {'a': 0, 'size': 60, 'pos': 13, 'lang': 78, 'order': 1},
         'poluchino': {'a': 0, 'size': 60, 'pos': 14, 'lang': 79, 'order': 1},
         'koeficient': {'a': 0, 'size': 60, 'pos': 15, 'lang': 80, 'order': 1},
-        'dostupno': {'a': 0, 'size': 60, 'pos': 16, 'lang': 81, 'order': 1},
         'metka': {'a': 0, 'size': 100, 'pos': 17, 'lang': 82, 'order': 1},
         'time_dobavleno': {'a': 0, 'size': 120, 'pos': 18, 'lang': 83, 'order': 1},
         'time_zavircheno': {'a': 0, 'size': 120, 'pos': 19, 'lang': 84, 'order': 1},
@@ -454,9 +453,10 @@ var engine = function() {
             } else
             if (key === 'speed-limit-up-enabled' && value === false) {
                 up_limit = 0;
-            } else {
-                console.log("unk", key, value);
             }
+            //else {
+            //       console.log("unk", key, value);
+            //  }
         });
         if (up_limit !== -1 && dl_limit !== -1) {
             ut['settings'] = [];
@@ -499,7 +499,7 @@ var engine = function() {
                 params[key] = val;
             }
         }
-        console.log("url params", params);
+        //console.log("url params", params);
         var sh_list = 0;
         var data = {};
         var cb = function() {
@@ -650,7 +650,7 @@ var engine = function() {
                 }
             },
             success: function(data) {
-                console.log("success", data);
+                //console.log("success", data);
                 var obj = data;
                 if (typeof(data) === "String") {
                     obj = $.parseJSON(obj);
@@ -1007,12 +1007,18 @@ var engine = function() {
             if ('metka' in obj) {
                 delete obj.metka;
             }
+            if ('dostupno' in obj) {
+                delete obj.dostupno;
+            }
             return obj;
         },
         getDefColums: function() {
             var obj = clone_obj(colums);
             if ('metka' in obj) {
                 delete obj.metka;
+            }
+            if ('dostupno' in obj) {
+                delete obj.dostupno;
             }
             return obj;
         },
