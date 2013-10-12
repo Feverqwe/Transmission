@@ -209,6 +209,7 @@ table td.progress div.val {
 }
 div.torrent-list-layer table td.controls div.btns {
     height: 18px;
+    text-align: center;
 }
 div.torrent-list-layer table td.controls div.btns > a {
     width: 18px;

@@ -28,7 +28,9 @@ var manager = function() {
         'body_width': 0
     };
     var chk_settings = function() {
-        //не работает!
+        if (localStorage.login === undefined) {
+            return 0;
+        }
         tmp_vars.lp_path = lp_path();
         return 1;
     };
@@ -44,7 +46,7 @@ var manager = function() {
     };
     var write_language = function() {
         tables['menu'].find('a.refresh').attr('title', lang_arr[24]);
-        tables['menu'].find('a.wui').attr('title', lang_arr[26]).attr('href', tmp_vars.lp_path + settings.ut_path.replace("/rpc",""));
+        tables['menu'].find('a.wui').attr('title', lang_arr[26]).attr('href', tmp_vars.lp_path + settings.ut_path.replace("/rpc", ""));
         tables['menu'].find('a.add_file').attr('title', lang_arr[118]);
         tables['menu'].find('a.start_all').attr('title', lang_arr[68]);
         tables['menu'].find('a.pause_all').attr('title', lang_arr[67]);
@@ -500,14 +502,6 @@ var manager = function() {
                     if (!item)
                         item = $('#' + v[0]);
                     item.attr('data-label', v[11]);
-                    if (colums['metka'].a) {
-                        var cell = item.children('td.metka');
-                        cell.children('div').attr('title', v[11]).html(v[11]);
-                        if (tmp_vars.tr_auto_order_cell) {
-                            tables['table-main'].trigger('updateCell', [cell[0], tmp_vars.tr_auto_order]);
-                        }
-                        break;
-                    }
                 case 23:
                     if (colums['time_dobavleno'].a) {
                         if (!item)
@@ -1837,8 +1831,8 @@ var manager = function() {
             });
             tables['menu'].on('click', 'a.refresh', function(e) {
                 e.preventDefault();
-                timer.start();
-                get_torrent_list();
+                timer.stop();
+                _engine.getForceTorrentList((tmp_vars.filelist_param) ? tmp_vars.filelist_param : '');
             });
             tables['menu'].on('click', 'a.start_all', function(e) {
                 e.preventDefault();
@@ -2050,13 +2044,6 @@ var manager = function() {
                                     contextActions(key, id);
                                 }
                             },
-                            remove_files: {
-                                name: lang_arr[9],
-                                callback: function(key, opt) {
-                                    var id = this[0].id;
-                                    contextActions(key, id);
-                                }
-                            },
                             remove_torrent_files: {
                                 name: lang_arr[10],
                                 callback: function(key, opt) {
@@ -2073,13 +2060,7 @@ var manager = function() {
                             var id = this[0].id;
                             contextActions(key, id);
                         }
-                    }/*, 
-                     Transmission
-                     labels: {
-                     name: lang_arr[11],
-                     className: "labels",
-                     items: get_label_context_menu()
-                     }*/
+                    }
                 }
             });
             tmp_vars['torrent_context_menu'] = $(".context-menu-list.context-menu-root.torrent");
@@ -2198,29 +2179,7 @@ var manager = function() {
                             tmp_vars.fl_file_selected = 1;
                             tables['fl-body'].find('input:checked').trigger('click');
                         }
-                    }/*, 
-                     Transmission
-                     s1: '-',
-                     download: {
-                     name: lang_arr[90],
-                     callback: function(key, opt) {
-                     function ui_url(file_number)
-                     {
-                     return 'proxy?sid=' +
-                     (tr_table_controller.get(torrent_file_list.getID()))[22] + '&file=' + file_number +
-                     '&disposition=ATTACHMENT&service=DOWNLOAD&qos=0';
-                     }
-                     var c = tmp_vars.fl_select_array.length;
-                     for (var n = 0; n < c; n++) {
-                     chrome.tabs.create({
-                     url: tmp_vars.lp_path + ui_url(tmp_vars.fl_select_array[n])
-                     });
-                     }
-                     ;
-                     tmp_vars.fl_file_selected = 1;
-                     tables['fl-body'].find('input:checked').trigger('click');
-                     }
-                     }*/
+                    }
                 }
             });
             $.contextMenu({

@@ -135,7 +135,7 @@ var options = function() {
         }
     };
     var make_bakup_form = function() {
-        $('div.backup_form div').children('a.backup_tab').on('click',function(e) {
+        $('div.backup_form div').children('a.backup_tab').on('click', function(e) {
             e.preventDefault();
             $(this).parents().eq(1).children('div.restore').slideUp('fast');
             $(this).parent().children('a.restore_tab').removeClass('active');
@@ -143,18 +143,18 @@ var options = function() {
             $(this).parent().children('a.backup_tab').addClass('active');
             getBackup();
         });
-        $('div.backup_form div').children('a.restore_tab').on('click',function(e) {
+        $('div.backup_form div').children('a.restore_tab').on('click', function(e) {
             e.preventDefault();
             $(this).parents().eq(1).children('div.backup').slideUp('fast');
             $(this).parent().children('a.backup_tab').removeClass('active');
             $(this).parents().eq(1).children('div.restore').slideDown('fast');
             $(this).parent().children('a.restore_tab').addClass('active');
         });
-        $('div.backup').find('input[name=backup]').on('click',function(e) {
+        $('div.backup').find('input[name=backup]').on('click', function(e) {
             e.preventDefault();
             getBackup();
         });
-        $('div.restore').find('input[name=restore]').on('click',function(e) {
+        $('div.restore').find('input[name=restore]').on('click', function(e) {
             e.preventDefault();
             stngsRestore($(this).parent().children('textarea').val());
             $('textarea[name="backup"]').empty();
@@ -180,18 +180,18 @@ var options = function() {
         $("ul.sortable").disableSelection();
         $("ul.sortable").find("div.size").resizable({handles: "e", resize: function(event, ui) {
                 $(this).parent().children('div').children("div").eq(1).children('label').html(ui.size.width);
-         }});
+            }});
     };
     var reset_table = function(table, arr) {
         table.empty();
         $.each(arr, function(k, v) {
-            ap(table,k,v);
+            ap(table, k, v);
         });
         $("ul.sortable").sortable({placeholder: "ui-state-highlight"});
         $("ul.sortable").disableSelection();
         $("ul.sortable").find("div.size").resizable({handles: "e", resize: function(event, ui) {
                 $(this).parent().children('div').children("div").eq(1).children('label').html(ui.size.width);
-         }});
+            }});
     };
     var bytesToSize = function(bytes, nan) {
         //переводит байты в строчки
@@ -207,8 +207,17 @@ var options = function() {
         return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
     };
     var write_language = function(language) {
-        if (!language) {
-            language = (localStorage.lang !== undefined) ? localStorage["lang"] : 'en';
+        if (language === undefined) {
+            language = localStorage["lang"];
+        }
+        if (language === undefined) {
+            language = 'en';
+            if ("chrome" in window && chrome.i18n && chrome.i18n.getMessage("lang") === 'ru') {
+                language = 'ru';
+            } else
+            if ("chrome" in window && chrome.i18n && chrome.i18n.getMessage("lang") === 'fr') {
+                language = 'fr';
+            }
         }
         lang_arr = get_lang(language);
         var lang = lang_arr.settings;

@@ -1,5 +1,6 @@
 var get_lang = function(lang) {
     var lang_arr_en = {
+        t: 'en',
         0: 'Start',
         1: 'Pause',
         2: 'Stop',
@@ -189,6 +190,7 @@ var get_lang = function(lang) {
         }
     };
     var lang_arr_fr = {
+        t: 'fr',
         0: 'Démarrer',
         1: 'Pause',
         2: 'Stop',
@@ -378,6 +380,7 @@ var get_lang = function(lang) {
         }
     };
     var lang_arr_ru = {
+        t: 'ru',
         0: 'Запустить',
         1: 'Пауза',
         2: 'Остановить',
@@ -566,16 +569,24 @@ var get_lang = function(lang) {
             68: 'Нажмите "Сохранить всё"'
         }
     };
-    if (!lang) {
-        lang = localStorage["lang"] || 'en';
+    if (lang === undefined) {
+        lang = localStorage["lang"];
+    }
+    if (lang === undefined) {
+        lang = 'en';
+        if ("chrome" in window && chrome.i18n && chrome.i18n.getMessage("lang") === 'ru') {
+            lang = 'ru';
+        } else
+        if ("chrome" in window && chrome.i18n && chrome.i18n.getMessage("lang") === 'fr') {
+            lang = 'fr';
+        }
     }
     if (lang === 'ru') {
         return lang_arr_ru;
     } else
     if (lang === 'fr') {
         return lang_arr_fr;
-    } else
-    {
+    } else {
         return lang_arr_en;
     }
 };

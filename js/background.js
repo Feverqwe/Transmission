@@ -511,14 +511,12 @@ var engine = function() {
             data.arguments['ids'] = id;
         } else
         if ('action' in params && (params.action === 'start' || params.action === 'unpause')) {
-            if (params.hash === undefined) {
-                var id = "recently-active";
-            } else {
-                var id = IntStrOrArrInArray(params.hash);
-            }
+            var id = IntStrOrArrInArray(params.hash);
             data['method'] = "torrent-start";
             data['arguments'] = {};
-            data.arguments['ids'] = id;
+            if (params.hash !== undefined) {
+                data.arguments['ids'] = id;
+            }
         } else
         if ('action' in params && params.action === 'forcestart') {
             var id = IntStrOrArrInArray(params.hash);
@@ -916,12 +914,17 @@ var engine = function() {
                 dir_url = context.val;
             }
             chrome.tabs.getSelected(null, function(tab) {
-                if (a.linkUrl.substr(0, 7).toLowerCase() === 'magnet:')
-                    uploadMagnet(a.linkUrl, dir_url);
-                else
-                    downloadFile(a.linkUrl, function(file) {
-                        uploadTorrent(file, dir_url);
+                if (a.linkUrl.substr(0, 7).toLowerCase() === 'magnet:') {
+                    get('&list=1', null, function() {
+                        uploadMagnet(a.linkUrl, dir_url);
                     });
+                } else {
+                    downloadFile(a.linkUrl, function(file) {
+                        get('&list=1', null, function() {
+                            uploadTorrent(file, dir_url);
+                        });
+                    });
+                }
             });
         };
         return {
@@ -977,6 +980,10 @@ var engine = function() {
         getTorrentList: function(t) {
             return getTorrentList(t);
         },
+        getForceTorrentList: function(t) {
+            tmp_vars.get['torrentc'] = 0;
+            return getTorrentList(t);
+        },
         sendAction: function(t, a, b) {
             return sendAction(t, a, b);
         },
@@ -996,10 +1003,18 @@ var engine = function() {
             return clone_obj(settings);
         },
         getColums: function() {
-            return (localStorage.colums !== undefined) ? JSON.parse(localStorage.colums) : clone_obj(colums);
+            var obj = (localStorage.colums !== undefined) ? JSON.parse(localStorage.colums) : clone_obj(colums);
+            if ('metka' in obj) {
+                delete obj.metka;
+            }
+            return obj;
         },
         getDefColums: function() {
-            return clone_obj(colums);
+            var obj = clone_obj(colums);
+            if ('metka' in obj) {
+                delete obj.metka;
+            }
+            return obj;
         },
         getDefFlColums: function() {
             return clone_obj(fl_colums);
