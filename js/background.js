@@ -456,13 +456,12 @@ var engine = function() {
             }
             //else {
             //       console.log("unk", key, value);
-            //  }
+            //}
         });
         if (up_limit !== -1 && dl_limit !== -1) {
-            ut['settings'] = [];
-            ut['settings'].push(['max_dl_rate', '', dl_limit]);
-            ut['settings'].push(['max_ul_rate', '', up_limit]);
+            ut['settings'] = [['max_dl_rate', '', dl_limit], ['max_ul_rate', '', up_limit]];
         }
+        //console.log("uTAPI", ut);
         return ut;
     };
     var ParseuTorrentUrl = function(url) {
@@ -502,115 +501,168 @@ var engine = function() {
         //console.log("url params", params);
         var sh_list = 0;
         var data = {};
-        var cb = function() {
-        };
-        if ('action' in params && params.action === 'getfiles') {
-            var id = IntStrOrArrInArray(params.hash);
-            data['method'] = "torrent-get";
-            data['arguments'] = {fields: ["id", "name", "totalSize", "percentDone", 'downloadedEver', 'uploadedEver', 'rateUpload', 'rateDownload', 'eta', 'peersSendingToUs', 'peersGettingFromUs', 'queuePosition', 'addedDate', 'doneDate', 'downloadDir', 'recheckProgress', 'status', 'error', 'errorString', 'files', 'fileStats']};
-            data.arguments['ids'] = id;
-        } else
-        if ('action' in params && (params.action === 'start' || params.action === 'unpause')) {
-            var id = IntStrOrArrInArray(params.hash);
-            data['method'] = "torrent-start";
-            data['arguments'] = {};
-            if (params.hash !== undefined) {
-                data.arguments['ids'] = id;
-            }
-        } else
-        if ('action' in params && params.action === 'forcestart') {
-            var id = IntStrOrArrInArray(params.hash);
-            data['method'] = "torrent-start-now";
-            data['arguments'] = {};
-            data.arguments['ids'] = id;
-        } else
-        if ('action' in params && (params.action === 'stop' || params.action === 'pause')) {
-            var id = IntStrOrArrInArray(params.hash);
-            data['method'] = "torrent-stop";
-            data['arguments'] = {};
-            data.arguments['ids'] = id;
-        } else
-        if ('action' in params && params.action === 'recheck') {
-            var id = IntStrOrArrInArray(params.hash);
-            data['method'] = "torrent-verify";
-            data['arguments'] = {};
-            data.arguments['ids'] = id;
-        } else
-        if ('action' in params && (params.action === 'remove' || params.action === 'removetorrent')) {
-            var id = IntStrOrArrInArray(params.hash);
-            data['method'] = "torrent-remove";
-            data['arguments'] = {};
-            data.arguments['ids'] = id;
-        } else
-        if ('action' in params && (params.action === 'removedata' || params.action === 'removedatatorrent')) {
-            var id = IntStrOrArrInArray(params.hash);
-            data['method'] = "torrent-remove";
-            data['arguments'] = {"delete-local-data": true};
-            data.arguments['ids'] = id;
-        } else
-        if ('action' in params && params.action === 'getsettings') {
-            data['method'] = "session-get";
-        } else
-        if ('action' in params && params.action === 'setprio' && params.p === "2") {
-            var id = IntStrOrArrInArray(params.hash);
-            var files = IntStrOrArrInArray(params.f);
-            data['method'] = "torrent-set";
-            data['arguments'] = {};
-            data.arguments['priority-normal'] = files;
-            data.arguments['files-wanted'] = files;
-            data.arguments['ids'] = id;
-        } else
-        if ('action' in params && params.action === 'setprio' && params.p === "1") {
-            var id = IntStrOrArrInArray(params.hash);
-            var files = IntStrOrArrInArray(params.f);
-            data['method'] = "torrent-set";
-            data['arguments'] = {};
-            data.arguments['priority-low'] = files;
-            data.arguments['files-wanted'] = files;
-            data.arguments['ids'] = id;
-        } else
-        if ('action' in params && params.action === 'setprio' && params.p === "3") {
-            var id = IntStrOrArrInArray(params.hash);
-            var files = IntStrOrArrInArray(params.f);
-            data['method'] = "torrent-set";
-            data['arguments'] = {};
-            data.arguments['priority-high'] = files;
-            data.arguments['files-wanted'] = files;
-            data.arguments['ids'] = id;
-        } else
-        if ('action' in params && params.action === 'setprio' && params.p === "0") {
-            var id = IntStrOrArrInArray(params.hash);
-            var files = IntStrOrArrInArray(params.f);
-            data['method'] = "torrent-set";
-            data['arguments'] = {};
-            data.arguments['files-unwanted'] = files;
-            data.arguments['ids'] = id;
-        } else
-        if ('action' in params && params.action === 'setsetting') {
-            var speed = parseInt(params.v);
-            data['method'] = "torrent-set";
-            data['arguments'] = {};
-            if (params.s === "max_dl_rate") {
-                if (speed === 0) {
-                    data.arguments['downloadLimited'] = false;
-                } else {
-                    data.arguments['downloadLimited'] = true;
-                    data.arguments['downloadLimit'] = speed;
+        var cb = undefined;
+        if ('action' in params) {
+            if (params.action === 'getfiles') {
+                var id = IntStrOrArrInArray(params.hash);
+                sh_list = 1;
+                data = {method: "torrent-get",
+                    arguments: {
+                        fields: ["id", "name", "totalSize", "percentDone", 'downloadedEver', 'uploadedEver', 'rateUpload', 'rateDownload', 'eta', 'peersSendingToUs', 'peersGettingFromUs', 'queuePosition', 'addedDate', 'doneDate', 'downloadDir', 'recheckProgress', 'status', 'error', 'errorString', 'files', 'fileStats'],
+                        ids: id
+                    }
+                };
+            } else
+            if (params.action === 'start' || params.action === 'unpause') {
+                var id = IntStrOrArrInArray(params.hash);
+                data = {
+                    method: "torrent-start"
+                };
+                if (params.hash !== undefined) {
+                    data['arguments'] = {ids: id};
                 }
-            }
-            if (params.s === "max_ul_rate") {
-                if (speed === 0) {
-                    data.arguments['uploadLimited'] = false;
-                } else {
-                    data.arguments['uploadLimited'] = true;
-                    data.arguments['uploadLimit'] = speed;
+            } else
+            if (params.action === 'forcestart') {
+                var id = IntStrOrArrInArray(params.hash);
+                data = {
+                    method: "torrent-start-now",
+                    arguments: {
+                        ids: id
+                    }
+                };
+            } else
+            if (params.action === 'stop' || params.action === 'pause') {
+                var id = IntStrOrArrInArray(params.hash);
+                data = {
+                    method: "torrent-stop",
+                    arguments: {
+                        ids: id
+                    }
+                };
+            } else
+            if (params.action === 'recheck') {
+                var id = IntStrOrArrInArray(params.hash);
+                data = {
+                    method: "torrent-verify",
+                    arguments: {
+                        ids: id
+                    }
+                };
+            } else
+            if (params.action === 'remove' || params.action === 'removetorrent') {
+                var id = IntStrOrArrInArray(params.hash);
+                data = {
+                    method: "torrent-remove",
+                    arguments: {
+                        ids: id
+                    }
+                };
+            } else
+            if (params.action === 'removedata' || params.action === 'removedatatorrent') {
+                var id = IntStrOrArrInArray(params.hash);
+                data = {
+                    method: "torrent-remove",
+                    arguments: {
+                        'delete-local-data': true,
+                        ids: id
+                    }
+                };
+            } else
+            if (params.action === 'getsettings') {
+                data = {method: "session-get"};
+            } else
+            if (params.action === 'setprio' && params.p === "2") {
+                var id = IntStrOrArrInArray(params.hash);
+                var files = IntStrOrArrInArray(params.f);
+                data = {
+                    method: "torrent-set",
+                    arguments: {
+                        'priority-normal': files,
+                        'files-wanted': files,
+                        ids: id
+                    }
+                };
+                cb = function() {
+                    get('&action=getfiles&hash=' + id);
+                };
+            } else
+            if (params.action === 'setprio' && params.p === "1") {
+                var id = IntStrOrArrInArray(params.hash);
+                var files = IntStrOrArrInArray(params.f);
+                data = {
+                    method: "torrent-set",
+                    arguments: {
+                        'priority-low': files,
+                        'files-wanted': files,
+                        ids: id
+                    }
+                };
+                cb = function() {
+                    get('&action=getfiles&hash=' + id);
+                };
+            } else
+            if (params.action === 'setprio' && params.p === "3") {
+                var id = IntStrOrArrInArray(params.hash);
+                var files = IntStrOrArrInArray(params.f);
+                data = {
+                    method: "torrent-set",
+                    arguments: {
+                        'priority-high': files,
+                        'files-wanted': files,
+                        ids: id
+                    }
+                };
+                cb = function() {
+                    get('&action=getfiles&hash=' + id);
+                };
+            } else
+            if (params.action === 'setprio' && params.p === "0") {
+                var id = IntStrOrArrInArray(params.hash);
+                var files = IntStrOrArrInArray(params.f);
+                data = {
+                    method: "torrent-set",
+                    arguments: {
+                        'files-unwanted': files,
+                        ids: id
+                    }
+                };
+                cb = function() {
+                    get('&action=getfiles&hash=' + id);
+                };
+            } else
+            if (params.action === 'setsetting') {
+                var speed = parseInt(params.v);
+                sh_list = 1;
+                data = {
+                    method: "torrent-set",
+                    arguments: {}
+                };
+                if (params.s === "max_dl_rate") {
+                    if (speed === 0) {
+                        data.arguments['downloadLimited'] = false;
+                    } else {
+                        data.arguments['downloadLimited'] = true;
+                        data.arguments['downloadLimit'] = speed;
+                    }
+                }
+                if (params.s === "max_ul_rate") {
+                    if (speed === 0) {
+                        data.arguments['uploadLimited'] = false;
+                    } else {
+                        data.arguments['uploadLimited'] = true;
+                        data.arguments['uploadLimit'] = speed;
+                    }
                 }
             }
         } else
         if ('list' in params) {
             sh_list = 1;
-            data['method'] = "torrent-get";
-            data['arguments'] = {fields: ["id", "name", "totalSize", "percentDone", 'downloadedEver', 'uploadedEver', 'rateUpload', 'rateDownload', 'eta', 'peersSendingToUs', 'peersGettingFromUs', 'queuePosition', 'addedDate', 'doneDate', 'downloadDir', 'recheckProgress', 'status', 'error', 'errorString']};
+            data = {
+                method: "torrent-get",
+                arguments: {
+                    fields: ["id", "name", "totalSize", "percentDone", 'downloadedEver', 'uploadedEver', 'rateUpload', 'rateDownload', 'eta', 'peersSendingToUs', 'peersGettingFromUs', 'queuePosition', 'addedDate', 'doneDate', 'downloadDir', 'recheckProgress', 'status', 'error', 'errorString']
+                }
+            };
             if ('cid' in params && parseInt(params.cid) !== 0) {
                 data.arguments['ids'] = "recently-active";
             }
@@ -620,7 +672,6 @@ var engine = function() {
                 get('&list=1');
             };
         }
-        //console.log("res", data);
         return [JSON.stringify(data), cb];
     };
     var get = function(action, cid, callback)
@@ -632,17 +683,15 @@ var engine = function() {
             });
             return 0;
         }
-        var url = settings.ut_url;
         var data = ParseuTorrentUrl(action + ((!cid) ? "&cid=" + tmp_vars.get['torrentc'] : ''));
-        if (callback === undefined) {
+        if (callback === undefined && data[1] !== undefined) {
             callback = data[1];
         }
-        data = data[0];
         $.ajax({
             type: "POST",
             cache: 0,
             url: settings.ut_url,
-            data: data,
+            data: data[0],
             beforeSend: function(xhr) {
                 xhr.setRequestHeader("X-Transmission-Session-Id", tmp_vars.get['token'] || "");
                 if (settings.login.length > 0) {
@@ -656,7 +705,7 @@ var engine = function() {
                     obj = $.parseJSON(obj);
                 }
                 obj = InuTorrentAPI(data);
-                if (callback) {
+                if (typeof(callback) === 'function') {
                     callback(obj);
                 }
                 if ('build' in obj) {
