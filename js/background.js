@@ -380,6 +380,9 @@ var engine = function() {
                     item[5] = field.downloadedEver;
                     item[6] = field.uploadedEver;
                     item[7] = Math.round(field.uploadedEver / field.downloadedEver * 1000);
+                    if (isNaN(item[7])) {
+                        item[7] = 0;
+                    }
                     item[8] = field.rateUpload;
                     item[9] = field.rateDownload;
                     item[10] = field.eta;
