@@ -574,6 +574,7 @@ var engine = function() {
             if (params.action === 'setprio' && params.p === "2") {
                 var id = IntStrOrArrInArray(params.hash);
                 var files = IntStrOrArrInArray(params.f);
+                sh_list = 1;
                 data = {
                     method: "torrent-set",
                     arguments: {
@@ -589,6 +590,7 @@ var engine = function() {
             if (params.action === 'setprio' && params.p === "1") {
                 var id = IntStrOrArrInArray(params.hash);
                 var files = IntStrOrArrInArray(params.f);
+                sh_list = 1;
                 data = {
                     method: "torrent-set",
                     arguments: {
@@ -604,6 +606,7 @@ var engine = function() {
             if (params.action === 'setprio' && params.p === "3") {
                 var id = IntStrOrArrInArray(params.hash);
                 var files = IntStrOrArrInArray(params.f);
+                sh_list = 1;
                 data = {
                     method: "torrent-set",
                     arguments: {
@@ -619,6 +622,7 @@ var engine = function() {
             if (params.action === 'setprio' && params.p === "0") {
                 var id = IntStrOrArrInArray(params.hash);
                 var files = IntStrOrArrInArray(params.f);
+                sh_list = 1;
                 data = {
                     method: "torrent-set",
                     arguments: {
