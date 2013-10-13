@@ -837,7 +837,7 @@ var engine = function() {
                 link_note(lang_arr[103], null, 1);
                 return;
             }
-            if (response.error || response.result !== "success") {
+            if (response.result !== "success" || response.error) {
                 link_note(lang_arr[23], (response.error) ? response.error : '', 1);
             } else {
                 tmp_vars.new_file_monitoring = function(name, e) {
@@ -880,6 +880,9 @@ var engine = function() {
             var xhr = new XMLHttpRequest();
             xhr.open("POST", settings.ut_url, true);
             xhr.setRequestHeader('X-Transmission-Session-Id', tmp_vars.get['token']);
+            if (settings.login.length > 0) {
+                xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password) + "=");
+            }
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
                     handleResponse(xhr.responseText);
@@ -900,6 +903,9 @@ var engine = function() {
             var xhr = new XMLHttpRequest();
             xhr.open("POST", settings.ut_url, true);
             xhr.setRequestHeader('X-Transmission-Session-Id', tmp_vars.get['token']);
+            if (settings.login.length > 0) {
+                xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password) + "=");
+            }
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
                     handleResponse(xhr.responseText);
