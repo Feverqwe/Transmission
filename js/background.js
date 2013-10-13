@@ -571,68 +571,51 @@ var engine = function() {
             if (params.action === 'getsettings') {
                 data = {method: "session-get"};
             } else
-            if (params.action === 'setprio' && params.p === "2") {
+            if (params.action === 'setprio') {
                 var id = IntStrOrArrInArray(params.hash);
                 var files = IntStrOrArrInArray(params.f);
-                sh_list = 1;
-                data = {
-                    method: "torrent-set",
-                    arguments: {
-                        'priority-normal': files,
-                        'files-wanted': files,
-                        ids: id
-                    }
-                };
                 cb = function() {
                     get('&action=getfiles&hash=' + id);
                 };
-            } else
-            if (params.action === 'setprio' && params.p === "1") {
-                var id = IntStrOrArrInArray(params.hash);
-                var files = IntStrOrArrInArray(params.f);
-                sh_list = 1;
-                data = {
-                    method: "torrent-set",
-                    arguments: {
-                        'priority-low': files,
-                        'files-wanted': files,
-                        ids: id
-                    }
-                };
-                cb = function() {
-                    get('&action=getfiles&hash=' + id);
-                };
-            } else
-            if (params.action === 'setprio' && params.p === "3") {
-                var id = IntStrOrArrInArray(params.hash);
-                var files = IntStrOrArrInArray(params.f);
-                sh_list = 1;
-                data = {
-                    method: "torrent-set",
-                    arguments: {
-                        'priority-high': files,
-                        'files-wanted': files,
-                        ids: id
-                    }
-                };
-                cb = function() {
-                    get('&action=getfiles&hash=' + id);
-                };
-            } else
-            if (params.action === 'setprio' && params.p === "0") {
-                var id = IntStrOrArrInArray(params.hash);
-                var files = IntStrOrArrInArray(params.f);
-                sh_list = 1;
-                data = {
-                    method: "torrent-set",
-                    arguments: {
-                        'files-unwanted': files,
-                        ids: id
-                    }
-                };
-                cb = function() {
-                    get('&action=getfiles&hash=' + id);
-                };
+                if (params.p === "2") {
+                    data = {
+                        method: "torrent-set",
+                        arguments: {
+                            'priority-normal': files,
+                            'files-wanted': files,
+                            ids: id
+                        }
+                    };
+                } else
+                if (params.p === "1") {
+                    data = {
+                        method: "torrent-set",
+                        arguments: {
+                            'priority-low': files,
+                            'files-wanted': files,
+                            ids: id
+                        }
+                    };
+                } else
+                if (params.p === "3") {
+                    data = {
+                        method: "torrent-set",
+                        arguments: {
+                            'priority-high': files,
+                            'files-wanted': files,
+                            ids: id
+                        }
+                    };
+                } else
+                if (params.p === "0") {
+                    data = {
+                        method: "torrent-set",
+                        arguments: {
+                            'files-unwanted': files,
+                            ids: id
+                        }
+                    };
+                }
             } else
             if (params.action === 'setsetting') {
                 var speed = parseInt(params.v);
@@ -671,7 +654,7 @@ var engine = function() {
                 data.arguments['ids'] = "recently-active";
             }
         }
-        if (sh_list === 0 && 'list' in params) {
+        if (sh_list === 0 && cb === undefined && 'list' in params) {
             cb = function() {
                 get('&list=1');
             };
