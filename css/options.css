@@ -1,5 +1,4 @@
 body {
-    background-color: #f1f2f1;
     font-family: Verdana, sans-serif;
     font-size: 0.84em;
 }
@@ -11,7 +10,7 @@ div.title {
 ul.menu {
     width: 720px;
     margin: 0 auto;
-    background-color: #fff;
+    background-color: #e6e6e6;
 }
 ul.menu li {
     display: inline-block;
@@ -26,13 +25,14 @@ ul.menu li a {
     padding-right: 10px;
     padding-top: 3px;
     padding-bottom: 3px;
-    color: #025EB3;
+    color: #0051D8;
+    border: 1px solid transparent;
+    border-radius: 4px;
 }
 ul.menu li a.active {
-    border-left: 2px solid #c40005;
-    background-color: #d1f09d;
-    color: #000;
     text-decoration: none;
+    border-color: #ccc;
+    color: #000;
 }
 div.page {
     width: 720px;
@@ -54,7 +54,6 @@ div.page.active {
 }
 ul {
     list-style: none;
-    margin: 0;
     padding: 0;
 }
 input {
@@ -86,7 +85,8 @@ input[type="button"] {
 }
 fieldset {
     margin-top: 15px;
-    border: 1px solid #c0c0c0;
+    border: 1px solid #ddd;
+    border-radius: 3px;
 }
 fieldset > ul > li > ul.item > li {
     display: inline-block;
@@ -95,7 +95,10 @@ div.page.setup fieldset > ul > li > ul.item > li:first-child {
     min-width: 200px;
 }
 ul.item > li {
-    margin-top: 2px;
+    display: inline-block;
+}
+.page.options ul.item > li:first-child {
+    padding: 6px 12px;
 }
 
 div.backup_form { 
@@ -105,17 +108,16 @@ div.backup_form > div {
     margin-bottom: -3px;
 }
 div.backup_form > div.restore, div.backup_form > div.backup {
-    background-color:#dddddd;
+    background-color:#fff;
     margin-top: 4px;
-    border: 1px solid #c0c0c0;
     overflow: hidden;
-    padding-bottom: 2px;
+    padding-bottom: 0px;
     text-align: center;
 }
 div.backup_form > textarea, div.backup_form textarea {
     width: 99.2%;
     height: 400px;
-    margin-top: 2px;
+    margin-top: 1px;
 }
 div.backup_form a.backup_tab, div.backup_form a.restore_tab {
     border-top-left-radius: 4px; 
@@ -130,7 +132,7 @@ div.backup_form a.backup_tab, div.backup_form a.restore_tab {
     color: #82838e;
 }
 div.backup_form a.backup_tab.active, div.backup_form a.restore_tab.active {
-    background-color:#dddddd; 
+    background-color:#fff; 
     color: #2f5be1;	
 }
 div.backup_form div.backup input, div.backup_form div.restore input {
@@ -153,43 +155,44 @@ ul.sortable {
 }
 ul.sortable li {
     height: 20px;
-    background-color: #ccc;
-    border-radius: 4px;
-    margin: 2px;
     padding: 1px;
     padding-left: 5px;
-    border: 1px solid #82838e;
+    border-top: 1px solid #ccc;
     white-space: nowrap;
     cursor: default;
     background-image: url(/images/draggable.png);
     background-position: center right 1%;
     background-repeat: no-repeat;
 }
+ul.sortable li:last-child {
+    border-bottom: 1px solid #ccc;
+}
 ul.sortable li.ui-state-highlight {
     background-color: #f1f2f1;
-    border: 1px dotted #82838e;
     background-image: none;
 }
 ul.sortable li.ui-sortable-helper {
     opacity: 0.8;
 }
 ul.sortable li {
-    height: 26px;
+    height: 35px;
+    padding-top: 5px;
 }
 ul.sortable div.size {
-    background-color: #fff;
+    background-color: #89C2FF;
     border-radius: 5px;
     height: 8px;
 }
 div.ui-resizable-e {
     width: 8px;
     height: 8px;
-    background-color: #fff;
+    background-color: #89C2FF;
     border-radius: 4px;
     right: -10px;
     cursor: e-resize;
 }
 div.ui-resizable {
+    margin-top: 3px;
     position: relative;
 }
 div.ui-resizable-handle {
@@ -239,4 +242,27 @@ div.help ul {
 }
 div.help ul li {
     margin-bottom: 8px;
+}
+h1 {
+    font-size: 36px;
+    margin: 0;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 500;
+    line-height: 1.1;
+    box-sizing: border-box;
+    -webkit-margin-before: 0.67em;
+    -webkit-margin-after: 0.67em;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+}
+
+ul.item {
+    margin-bottom: 2px;
+}
+ul.item > li:first-child {
+    padding: 6px 12px;
+}
+.ui-sortable-helper {
+    background-color:#fff !important;
+    opacity: 0.9;
 }
