@@ -977,6 +977,7 @@ var engine = function() {
                     "onclick": addTorrent
                 });
                 //выбор каталога из контекстного меню>
+                context_menu = null;
                 if (settings.folders_array && settings.folders_array.length)
                 {
                     var arr = settings.folders_array;
