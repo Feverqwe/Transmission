@@ -837,8 +837,7 @@ var engine = function() {
                 link_note(lang_arr[103], null, 1);
                 return;
             }
-            ;
-            if (response.error) {
+            if (response.error || response.result !== "success") {
                 link_note(lang_arr[23], (response.error) ? response.error : '', 1);
             } else {
                 tmp_vars.new_file_monitoring = function(name, e) {
