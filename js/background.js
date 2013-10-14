@@ -390,15 +390,13 @@ var engine = function() {
                     var l_c = 0;
                     var s_c = 0;
                     field.trackerStats.forEach(function(itm) {
-                        l_c += itm.leecherCount;
-                        s_c += itm.seederCount;
+                        if (itm.leecherCount > 0) {
+                            l_c += itm.leecherCount;
+                        }
+                        if (itm.seederCount > 0) {
+                            s_c += itm.seederCount;
+                        }
                     });
-                    if (l_c < 0) {
-                        l_c = 0;
-                    }
-                    if (s_c < 0) {
-                        s_c = 0;
-                    }
                     item[13] = l_c;
                     item[14] = field.peersSendingToUs;
                     item[15] = s_c;
