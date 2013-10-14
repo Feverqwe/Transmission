@@ -212,9 +212,13 @@ var manager = function() {
             }
         };
     };
-    var get_torrent_list = function() {
+    var get_torrent_list = function(first) {
         timer.stop();
-        _engine.getTorrentList((tmp_vars.filelist_param) ? tmp_vars.filelist_param : '');
+        if (first) {
+            _engine.getForceTorrentList((tmp_vars.filelist_param) ? tmp_vars.filelist_param : '');
+        } else {
+            _engine.getTorrentList((tmp_vars.filelist_param) ? tmp_vars.filelist_param : '');
+        }
     };
     /*
      ,arr[i][0] /* ХЭШ
@@ -2209,7 +2213,7 @@ var manager = function() {
             _engine.getLabels();
             _engine.getStatus();
             _engine.get_cache_torrent_list();
-            get_torrent_list();
+            get_torrent_list(1);
             return 1;
         },
         updateList: function(a, b) {
