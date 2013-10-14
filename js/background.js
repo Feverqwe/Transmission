@@ -387,9 +387,21 @@ var engine = function() {
                     item[9] = field.rateDownload;
                     item[10] = field.eta;
                     item[12] = field.peersGettingFromUs;
-                    item[13] = field.peersGettingFromUs;
+                    var l_c = 0;
+                    var s_c = 0;
+                    field.trackerStats.forEach(function(itm) {
+                        l_c += itm.leecherCount;
+                        s_c += itm.seederCount;
+                    });
+                    if (l_c < 0) {
+                        l_c = 0;
+                    }
+                    if (s_c < 0) {
+                        s_c = 0;
+                    }
+                    item[13] = l_c;
                     item[14] = field.peersSendingToUs;
-                    item[15] = field.peersSendingToUs;
+                    item[15] = s_c;
                     item[17] = field.queuePosition;
 
                     item[21] = utStatus[1];
@@ -511,7 +523,7 @@ var engine = function() {
                 sh_list = 1;
                 data = {method: "torrent-get",
                     arguments: {
-                        fields: ["id", "name", "totalSize", "percentDone", 'downloadedEver', 'uploadedEver', 'rateUpload', 'rateDownload', 'eta', 'peersSendingToUs', 'peersGettingFromUs', 'queuePosition', 'addedDate', 'doneDate', 'downloadDir', 'recheckProgress', 'status', 'error', 'errorString', 'files', 'fileStats'],
+                        fields: ["id", "name", "totalSize", "percentDone", 'downloadedEver', 'uploadedEver', 'rateUpload', 'rateDownload', 'eta', 'peersSendingToUs', 'peersGettingFromUs', 'queuePosition', 'addedDate', 'doneDate', 'downloadDir', 'recheckProgress', 'status', 'error', 'errorString', 'trackerStats', 'files', 'fileStats'],
                         ids: id
                     }
                 };
@@ -650,7 +662,7 @@ var engine = function() {
             data = {
                 method: "torrent-get",
                 arguments: {
-                    fields: ["id", "name", "totalSize", "percentDone", 'downloadedEver', 'uploadedEver', 'rateUpload', 'rateDownload', 'eta', 'peersSendingToUs', 'peersGettingFromUs', 'queuePosition', 'addedDate', 'doneDate', 'downloadDir', 'recheckProgress', 'status', 'error', 'errorString']
+                    fields: ["id", "name", "totalSize", "percentDone", 'downloadedEver', 'uploadedEver', 'rateUpload', 'rateDownload', 'eta', 'peersSendingToUs', 'peersGettingFromUs', 'queuePosition', 'addedDate', 'doneDate', 'downloadDir', 'recheckProgress', 'status', 'error', 'errorString', 'trackerStats']
                 }
             };
             if ('cid' in params && parseInt(params.cid) !== 0) {
