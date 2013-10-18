@@ -75,7 +75,7 @@ var engine = function() {
         'download': {'a': 1, 'size': 60, 'pos': 4, 'lang': 79, 'order': 1},
         'progress': {'a': 1, 'size': 70, 'pos': 5, 'lang': 15, 'order': 1},
         'priority': {'a': 1, 'size': 74, 'pos': 6, 'lang': 89, 'order': 1}
-    }
+    };
     var timer = function() {
         var status = 0;
         var tmr = null;
@@ -306,6 +306,9 @@ var engine = function() {
         if (code === 6) {
             uCode = 201;
             Status = "Seeding";
+        } else {
+            uCode = 201;
+            Status = "Unknown";
         }
         return [uCode, Status];
     };
@@ -360,35 +363,57 @@ var engine = function() {
                 var l = value.length;
                 for (var i = 0; i < l; i++) {
                     var field = value[i];
+                    if (field === undefined) {
+                        console.log("Field undefined!");
+                        continue;
+                    }
                     var item = ["", 0, "", 0, 0, 0, 0, 0, 0, 0, 0, "", 0, 0, 0, 0, 0, 0, 0, "", "", "", "", 0, 0, "", "", 0];
+                    //    0, 1,  2, 3, 4, 5, 6, 7, 8, 9,10, 11,12,13,14,15,16,17,18, 19, 20, 21, 22,23,24, 25, 26, 28
                     var utStatus = [];
+                    if (field.id === undefined) {
+                        console.log("File ID is undefined!");
+                        continue;
+                    }
                     if (field.error > 0) {
                         utStatus[0] = 144;
-                        utStatus[1] = field.errorString;
+                        utStatus[1] = field.errorString || "Unknown error!";
                     } else {
                         utStatus = readTransmStatus(field.status);
                     }
                     item[0] = field.id;
                     item[1] = utStatus[0];
-                    item[2] = field.name;
-                    item[3] = field.totalSize;
+                    item[2] = field.name || "Unknown name";
+                    item[3] = field.totalSize || 0;
+                    if (field.recheckProgress === undefined) {
+                        field.recheckProgress = 0;
+                    }
+                    if (field.percentDone === undefined) {
+                        field.percentDone = 0;
+                    }
                     if (field.recheckProgress !== 0) {
                         item[4] = parseInt(field.recheckProgress * 1000);
                     } else {
                         item[4] = parseInt(field.percentDone * 1000);
                     }
-                    item[5] = field.downloadedEver;
-                    item[6] = field.uploadedEver;
-                    item[7] = Math.round(field.uploadedEver / field.downloadedEver * 1000);
+                    item[5] = field.downloadedEver || 0;
+                    item[6] = field.uploadedEver || 0;
+                    if (field.downloadedEver > 0) {
+                        item[7] = Math.round(field.uploadedEver / field.downloadedEver * 1000);
+                    } else {
+                        item[7] = 0;
+                    }
                     if (isNaN(item[7])) {
                         item[7] = 0;
                     }
-                    item[8] = field.rateUpload;
-                    item[9] = field.rateDownload;
-                    item[10] = field.eta;
-                    item[12] = field.peersGettingFromUs;
+                    item[8] = field.rateUpload || 0;
+                    item[9] = field.rateDownload || 0;
+                    item[10] = field.eta || 0;
+                    item[12] = field.peersGettingFromUs || 0;
                     var l_c = 0;
                     var s_c = 0;
+                    if (field.trackerStats === undefined) {
+                        field.trackerStats = [];
+                    }
                     field.trackerStats.forEach(function(itm) {
                         if (itm.leecherCount > 0) {
                             l_c += itm.leecherCount;
@@ -398,20 +423,30 @@ var engine = function() {
                         }
                     });
                     item[13] = l_c;
-                    item[14] = field.peersSendingToUs;
+                    item[14] = field.peersSendingToUs || 0;
                     item[15] = s_c;
-                    item[17] = field.queuePosition;
+                    item[17] = field.queuePosition || 0;
 
                     item[21] = utStatus[1];
 
-                    item[23] = field.addedDate;
-                    item[24] = field.doneDate;
-                    item[26] = field.downloadDir;
+                    item[23] = field.addedDate || 0;
+                    item[24] = field.doneDate || 0;
+                    item[26] = field.downloadDir || "Unknown path";
                     if (fileMode) {
                         ut['files'] = [];
                         ut['files'][0] = item[0];
                         ut['files'][1] = [];
+                        if (field.files === undefined) {
+                            field.files = [];
+                        }
+                        if (field.fileStats === undefined) {
+                            field.fileStats = [];
+                        }
                         var fn = field.files.length;
+                        if (field.files.length > field.fileStats.length) {
+                            fn = 0;
+                            console.log("Files more fileStats!");
+                        }
                         for (var n = 0; n < fn; n++) {
                             var f_item = field.files[n];
                             var s_item = field.fileStats[n] || {priority: 0};
