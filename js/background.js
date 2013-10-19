@@ -908,19 +908,22 @@ var engine = function() {
                 get("&list=1");
             }
         };
+        function _arrayBufferToBase64(buffer) {
+            var binary = '';
+            var bytes = new Uint8Array(buffer);
+            var len = bytes.byteLength;
+            for (var i = 0; i < len; i++) {
+                binary += String.fromCharCode(bytes[ i ]);
+            }
+            return window.btoa(binary);
+        }
         var downloadFile = function(url, callback) {
             var xhr = new XMLHttpRequest();
             xhr.open("GET", url, true);
             xhr.overrideMimeType("text/plain; charset=x-user-defined");
-            xhr.responseType = "blob";
+            xhr.responseType = "arraybuffer";
             xhr.onload = function() {
-                var reader = new FileReader();
-                reader.onload = function() {
-                    var dataUrl = reader.result;
-                    var base64 = dataUrl.split(',')[1];
-                    callback(base64);
-                };
-                reader.readAsDataURL(xhr.response);
+                callback(_arrayBufferToBase64(xhr.response));
             };
             xhr.send(null);
         };
