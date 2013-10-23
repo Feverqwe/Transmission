@@ -88,6 +88,9 @@ var engine = function() {
             }
             status = 1;
             tmr = setInterval(function() {
+                if (!popup.chk()) {
+                    tmp_vars.get['torrentc'] = 0;
+                }
                 getTorrentList();
             }, interval);
             return 1;
@@ -131,7 +134,7 @@ var engine = function() {
                 storage['connection'] = {'status': s, 'name': d};
             }
             if ((old_s !== s || old_d !== d) && popup.chk()) {
-                tmp_vars.popup.manager.setStatus(s, (typeof(d) === 'number') ? lang_arr[d] : d);
+                tmp_vars.popup.manager.setStatus(s, (typeof (d) === 'number') ? lang_arr[d] : d);
             }
         };
         var get = function(type) {
@@ -142,9 +145,9 @@ var engine = function() {
                 d = storage[type]['name'];
             }
             if (popup.chk()) {
-                tmp_vars.popup.manager.setStatus(s, (typeof(d) === 'number') ? lang_arr[d] : d);
+                tmp_vars.popup.manager.setStatus(s, (typeof (d) === 'number') ? lang_arr[d] : d);
             }
-            return (typeof(d) === 'number') ? lang_arr[d] : d;
+            return (typeof (d) === 'number') ? lang_arr[d] : d;
         };
         return {
             connection: function(s, d) {
@@ -173,7 +176,7 @@ var engine = function() {
                     tmp_vars.get['token'] = xhr.getResponseHeader("X-Transmission-Session-Id");
                     tmp_vars.get['torrentc'] = 0;
                     tmp_vars.token_reconnect_counter = 0;
-                    if (typeof(callback) === 'function') {
+                    if (typeof (callback) === 'function') {
                         callback();
                     }
                     return;
@@ -518,7 +521,7 @@ var engine = function() {
                 return strORarr;
             }
             var arr = [parseInt(strORarr)];
-            if (typeof(strORarr) === "object") {
+            if (typeof (strORarr) === "object") {
                 arr = [];
                 strORarr.forEach(function(itm) {
                     arr.push(parseInt(itm));
@@ -538,7 +541,7 @@ var engine = function() {
             var key = key_val[0];
             var val = key_val[1];
             if (key in params) {
-                if (typeof(params[key]) !== "object") {
+                if (typeof (params[key]) !== "object") {
                     params[key] = [params[key]];
                 }
                 params[key].push(val);
@@ -698,8 +701,12 @@ var engine = function() {
                     fields: ["id", "name", "totalSize", "percentDone", 'downloadedEver', 'uploadedEver', 'rateUpload', 'rateDownload', 'eta', 'peersSendingToUs', 'peersGettingFromUs', 'queuePosition', 'addedDate', 'doneDate', 'downloadDir', 'recheckProgress', 'status', 'error', 'errorString', 'trackerStats']
                 }
             };
-            if ('cid' in params && parseInt(params.cid) !== 0) {
-                data.arguments['ids'] = "recently-active";
+            if ('cid' in params) {
+                if (parseInt(params.cid) !== 0) {
+                    data.arguments['ids'] = "recently-active";
+                } else {
+                    tmp_vars.get['torrentc'] = 0;
+                }
             }
         }
         if (sh_list === 0 && cb === undefined && 'list' in params) {
@@ -718,7 +725,7 @@ var engine = function() {
             });
             return 0;
         }
-        var data = ParseuTorrentUrl(action + ((!cid) ? "&cid=" + tmp_vars.get['torrentc'] : ''));
+        var data = ParseuTorrentUrl(action + ((!cid) ? "&cid=" + tmp_vars.get['torrentc'] : '&cid=' + cid));
         if (callback === undefined && data[1] !== undefined) {
             callback = data[1];
         }
@@ -736,11 +743,11 @@ var engine = function() {
             success: function(data) {
                 //console.log("success", data);
                 var obj = data;
-                if (typeof(data) === "String") {
+                if (typeof (data) === "String") {
                     obj = $.parseJSON(obj);
                 }
                 obj = InuTorrentAPI(data);
-                if (typeof(callback) === 'function') {
+                if (typeof (callback) === 'function') {
                     callback(obj);
                 }
                 if ('build' in obj) {
@@ -851,11 +858,9 @@ var engine = function() {
                         lang_arr[71] + xhr.status + ' ' + thrownError;
                 status.connection(1, error_desk);
                 if (xhr.status === 409 && tmp_vars['get_repeat'] <= 3) {
-                    tmp_vars.get['token'] = null;
-                    getToken(function() {
-                        tmp_vars['get_repeat'] += 1;
-                        get(action, cid, callback);
-                    });
+                    tmp_vars.get['token'] = xhr.getResponseHeader("X-Transmission-Session-Id");
+                    tmp_vars['get_repeat'] += 1;
+                    get(action, cid, callback);
                 }
             }
         });
@@ -1012,12 +1017,12 @@ var engine = function() {
             }
             chrome.tabs.getSelected(null, function(tab) {
                 if (a.linkUrl.substr(0, 7).toLowerCase() === 'magnet:') {
-                    get('&list=1', null, function() {
+                    get('&list=1', undefined, function() {
                         uploadMagnet(a.linkUrl, dir_url);
                     });
                 } else {
                     downloadFile(a.linkUrl, function(file) {
-                        get('&list=1', null, function() {
+                        get('&list=1', undefined, function() {
                             uploadTorrent(file, dir_url);
                         });
                     });
