@@ -75,6 +75,12 @@ ul.menu a.add_file{
 ul.menu a.btn:hover {
     border: 1px solid #a9acb1;
 }
+ul.menu a.alt_speed{
+    background-image: url("/images/alt_speed.png");
+}
+ul.menu a.alt_speed.active{
+    background-image: url("/images/alt_speed_active.png");
+}
 .torrent-list-layer {
     overflow: auto;
     border-top: 1px #c0c0c0 solid;

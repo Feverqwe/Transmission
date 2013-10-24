@@ -50,6 +50,7 @@ var manager = function() {
         tables['menu'].find('a.add_file').attr('title', lang_arr[118]);
         tables['menu'].find('a.start_all').attr('title', lang_arr[68]);
         tables['menu'].find('a.pause_all').attr('title', lang_arr[67]);
+        tables['menu'].find('a.alt_speed').attr('title', lang_arr[120]);
         tables['fl-bottom'].find('a.update').attr('title', lang_arr[91][1]);
         tables['fl-bottom'].find('a.close').attr('title', lang_arr[91][2]);
     };
@@ -1516,9 +1517,9 @@ var manager = function() {
         var add_layer = function() {
             $('<div class="file-list-layer-temp"></div>')
                     .css({
-                height: tables.window.height(),
-                width: tables.window.width()
-            }).on('mousedown', function() {
+                        height: tables.window.height(),
+                        width: tables.window.width()
+                    }).on('mousedown', function() {
                 $(this).remove();
                 close();
             }).appendTo(tables['body']);
@@ -1890,6 +1891,19 @@ var manager = function() {
                 if (param.length)
                     _engine.sendAction(param);
             });
+            tables['menu'].on('click', 'a.alt_speed', function(e) {
+                e.preventDefault();
+                var param = '&action=setsetting&s=alt-speed-enabled&v=';
+                if ($(this).hasClass('active')) {
+                    _engine.sendAction(param + '0', undefined, function() {
+                        _engine.sendAction('&action=getsettings');
+                    });
+                } else {
+                    _engine.sendAction(param + '1', undefined, function() {
+                        _engine.sendAction('&action=getsettings');
+                    });
+                }
+            });
             tables['table-body'].on('click', 'a.start', function(e) {
                 e.preventDefault();
                 var hash = $(this).parents().eq(2).attr('id');
@@ -2013,7 +2027,7 @@ var manager = function() {
                                 'textNo': lang_arr[110][1]
                             }, function(r) {
                                 if (r) {
-                                    if (typeof(r) !== 'string')
+                                    if (typeof (r) !== 'string')
                                     {
                                         contextActions(key, id);
                                     }
@@ -2213,6 +2227,7 @@ var manager = function() {
             _engine.getLabels();
             _engine.getStatus();
             _engine.get_cache_torrent_list();
+            _engine.get_alt_speed_atate();
             get_torrent_list(1);
             return 1;
         },
@@ -2237,6 +2252,13 @@ var manager = function() {
         },
         setFileList: function(a) {
             torrent_file_list.setFL(a);
+        },
+        setAltState: function(a) {
+            if (a) {
+                $('a.alt_speed').addClass('active');
+            } else {
+                $('a.alt_speed').removeClass('active');
+            }
         }
     };
 }();

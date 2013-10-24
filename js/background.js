@@ -504,6 +504,12 @@ var engine = function() {
             } else
             if (key === 'speed-limit-up-enabled' && value === false) {
                 up_limit = 0;
+            } else
+            if (key === 'alt-speed-enabled') {
+                tmp_vars.get['alt_speed'] = value;
+                if (popup.chk()) {
+                    tmp_vars.popup.manager.setAltState(tmp_vars.get['alt_speed']);
+                }
             }
             //else {
             //       console.log("unk", key, value);
@@ -689,6 +695,14 @@ var engine = function() {
                     } else {
                         data.arguments['uploadLimited'] = true;
                         data.arguments['uploadLimit'] = speed;
+                    }
+                }
+                if (params.s === "alt-speed-enabled") {
+                    data.method = "session-set";
+                    if (speed === 0) {
+                        data.arguments['alt-speed-enabled'] = false;
+                    } else {
+                        data.arguments['alt-speed-enabled'] = true;
                     }
                 }
             }
@@ -1165,6 +1179,15 @@ var engine = function() {
             tmp_vars.get_repeat = 0;
             context_menu_obj.load();
             tmp_vars.get = {};
+        },
+        get_alt_speed_atate: function() {
+            if (tmp_vars.get['alt_speed'] !== undefined) {
+                if (popup.chk()) {
+                    tmp_vars.popup.manager.setAltState(tmp_vars.get['alt_speed']);
+                }
+            } else {
+                get('&action=getsettings');
+            }
         },
         upload_file: context_menu_obj.uploadTorrent
     };
