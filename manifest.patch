@@ -4,8 +4,8 @@
          "default_title": "Transmission"
      },
      "background": {
--        "scripts": ["js/jquery-1.9.1.min.js","js/lang.js","js/background.js"]
-+        "scripts": ["js/jquery-1.9.1.min.js","js/background.js"]
+-        "scripts": ["js/jquery-2.0.3.min.js","js/lang.js","js/background.js"]
++        "scripts": ["js/jquery-2.0.3.min.js","js/background.js"]
      },
      "icons": {
          "128": "images/icon_128.png"
