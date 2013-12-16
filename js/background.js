@@ -165,7 +165,7 @@ var engine = function() {
             url: settings.ut_url,
             beforeSend: function(xhr) {
                 if (settings.login.length > 0) {
-                    xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password) + "=");
+                    xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password));
                 }
             },
             data: '{"method":"session-get"}',
@@ -751,7 +751,7 @@ var engine = function() {
             beforeSend: function(xhr) {
                 xhr.setRequestHeader("X-Transmission-Session-Id", tmp_vars.get['token'] || "");
                 if (settings.login.length > 0) {
-                    xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password) + "=");
+                    xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password));
                 }
             },
             success: function(data) {
@@ -887,7 +887,7 @@ var engine = function() {
             try {
                 var xhr = new XMLHttpRequest();
                 xhr.open("GET", settings.ut_url + "?token=" + tmp_vars.get['token'] + "&list=1" + "&cid=" + tmp_vars.get['torrentc'], false);
-                xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password) + "=");
+                xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password));
                 xhr.send(null);
             } catch (e) {
                 return null;
@@ -953,7 +953,7 @@ var engine = function() {
             xhr.open("POST", settings.ut_url, true);
             xhr.setRequestHeader('X-Transmission-Session-Id', tmp_vars.get['token']);
             if (settings.login.length > 0) {
-                xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password) + "=");
+                xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password));
             }
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
@@ -976,7 +976,7 @@ var engine = function() {
             xhr.open("POST", settings.ut_url, true);
             xhr.setRequestHeader('X-Transmission-Session-Id', tmp_vars.get['token']);
             if (settings.login.length > 0) {
-                xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password) + "=");
+                xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password));
             }
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
