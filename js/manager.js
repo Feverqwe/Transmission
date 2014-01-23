@@ -48,6 +48,7 @@ var manager = function() {
         tables['menu'].find('a.refresh').attr('title', lang_arr[24]);
         tables['menu'].find('a.wui').attr('title', lang_arr[26]).attr('href', tmp_vars.lp_path + settings.ut_path.replace("/rpc", ""));
         tables['menu'].find('a.add_file').attr('title', lang_arr[118]);
+        tables['menu'].find('a.add_magnet').attr('title', lang_arr[122]);
         tables['menu'].find('a.start_all').attr('title', lang_arr[68]);
         tables['menu'].find('a.pause_all').attr('title', lang_arr[67]);
         tables['menu'].find('a.alt_speed').attr('title', lang_arr[120]);
@@ -1839,6 +1840,38 @@ var manager = function() {
             tables['menu'].on('click', 'a.add_file', function(e) {
                 e.preventDefault();
                 tables.file_select.trigger('click');
+            });
+            tables['menu'].on('click', 'a.add_magnet', function(e) {
+                e.preventDefault();
+                apprise(lang_arr[121], {
+                    'input': true,
+                    'textOk': lang_arr[119][0],
+                    'textCancel': lang_arr[119][1]
+                }, function(r) {
+                    if (r === false || r.length === 0) {
+                        return;
+                    }
+                    var url = r;
+                    if (settings.folders_array.length > 0) {
+                        apprise(lang_arr[117], {
+                            'select': settings.folders_array,
+                            'textOk': lang_arr[119][0],
+                            'textCancel': lang_arr[119][1]
+                        }, function(r) {
+                            if (r === false) {
+                                return;
+                            }
+                            r = parseFloat(r);
+                            if (isNaN(r)) {
+                                return;
+                            }
+                            var folder = settings.folders_array[r][1];
+                            _engine.upload_url(url, folder);
+                        });
+                    } else {
+                        _engine.upload_url(url);
+                    }
+                });
             });
             tables.file_select.on('change', function(e) {
                 e.preventDefault();

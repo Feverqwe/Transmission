@@ -815,13 +815,11 @@ var engine = function() {
                             tmp_vars.get['torrents'][tmp_vars.get['torrents'].length] = tmp_vars.get['torrentp'][np];
                             if (tmp_vars.new_file_monitoring) {
                                 tmp_vars.new_file_monitoring(obj['torrentp'][np][2]);
-                                tmp_vars.new_file_monitoring = null;
                             }
                         }
                     }
                     if (tmp_vars.new_file_monitoring) {
                         tmp_vars.new_file_monitoring(null, 1);
-                        tmp_vars.new_file_monitoring = null;
                     }
                     if (popup.chk()) {
                         tmp_vars.popup.manager.updateList(obj['torrentp'], 1);
@@ -831,7 +829,6 @@ var engine = function() {
                 if ('torrents' in obj) {
                     if (tmp_vars.new_file_monitoring) {
                         tmp_vars.new_file_monitoring(obj['torrents'][obj['torrents'].length - 1][2]);
-                        tmp_vars.new_file_monitoring = null;
                     }
                     //Full torrent list
                     addons_notify(tmp_vars.get['torrents'], obj['torrents']);
@@ -895,7 +892,8 @@ var engine = function() {
             // convert response to an object
             return JSON.parse(xhr.responseText);
         };
-        var handleResponse = function(responseText) {
+        var handleResponse = function(type, responseText) {
+            var retry = 5;
             // check for errors
             var response = null;
             try {
@@ -911,16 +909,23 @@ var engine = function() {
                 link_note(lang_arr[23], (response.error) ? response.error : '', 1);
             } else {
                 tmp_vars.new_file_monitoring = function(name, e) {
+                    if (type !== 'url' || (type === 'url' && (!e || retry === 0) ) ) {
+                        tmp_vars.new_file_monitoring = null;
+                    }
                     if (e) {
+                        if (type === 'url' && retry !== 0) {
+                            retry--;
+                            return;
+                        }
                         link_note(lang_arr[112], null, 1);
-                    } else {
-                        link_note(name, lang_arr[102], null);
-                        if (settings.change_downloads) {
-                            var label = {k: 'download', v: null};
-                            localStorage.selected_label = JSON.stringify(label);
-                            if (popup.chk()) {
-                                tmp_vars.popup.manager.setLabel(label);
-                            }
+                        return;
+                    }
+                    link_note(name, lang_arr[102], null);
+                    if (settings.change_downloads) {
+                        var label = {k: 'download', v: null};
+                        localStorage.selected_label = JSON.stringify(label);
+                        if (popup.chk()) {
+                            tmp_vars.popup.manager.setLabel(label);
                         }
                     }
                 };
@@ -957,7 +962,7 @@ var engine = function() {
             }
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
-                    handleResponse(xhr.responseText);
+                    handleResponse('file', xhr.responseText);
                 }
             };
             params = {
@@ -972,6 +977,9 @@ var engine = function() {
             xhr.send(JSON.stringify(params));
         };
         var uploadMagnet = function(url, dir_url) {
+            if (dir_url === undefined) {
+                dir_url = '';
+            }
             var xhr = new XMLHttpRequest();
             xhr.open("POST", settings.ut_url, true);
             xhr.setRequestHeader('X-Transmission-Session-Id', tmp_vars.get['token']);
@@ -980,7 +988,7 @@ var engine = function() {
             }
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
-                    handleResponse(xhr.responseText);
+                    handleResponse('url', xhr.responseText);
                 }
             };
             params = {
@@ -989,7 +997,7 @@ var engine = function() {
                     filename: url
                 }
             };
-            if (dir_url && dir_url.length > 0) {
+            if (dir_url.length > 0) {
                 params.arguments['download-dir'] = dir_url;
             }
             xhr.send(JSON.stringify(params));
@@ -1076,7 +1084,8 @@ var engine = function() {
                     context_menu = items;
                 }
             },
-            'uploadTorrent': uploadTorrent
+            'uploadTorrent': uploadTorrent,
+            'uploadURL': uploadMagnet
         };
     }();
     var getTorrentList = function(subaction) {
@@ -1189,7 +1198,8 @@ var engine = function() {
                 get('&action=getsettings');
             }
         },
-        upload_file: context_menu_obj.uploadTorrent
+        upload_file: context_menu_obj.uploadTorrent,
+        upload_url: context_menu_obj.uploadURL
     };
 }();
 $(document).ready(function() {

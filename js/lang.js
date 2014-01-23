@@ -119,6 +119,8 @@ var get_lang = function(lang) {
         118: 'Add torrent file',
         119: ['Ok','Cancel'],
         120: 'Temporary Speed Limits',
+        122: 'Add link',
+        121: 'Enter URL',
         "settings": {
             1: "Transmission",
             2: "Notifications",
@@ -310,6 +312,8 @@ var get_lang = function(lang) {
         118: 'Ajouter de fichier torrent',
         119: ['Ok','Fermer'],
         120: 'Temporaire Des Limites De Vitesse',
+        122: 'Ouvrir URL',
+        121: 'Entrez l\'URL',
         "settings": {
             1: "Transmission",
             2: "Notifications",
@@ -501,6 +505,8 @@ var get_lang = function(lang) {
         118: 'Добавить торрент файл',
         119: ['Ок','Отменить'],
         120: 'Временное ограничение скорости',
+        122: 'Добавить ссылку',
+        121: 'Введите URL',
         "settings": {
             1: "Transmission",
             2: "Уведомления",

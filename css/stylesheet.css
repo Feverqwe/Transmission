@@ -72,6 +72,9 @@ ul.menu a.pause_all{
 ul.menu a.add_file{
     background-image: url("/images/add.png");
 }
+ul.menu a.add_magnet{
+    background-image: url("/images/magnet.png");
+}
 ul.menu a.btn:hover {
     border: 1px solid #a9acb1;
 }
