@@ -2,19 +2,19 @@
 <html>
     <head> 	
         <meta charset="utf-8" />
-        <title>Transmission easy client</title>
+        <title>uTorrent easy client</title>
         <link rel="stylesheet" type="text/css" href="css/options.css"> 
-        <script src="js/jquery-2.0.3.min.js"></script>
-        <script src="js/jquery-ui-1.10.3.custom.min.js"></script>
+        <script src="js/jquery-2.1.0.min.js"></script>
+        <script src="js/jquery-ui-1.10.4.custom.min.js"></script>
         <script src="js/lang.js"></script>
         <script src="js/options.js"></script>
     </head>
     <body>
         <div class="title">
-            <h1>Transmission easy client</h1>
+            <h1>uTorrent easy client</h1>
         </div>
         <ul class="menu">
-            <li><a class="active" href="#utorrent" data-page="setup" data-lang="1">Transmission</a></li>
+            <li><a class="active" href="#utorrent" data-page="setup" data-lang="1">uTorrent</a></li>
             <li><a href="#notify" data-page="notify" data-lang="2">Уведомления</a></li>
             <li><a href="#ui" data-page="ui" data-lang="3">Интерфейс</a></li>
             <li><a href="#context" data-page="context" data-lang="4">Контекстное меню</a></li>
@@ -27,12 +27,12 @@
                     <select name="language"><option value="en">English</option><option value="fr">Français</option><option value="ru">Русский</option></select>
                 </div>
             </fieldset>
-            <!--<fieldset>
+            <fieldset>
                 <legend><a href="#help" data-lang="61" class="help">Справка</a></legend>
                 <div class="help">
                     <div class="img"><img src="/images/help_how_to.png" /></div>
                     <ul>
-                        <li data-lang="62">Откройте приложение Transmission</li>
+                        <li data-lang="62">Откройте приложение uTorrent</li>
                         <li data-lang="63">Войдите в "Настройки" > "Настройки приложения"</li>
                         <li data-lang="64">Откройте раздел "Дополнительно" > "Веб-интерфейс"</li>
                         <li data-lang="65">Поставьте галочку "Использовать Веб-интерфейс", введите "Имя" и "Пароль"</li>
@@ -41,7 +41,7 @@
                         <li data-lang="68">Нажмите "Сохранить все"</li>
                     </ul>
                 </div>
-            </fieldset>-->
+            </fieldset>
             <fieldset>
                 <legend data-lang="6">Веб-интерфейс</legend>
                 <ul>
@@ -82,7 +82,6 @@
                     <li><ul class="item"><li><input type="checkbox" name="hide_finished"/></li><li data-lang="34">Скрывать все торренты, которые загружены, но не раздаются</li></ul></li>
                     <li><ul class="item"><li><input type="checkbox" name="hide_seeding"/></li><li data-lang="33">Скрывать все торренты, которые раздаются</li></ul></li>
                     <li><ul class="item"><li><input type="checkbox" name="graph"/></li><li data-lang="32">Показывать график скорости</li></ul></li>
-                    <li><ul class="item"><li><input type="checkbox" name="auto_order"/></li><li data-lang="31">Выполнять сортировку списка после обновления</li></ul></li>
                     <li><ul class="item"><li data-lang="30">Высота окна</li><li><input type="number" name="window_height"/>px</li></ul></li>
                 </ul>
             </fieldset>
@@ -113,12 +112,14 @@
                 <ul>
                     <li><ul class="item"><li><input type="checkbox" name="context_menu_trigger"/></li><li data-lang="26">Включить контекстное меню</li></ul></li>
                     <li><ul class="item"><li><input type="checkbox" name="change_downloads"/></li><li data-lang="25">Автоматически переходить в раздел "Загрузки" при успешном добавлении торрент-файла</li></ul></li>
+                    <li><ul class="item"><li><input type="checkbox" name="context_labels"/></li><li data-lang="69">Заменить каталоги на метки (при добавлении будет присваиваться метка)</li></ul></li>
                 </ul>
             </fieldset>
             <fieldset class="folders">
                 <legend data-lang="15">Управление каталогами</legend>
                 <ul>
-                    <li><span data-lang="24">Подкаталог</span> <input type="text"> <input data-lang="48" name="add_folder" type="button" value="Добавить"></li>
+                    <li><span data-lang="24">Каталог</span> <select name="folder_arr"></select></li>
+                    <li><span data-lang="23">Подкаталог</span> <input type="text"> <input data-lang="48" name="add_folder" type="button" value="Добавить"></li>
                     <li class="list"><select name="folders" multiple="multiple"></select></li>
                     <li><input data-lang="22" name="rm_folder" type="button" value="Удалить выбранное"/></li>
                 </ul>

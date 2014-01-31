@@ -23,19 +23,16 @@ java -jar compiler.jar --js .\js\lang.js --js .\js\options.js --js_output_file .
 :: make background.js
 java -jar compiler.jar --js .\js\lang.js --js .\js\background.js --js_output_file .\build\js\background.js
 :: make manager.js
-java -jar compiler.jar --js .\js\apprise-1.5.min.js --js .\js\jquery.selectbox.js --js .\js\jquery.contextMenu.js --js .\js\jquery.tablesorter.js --js .\js\graph.js --js .\js\lang.js --js .\js\manager.js --js_output_file .\build\js\manager.js
+java -jar compiler.jar --js .\js\notifer.js --js .\js\jquery.selectBox.js --js .\js\jquery.contextMenu.js --js .\js\manager.js --js_output_file .\build\js\manager.js
 :: make stylesheet.css
-copy .\css\stylesheet.css+.\js\jquery.contextmenu.css+.\js\jquery.selectbox.css+.\css\apprise.min.css .\build\css\stylesheet.css
+copy .\css\stylesheet.css+.\css\jquery.contextMenu.css+.\css\jquery.selectBox.css .\build\css\stylesheet.css
 :: clear
-del .\build\js\apprise-1.5.min.js
-del .\build\js\graph.js
-del .\build\js\jquery.contextmenu.css
-del .\build\js\jquery.contextmenu.js
-del .\build\js\jquery.selectbox.css
-del .\build\js\jquery.selectbox.js
-del .\build\js\jquery.tablesorter.js
+del .\build\js\notifer.js
+del .\build\css\jquery.contextMenu.css
+del .\build\js\jquery.contextMenu.js
+del .\build\css\jquery.selectBox.css
+del .\build\js\jquery.selectBox.js
 del .\build\js\lang.js
-del .\build\css\apprise.min.css
 :: 
 
 java -jar yuicompressor-2.4.8.jar .\build\css\stylesheet.css -o .\build\css\stylesheet.css

@@ -1,82 +1,84 @@
 var options = function() {
     var _engine = (chrome.extension.getBackgroundPage()).engine;
     var set_place_holder = function() {
-        var def = _engine.getDefSettings();
-        var set = _engine.getSettings();
-        $.each(def, function(k, v) {
-            if (v.t == "text" || v.t == "number" || v.t == "password") {
-                $('input[name="' + k + '"]').removeAttr("value");
-                if (k in set && set[k] != v.v) {
-                    if (k == "bg_update_interval" || k == "notify_visbl_interval" || k == "mgr_update_interval") {
-                        $('input[name="' + k + '"]').attr("value", set[k] / 1000);
+        var def_settings = _engine.def_settings;
+        var settings = _engine.settings;
+        $.each(def_settings, function(k, v) {
+            if (v.t === "text" || v.t === "number" || v.t === "password") {
+                var dom_obj = $('input[name="' + k + '"]');
+                dom_obj.removeAttr("value");
+                if (settings[k] === undefined) {
+                    settings[k] = v.v;
+                }
+                if (settings[k] !== v.v) {
+                    if (k === "bg_update_interval" || k === "notify_visbl_interval" || k === "mgr_update_interval") {
+                        dom_obj.attr("value", settings[k] / 1000);
                     } else {
-                        $('input[name="' + k + '"]').attr("value", set[k]);
+                        dom_obj.attr("value", settings[k]);
                     }
                 }
-                if (v.v != null) {
-                    if (k == "bg_update_interval" || k == "notify_visbl_interval" || k == "mgr_update_interval") {
-                        $('input[name="' + k + '"]').attr("placeholder", v.v / 1000);
+                if (v.v !== undefined) {
+                    if (k === "bg_update_interval" || k === "notify_visbl_interval" || k === "mgr_update_interval") {
+                        dom_obj.attr("placeholder", v.v / 1000);
                     } else {
-                        $('input[name="' + k + '"]').attr("placeholder", v.v);
+                        dom_obj.attr("placeholder", v.v);
                     }
                 }
-            }
-            if (v.t == "checkbox") {
-                if (k in set) {
-                    $('input[name="' + k + '"]').eq(0)[0].checked = (set[k]) ? 1 : 0;
-                } else {
-                    $('input[name="' + k + '"]').eq(0)[0].checked = (v.v) ? 1 : 0;
-                }
-            }
-            if (v.t == "array") {
-                if (k in set) {
-                    if (k == "folders_array") {
-                        var arr = set[k];
-                        $('select[name="folders"]').empty();
-                        for (var n = 0; n < arr.length; n++) {
-                            $('select[name="folders"]').append(new Option(arr[n][1], JSON.stringify(arr[n])));
-                        }
+            } else
+            if (v.t === "checkbox") {
+                $('input[name="' + k + '"]').prop('checked', settings[k]);
+            } else
+            if (v.t === "array") {
+                if (k === "folders_array") {
+                    var arr = settings[k];
+                    var $select =  $('select[name="folders"]');
+                    $select.empty();
+                    for (var n = 0, len = arr.length; n < len; n++) {
+                        $select.append( $('<option>', {text: arr[n][1], value: JSON.stringify(arr[n])}) );
                     }
                 }
             }
         });
         write_sortable_tables();
+        $('select[name="folder_arr"]').empty().off().on('click', function() {
+            _engine.sendAction({action: 'list-dirs'});
+            return 1;
+        });
+        $('input[name="add_folder"]').prop('disabled', !$('input[name="context_labels"]').prop('checked'));
     };
     var saveAll = function() {
         localStorage['lang'] = $('select[name="language"]').val();
-        var def = _engine.getDefSettings();
-        $.each(def, function(key, value) {
-            if (value.t == "text") {
-                var val = $('input[name="' + key + '"]').val();
-                if (val.length <= 0) {
-                    val = $('input[name="' + key + '"]').attr('placeholder');
+        var def_settings = _engine.def_settings;
+        $.each(def_settings, function(key, value) {
+            var $el = $('input[name="' + key + '"]');
+            if (value.t === "text" || value.t == "password") {
+                var val = $el.val();
+                if (val.length === 0 && (key !== 'login' || key !== 'password') ) {
+                    val = value.v;
                 }
                 localStorage[key] = val;
             } else
-            if (value.t == "password") {
-                var val = $('input[name="' + key + '"]').val();
+            if (value.t === "checkbox") {
+                var val = ($el.prop('checked'))?1:0;
                 localStorage[key] = val;
             } else
-            if (value.t == "checkbox") {
-                var val = ($('input[name="' + key + '"]').eq(0)[0].checked) ? 1 : 0;
-                localStorage[key] = val;
-            } else
-            if (value.t == "number") {
-                var val = $('input[name="' + key + '"]').val();
+            if (value.t === "number") {
+                var val = $el.val();
                 if (val.length <= 0) {
-                    val = $('input[name="' + key + '"]').attr('placeholder');
+                    //берется из placeholder потому, что bg_update_interval итп именют кратные значения
+                    val = $el.attr('placeholder');
                 }
-                if (key == "bg_update_interval" || key == "notify_visbl_interval" || key == "mgr_update_interval") {
+                if (key === "bg_update_interval" || key === "notify_visbl_interval" || key === "mgr_update_interval") {
                     val = val * 1000;
                 }
                 localStorage[key] = val;
             }
         });
-        var folders_arr = [];
-        var f_sel = $('select[name="folders"]').children('option');
-        var c = f_sel.length;
-        for (var n = 0; n < c; n++) {
-            folders_arr[folders_arr.length] = JSON.parse(f_sel.eq(n).val());
+        var $f_select = $('select[name="folders"]').children('option');
+        var f_select_len = $f_select.length;
+        var folders_arr = new Array(f_select_len);
+        for (var n = 0; n < f_select_len; n++) {
+            folders_arr[n] = JSON.parse($f_select.eq(n).val());
         }
         localStorage['folders_array'] = JSON.stringify(folders_arr);
 
@@ -193,6 +195,16 @@ var options = function() {
                 $(this).parent().children('div').children("div").eq(1).children('label').html(ui.size.width);
             }});
     };
+    var setDirList = function (arr) {
+        $('input[name="add_folder"]')[0].disabled = false;
+        var f_select = $('select[name="folder_arr"]');
+        f_select.empty();
+        $(this).unbind('click');
+        $.each(arr, function(key, value) {
+            var name = '[' + bytesToSize(value['available'] * 1024 * 1024) + ' ' + lang_arr[107][1] + '] ' + value['path'];
+            f_select.append( $('<option>', {value: key, text: name}) );
+        });
+    };
     var bytesToSize = function(bytes, nan) {
         //переводит байты в строчки
         var sizes = lang_arr[59];
@@ -212,10 +224,10 @@ var options = function() {
         }
         if (language === undefined) {
             language = 'en';
-            if ("chrome" in window && chrome.i18n && chrome.i18n.getMessage("lang") === 'ru') {
+            if (chrome.i18n.getMessage("lang") === 'ru') {
                 language = 'ru';
             } else
-            if ("chrome" in window && chrome.i18n && chrome.i18n.getMessage("lang") === 'fr') {
+            if (chrome.i18n.getMessage("lang") === 'fr') {
                 language = 'fr';
             }
         }
@@ -255,12 +267,13 @@ var options = function() {
                 window.location = "manager.html";
             }
         }, function() {
-            $('div.page.save > div.status').css({'background': 'none', 'color': '#c40005'}).text(lang_arr.settings[53] + ' ' + _engine.getStatus());
+            $('div.page.save > div.status').css({'background': 'none', 'color': '#c40005'}).text(lang_arr.settings[53] + ' ' + _engine.cache.status);
         });
     };
     return {
         begin: function() {
             write_language();
+            _engine.setOptionsWindow(window);
             $('select[name="language"]').on('change', function() {
                 write_language($(this).val());
             });
@@ -282,7 +295,7 @@ var options = function() {
                 reset_table($("ul.fl_colums"), _engine.getDefFlColums());
             });
             $('input[name="add_folder"]').on('click', function() {
-                var arr = ["", $(this).parent().children('input[type=text]').val()];
+                var arr = [$('select[name="folder_arr"]').val(), $(this).parent().children('input[type=text]').val()];
                 if (arr[1].length < 1)
                     return;
                 $('select[name="folders"]').append(new Option(arr[1], JSON.stringify(arr)));
@@ -296,6 +309,13 @@ var options = function() {
                 $('div.page.save > div.status').css('background', 'url(images/loading.gif) center center no-repeat').text('');
                 _engine.updateSettings(lang_arr);
                 chk_settings();
+            });
+            $('input[name="context_labels"]').on('click', function() {
+                if (this.checked) {
+                    $('input[name="add_folder"]')[0].disabled = false;
+                } else {
+                    $('input[name="add_folder"]')[0].disabled = true;
+                }
             });
             if (chrome.storage) {
                 $('input[name="save_in_cloud"]').on('click', function() {
@@ -330,7 +350,8 @@ var options = function() {
             }
             set_place_holder();
             make_bakup_form();
-        }
+        },
+        setDirList: setDirList
     };
 }();
 $(function() {

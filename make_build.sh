@@ -34,17 +34,11 @@ cat background.js >> new_background.js
 cd ../
 #make manager.js
 cd ./js/.
-cat apprise-1.5.min.js > new_manager.js
+cat notifer.js > new_manager.js
 echo "" >> new_manager.js
-cat jquery.selectbox.js >> new_manager.js
+cat jquery.selectBox.js >> new_manager.js
 echo "" >> new_manager.js
 cat jquery.contextMenu.js >> new_manager.js
-echo "" >> new_manager.js
-cat jquery.tablesorter.js >> new_manager.js
-echo "" >> new_manager.js
-cat graph.js >> new_manager.js
-echo "" >> new_manager.js
-cat lang.js >> new_manager.js
 echo "" >> new_manager.js
 cat manager.js >> new_manager.js
 cd ../
@@ -52,21 +46,17 @@ cd ../
 cd ./css/.
 cat stylesheet.css > new_stylesheet.css
 echo "" >> new_stylesheet.css
-cat ../js/jquery.contextmenu.css >> new_stylesheet.css
+cat ../css/jquery.contextMenu.css >> new_stylesheet.css
 echo "" >> new_stylesheet.css
-cat ../js/jquery.selectbox.css >> new_stylesheet.css
-echo "" >> new_stylesheet.css
-cat apprise.min.css >> new_stylesheet.css
+cat ../css/jquery.selectBox.css >> new_stylesheet.css
 echo "" >> new_stylesheet.css
 cd ../
 #clear
-rm ./js/apprise-1.5.min.js
-rm ./js/graph.js
-rm ./js/jquery.contextmenu.css
-rm ./js/jquery.contextmenu.js
-rm ./js/jquery.selectbox.css
-rm ./js/jquery.selectbox.js
-rm ./js/jquery.tablesorter.js
+rm ./js/notifer.js
+rm ./css/jquery.contextMenu.css
+rm ./js/jquery.contextMenu.js
+rm ./css/jquery.selectBox.css
+rm ./js/jquery.selectBox.js
 rm ./js/lang.js
 rm ./css/apprise.min.css
 #

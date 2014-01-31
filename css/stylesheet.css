@@ -12,6 +12,7 @@ ul {
 ul.menu {
     overflow: hidden;
     height: 33px;
+    position: relative;
 }
 ul.menu li {
     display: inline-block;
@@ -31,7 +32,6 @@ ul.menu li.separate {
     margin-left: 3px;
 }
 ul.menu li.graph {
-    width: auto;
 }
 ul.menu li.select {
     width: auto;
@@ -43,6 +43,12 @@ ul.menu li.select > a {
     width: 110px !important;
     float: right;
     height: 24px !important;
+}
+ul.menu li.select {
+    width: 152px;
+    position: absolute;
+    right: 0;
+    top: 0;
 }
 ul.menu a.btn{
     width: 28px;
@@ -78,12 +84,7 @@ ul.menu a.add_magnet{
 ul.menu a.btn:hover {
     border: 1px solid #a9acb1;
 }
-ul.menu a.alt_speed{
-    background-image: url("/images/alt_speed.png");
-}
-ul.menu a.alt_speed.active{
-    background-image: url("/images/alt_speed_active.png");
-}
+
 .torrent-list-layer {
     overflow: auto;
     border-top: 1px #c0c0c0 solid;
@@ -108,7 +109,7 @@ table thead tr th {
     border-right: 1px solid #c0c0c0;
 }
 table thead tr th:last-child  {
-    border-right: 0px;
+    border-right: 0;
 }
 table thead th {
     font-weight: normal;
@@ -190,6 +191,7 @@ table tbody tr.selected {
 table td.progress, table th.progress {
     padding: 0;
     position: relative;
+    padding-left: 2px;
     padding-right: 2px;
     overflow: hidden;
 }
@@ -201,6 +203,7 @@ table td.progress div.progress_b {
     border-radius: 3px;
     position: relative;
     color: #fff;
+    margin-left: -1px;
 }
 table td.progress div.progress_b_i {
     position: absolute;
@@ -218,7 +221,6 @@ table td.progress div.val {
 }
 div.torrent-list-layer table td.controls div.btns {
     height: 18px;
-    text-align: center;
 }
 div.torrent-list-layer table td.controls div.btns > a {
     width: 18px;
@@ -266,17 +268,21 @@ table.status-panel td.download {
 table.status-panel td.upload {
     background-image: url(/images/icon_uploading.png);
 }
-li.context-menu-item label {
-    margin-left: -10px;
-}
 ul.context-menu-list label {
-    margin-left: -13px;
+    position: absolute;
+    left: 4px;
+}
+ul.context-menu-list label.context {
+    position: absolute;
+    left: auto;
 }
 div.file-list-layer-temp {
     position: fixed;
     z-index: 3;
     top: 0;
     left: 0;
+    height: 100%;
+    width: 100%;
 }
 div.file-list-loading {
     position: absolute;
@@ -341,6 +347,7 @@ div.file-list ul.bottom-menu li {
 }
 div.file-list ul.bottom-menu li.btn {
     float: right;
+    cursor: pointer;
 }
 div.file-list ul.bottom-menu a {
     border: 1px solid #fff;
@@ -386,35 +393,35 @@ div.fl-layer a.folder {
     padding-right: 1px;
     text-decoration: none;
 }
-div.fl-layer a.folder.c7 {
+div.fl-layer a.folder.c6 {
     background-color: #d0d0d0;
 }
-div.fl-layer a.folder.c6 {
+div.fl-layer a.folder.c5 {
     background-color: #ffa39f;
 }
-div.fl-layer a.folder.c5 {
+div.fl-layer a.folder.c4 {
     background-color: #e8bdeb;
 }
-div.fl-layer a.folder.c4 {
+div.fl-layer a.folder.c3 {
     background-color: #f6f79d;
 }
-div.fl-layer a.folder.c3 {
+div.fl-layer a.folder.c2 {
     background-color: #fad294;
 }
-div.fl-layer a.folder.c2 {
+div.fl-layer a.folder.c1 {
     background-color: #d1f09d;
 }
-div.fl-layer a.folder.c1 {
+div.fl-layer a.folder.c0 {
     background-color: #acd1ff;
 }
-table thead .headerSortDown {
+table thead .sortDown {
     background-image: url('/images/down.png');
     background-position: right center;
     background-repeat: no-repeat;
     background-origin: content-box;
     padding-rigth: 3px;
 }
-table thead .headerSortUp {
+table thead .sortUp {
     background-image: url('/images/up.png');
     background-position: right center;
     background-repeat: no-repeat;
@@ -482,6 +489,136 @@ li.select div[data-image=inacive],
 .appriseOverlay {
     z-index: 3;
 }
-input[name="torrent_file"] {
-    display: none;
+.selectBox [data-image="all"],
+.selectBox-dropdown-menu [data-image="all"] > a {
+    background: url('/images/c_all.png') left center no-repeat;
+    padding-left: 20px !important;
+    background-position-x: 3px;
+}
+.selectBox-dropdown-menu [data-image="all"] > a {
+    background-position-y: 1px;
+}
+
+.selectBox [data-image="download"],
+.selectBox-dropdown-menu [data-image="download"] > a {
+    background: url('/images/c_down.png') left center no-repeat;
+    padding-left: 20px !important;
+    background-position-x: 3px;
+}
+.selectBox-dropdown-menu [data-image="download"] > a {
+    background-position-y: 1px;
+}
+
+.selectBox [data-image="seeding"],
+.selectBox-dropdown-menu [data-image="seeding"] > a {
+    background: url('/images/c_uplo.png') left center no-repeat;
+    padding-left: 20px !important;
+    background-position-x: 3px;
+}
+.selectBox-dropdown-menu [data-image="seeding"] > a {
+    background-position-y: 1px;
+}
+
+.selectBox [data-image="complite"],
+.selectBox-dropdown-menu [data-image="complite"] > a {
+    background: url('/images/c_comp.png') left center no-repeat;
+    padding-left: 20px !important;
+    background-position-x: 3px;
+}
+.selectBox-dropdown-menu [data-image="complite"] > a {
+    background-position-y: 1px;
+}
+
+.selectBox [data-image="active"],
+.selectBox-dropdown-menu [data-image="active"] > a {
+    background: url('/images/c_active.png') left center no-repeat;
+    padding-left: 20px !important;
+    background-position-x: 3px;
+}
+.selectBox-dropdown-menu [data-image="active"] > a {
+    background-position-y: 1px;
+}
+
+.selectBox [data-image="inacive"],
+.selectBox-dropdown-menu [data-image="inacive"] > a {
+    background: url('/images/c_iact.png') left center no-repeat;
+    padding-left: 20px !important;
+    background-position-x: 3px;
+}
+.selectBox-dropdown-menu [data-image="inacive"] > a {
+    background-position-y: 1px;
+}
+
+.nf-layer {
+    position: fixed;
+    z-index: 3;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+}
+.nf-notifi {
+    position: fixed;
+    z-index: 10;
+    margin-left: calc(50% - 115px);
+    width: 230px;
+    top: 0;
+    background-color: #fff;
+    box-shadow: 0 2px 10px 0 rgba(0,0,0,0.2);
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 6px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-top-width: 0;
+}
+.nf-notifi .btn_cancel {
+    float: right;
+}
+.nf-notifi button {
+    min-width: 70px;
+}
+.nf-notifi .item {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+.nf-notifi .item span {
+    display: block;
+    color: #333;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 2px;
+}
+.nf-notifi .item input,
+.nf-notifi .item select{
+    width: 200px;
+    margin-left: calc(50% - 100px);
+}
+.speed .limit {
+    padding-left: 3px;
+    padding-right: 3px;
+    border-radius: 5px;
+    margin-right: 3px;
+    margin-left: 3px;
+    cursor: pointer;
+    color: #fff;
+}
+.speed .limit.dl {
+    background-color: #3687ED;
+}
+.speed .limit.up {
+    background-color: #41B541;
+}
+li.labels span > i {
+    padding-left: 3px;
+    padding-right: 3px;
+    margin-left: 5px;
+    background-color: #818181;
+    border-radius: 3px;
+    color: #fff;
+}
+path.line {
+    fill: none;
+    stroke: red;
+    stroke-width: 1.5px;
 }

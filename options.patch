@@ -2,8 +2,8 @@
 +++ m_options.html	2013-03-23 13:06:04.000000000 +0600
 @@ -6,7 +6,6 @@
          <link rel="stylesheet" type="text/css" href="css/options.css"> 
-         <script src="js/jquery-2.0.3.min.js"></script>
-         <script src="js/jquery-ui-1.10.3.custom.min.js"></script>
+         <script src="js/jquery-2.1.0.min.js"></script>
+         <script src="js/jquery-ui-1.10.4.custom.min.js"></script>
 -        <script src="js/lang.js"></script>
          <script src="js/options.js"></script>
      </head>

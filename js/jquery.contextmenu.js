@@ -578,7 +578,9 @@
                 (data.contextMenu.$menu ? data.contextMenu : data.contextMenuRoot).$menu.children().removeClass('hover');
 
             if ($this.hasClass('disabled') || $this.hasClass('not-selectable')) {
-                opt.$selected = null;
+                if (opt !== undefined) {
+                    opt.$selected = null;
+                }
                 return;
             }
             

@@ -1,71 +1,84 @@
+/*!
+ * jQuery contextMenu - Plugin for simple contextMenu handling
+ *
+ * Version: git-master
+ *
+ * Authors: Rodney Rehm, Addy Osmani (patches for FF)
+ * Web: http://medialize.github.com/jQuery-contextMenu/
+ *
+ * Licensed under
+ *   MIT License http://www.opensource.org/licenses/mit-license
+ *   GPL v3 http://opensource.org/licenses/GPL-3.0
+ *
+ */
+
 .context-menu-list {
     margin:0; 
     padding:0;
-
+    
+    min-width: 150px;
+    max-width: 250px;
     display: inline-block;
     position: absolute;
     list-style-type: none;
 
-
     background: #fff;
-
-    -webkit-box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
     border-radius: 4px;
+
     font-size: 1em;
-    min-width: 140px;
-    max-width: 210px;
-    z-index: 100 !important;
-    
 }
+
 .context-menu-item {
     padding: 1px;
     background-color: #fff;
     position: relative;
-    -moz-user-select: -moz-none;
-    border: 1px solid #fff;
+    -webkit-user-select: none;
+            user-select: none;
     padding-left: 15px;
+    padding-right: 15px;
+    border: 1px solid #fff;
 }
 
-.context-menu-item:first-child, 
-.context-menu-item.first {
+.context-menu-item:first-child, .context-menu-item.first {
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
 }
-.context-menu-item:last-child, 
-.context-menu-item.last {
+
+.context-menu-item:last-child, .context-menu-item.last {
     border-bottom-right-radius: 4px;
     border-bottom-left-radius: 4px;
 }
 
 .context-menu-separator {
-    padding:0px !important;
-    margin-bottom: 1px !important;
-    border-bottom: 1px solid #E5E5E5;
-    max-height: 0px !important;
+    padding:0;
+    border-bottom: 1px solid #e5e5e5;
+    margin-bottom: 1px;
+    max-height: 0px;
 }
 
-.context-menu-item > label {
-    -moz-user-select: text;
+.context-menu-item > label > input,
+.context-menu-item > label > textarea {
+    -webkit-user-select: text;
+            user-select: text;
 }
 
 .context-menu-item.hover {
     cursor: pointer;
-    background-color: #55aaff;
+    background-color: #5af;
     background-image: -webkit-gradient(
         linear,
         left bottom,
         left top,
-        color-stop(0.5, rgb(38,98,237)),
-        color-stop(0.9, rgb(100,138,241))
-        );
-    border: 1px solid #1957E4;
+        color-stop(0.5,#2662ed),
+        color-stop(0.9,#648af1
+        )
+    );
+    border: 1px solid #1957e4;
     color: #fff;
 }
-.context-menu-item .context-menu-item {
+li.context-menu-item ul.context-menu-list {
     color: #000;
-}
-.context-menu-item .context-menu-item.hover {
-    color: #fff;
 }
 
 .context-menu-item.disabled {
@@ -78,19 +91,31 @@
     background-color: #fff;
 }
 
+.context-menu-submenu:after {
+    content: ">";
+    color: #666;
+    position: absolute;
+    top: 0;
+    right: 3px;
+    z-index: 1;
+}
+
 /* icons
     #protip:
     In case you want to use sprites for icons (which I would suggest you do) have a look at
     http://css-tricks.com/13224-pseudo-spriting/ to get an idea of how to implement 
     .context-menu-item.icon:before {}
-*/
-.context-menu-item.icon { height: 18px; background-repeat: no-repeat; background-position: 4px 2px; }
+ */
+/*
+.context-menu-item.icon { min-height: 18px; background-repeat: no-repeat; background-position: 4px 2px; }
 .context-menu-item.icon-edit { background-image: url(images/page_white_edit.png); }
 .context-menu-item.icon-cut { background-image: url(images/cut.png); }
 .context-menu-item.icon-copy { background-image: url(images/page_white_copy.png); }
 .context-menu-item.icon-paste { background-image: url(images/page_white_paste.png); }
 .context-menu-item.icon-delete { background-image: url(images/page_white_delete.png); }
+.context-menu-item.icon-add { background-image: url(images/page_white_add.png); }
 .context-menu-item.icon-quit { background-image: url(images/door.png); }
+*/
 
 /* vertically align inside labels */
 .context-menu-input > label > * { vertical-align: top; }
@@ -110,12 +135,9 @@
 .context-menu-input > label > select {
     display: block;
     width: 100%;
-
+    
     -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    -ms-box-sizing: border-box;
-    -o-box-sizing: border-box;
-    box-sizing: border-box;
+            box-sizing: border-box;
 }
 
 .context-menu-input > label > textarea {
@@ -132,24 +154,6 @@
     display: block;
 }
 
-.context-menu-item span {
-    max-width: 300px;
-}
-.context-menu-item.not-selectable {
-    cursor: default;
-    background-color: #fff;
-    padding: 2px 2px 2px 2px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.context-menu-item.not-enable {
-    cursor: default;
-    background-color: #fff;
-    color: #8f8f8f;
-}
-.context-menu-item.not-enable:hover {
-    cursor: default;
-    background-color: #d7d7d7;
-    background-image: none;
-    border: 1px solid #a6a6a6;
+.context-menu-accesskey {
+    text-decoration: underline;
 }
