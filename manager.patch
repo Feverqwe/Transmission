@@ -1,7 +1,7 @@
 --- o_manager.html	2014-01-28 13:18:21.530857100 +0600
 +++ manager.html	2014-01-28 20:44:23.787570700 +0600
 @@ -4,12 +4,7 @@
-         <title>uTorrent easy client</title>
+         <title>Transmission easy client</title>
          <meta charset="utf-8" />
          <link rel="stylesheet" type="text/css" href="css/stylesheet.css"> 
 -        <link rel="stylesheet" type="text/css" href="css/jquery.contextMenu.css">

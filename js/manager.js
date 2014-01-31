@@ -7,6 +7,7 @@
     }
 })();
 var manager = function () {
+    var isTransmission = true;
     var var_cache = {
         status: null,
         //кэшироованный список торрентов
@@ -137,19 +138,28 @@ var manager = function () {
         dom_cache.fl_head.html(head.clone());
     };
     var writeLanguage = function () {
-        var webUi_url = ((_settings.ssl) ? 'https' : 'http') + "://" + _settings.login + ":" + _settings.password + "@" +
-            _settings.ut_ip + ":" + _settings.ut_port + "/" + _settings.ut_path;
+        var webUi_url = '';
+        if (_settings.login.length === 0) {
+            webUi_url = ((_settings.ssl) ? 'https' : 'http') + "://" + _settings.ut_ip + ":" + _settings.ut_port + "/";
+        } else {
+            webUi_url = ((_settings.ssl) ? 'https' : 'http') + "://" + _settings.login + ":" + _settings.password + "@" +
+                _settings.ut_ip + ":" + _settings.ut_port + "/";
+        }
         dom_cache.menu.find('a.refresh').attr('title', _lang_arr[24]);
         dom_cache.menu.find('a.wui').attr('title', _lang_arr[26]).attr('href', webUi_url);
         dom_cache.menu.find('a.add_file').attr('title', _lang_arr[118]);
         dom_cache.menu.find('a.add_magnet').attr('title', _lang_arr[120]);
         dom_cache.menu.find('a.start_all').attr('title', _lang_arr[68]);
         dom_cache.menu.find('a.pause_all').attr('title', _lang_arr[67]);
+        dom_cache.menu.find('a.alt_speed').attr('title', _lang_arr.tsl);
         dom_cache.fl_bottom.find('a.update').attr('title', _lang_arr[91][1]);
         dom_cache.fl_bottom.find('a.close').attr('title', _lang_arr[91][2]);
     };
     var setLabels = function (items) {
         var custom = ['all', 'download', 'seeding', 'complite', 'active', 'inacive', 'no label'];
+        if (isTransmission) {
+            custom.splice(-1);
+        }
         var $options = [];
         for (var i = 0, item; item = custom[i]; i++) {
             $options.push($('<option>', {value: item, text: _lang_arr[70][i], selected: (var_cache.current_filter.custom === 1 && var_cache.current_filter.label === item)}).data('image', item).data('type', 'custom'));
@@ -349,7 +359,7 @@ var manager = function () {
             var str_time = utimeToTimeStamp(v[24]);
             return $('<td>', {'class': key}).append($('<div>', {text: str_time, title: str_time}));
         } else if (key === 'controls') {
-            return $('<td>', {'class': key}).append($('<div>', {'class': 'btns'}).append($('<a>', {href: '#start', title: _lang_arr[0], 'class': 'start'}), $('<a>', {href: '#pause', title: _lang_arr[1], 'class': 'pause'}), $('<a>', {href: '#stop', title: _lang_arr[2], 'class': 'stop'})));
+            return $('<td>', {'class': key}).append($('<div>', {'class': 'btns'}).append($('<a>', {href: '#start', title: _lang_arr[0], 'class': 'start'}), (isTransmission)?'':$('<a>', {href: '#pause', title: _lang_arr[1], 'class': 'pause'}), $('<a>', {href: '#stop', title: _lang_arr[2], 'class': 'stop'})));
         }
         return '';
     };
@@ -1099,6 +1109,7 @@ var manager = function () {
             cl.progress = (var_cache.fl_colums.progress.a === 1) ? 1 : undefined;
         } else if (n === 3) {
             cl.priority = (var_cache.fl_colums.priority.a === 1) ? 1 : undefined;
+            cl.progress = (var_cache.fl_colums.progress.a === 1) ? 1 : undefined;
         }
     };
     var fl_item_update = function (v, cl, n) {
@@ -1440,18 +1451,20 @@ var manager = function () {
                 return i;
         };
         sel_en[1] = 1; //start
-        sel_en[2] = 1; //pause
+        sel_en[2] = 1; //force_start
         sel_en[3] = 1; //stop
-        sel_en[4] = 0; //force start
+        sel_en[4] = 0; //pause
         sel_en[5] = 0; //unpause
-        sel_en[6] = 1; //forcer re-check
+        sel_en[6] = 1; //recheck
         var t = i;
         while (t > 0) {
             t = minusSt(t);
         }
-        /*
-         start,force_start,stop,pause,unpause,recheck
-         */
+        if (isTransmission) {
+            sel_en[2] = 0; //may be torrent-reannounce?
+            sel_en[4] = 0;
+            sel_en[5] = 0;
+        }
         return {start: sel_en[1], force_start: sel_en[2], stop: sel_en[3], pause: sel_en[4], unpause: sel_en[5], recheck: sel_en[6]};
     };
     var updateLabesCtx = function (trigger, id) {
@@ -1653,7 +1666,7 @@ var manager = function () {
 
             setStatus(_engine.cache.status);
             tr_list(_engine.cache.torrents || []);
-            getTorrentList();
+            _engine.sendAction({list: 1, cid: 0});
 
             dom_cache.tr_body.on('dblclick', 'tr', function () {
                 var id = $(this).attr('id');
@@ -1668,6 +1681,10 @@ var manager = function () {
 
             setSpeedLimit(_engine.cache.settings || []);
             _engine.sendAction({action: 'getsettings'});
+
+            if (isTransmission) {
+                manager.setAltSpeedState(_engine.cache.alt_speed || false);
+            }
 
             dom_cache.fl_fixed_head.on('click', 'th', function (e) {
                 if (e.target.nodeName === 'INPUT' || $(e.target).find('input').length !== 0) {
@@ -1702,6 +1719,18 @@ var manager = function () {
                 }
             });
 
+            dom_cache.menu.on('click', 'a.alt_speed', function(e) {
+                e.preventDefault();
+                if ($(this).hasClass('active')) {
+                    _engine.sendAction({action: 'setsetting', s: 'alt-speed-enabled', v: 0}, function () {
+                        _engine.sendAction({action: 'getsettings'});
+                    })
+                } else {
+                    _engine.sendAction({action: 'setsetting', s: 'alt-speed-enabled', v: 1}, function () {
+                        _engine.sendAction({action: 'getsettings'});
+                    })
+                }
+            });
             dom_cache.menu.on('click', 'a.add_file', function (e) {
                 e.preventDefault();
                 $('<input class="file-select" type="file" multiple accept="application/x-bittorrent"/>').on('change',function () {
@@ -1790,7 +1819,7 @@ var manager = function () {
                 window._engine = chrome.extension.getBackgroundPage().engine;
                 _engine.setWindow(window);
                 mgTimer.start();
-                getTorrentList();
+                _engine.sendAction({list: 1, cid: 0})
             });
             dom_cache.menu.on('click', 'a.start_all', function (e) {
                 e.preventDefault();
@@ -1877,7 +1906,9 @@ var manager = function () {
                                 }
                             }
                         });
-                        updateLabesCtx(trigger, id);
+                        if (!isTransmission) {
+                            updateLabesCtx(trigger, id);
+                        }
                     },
                     hide: function () {
                         if (var_cache.fl_show !== true) {
@@ -1945,12 +1976,15 @@ var manager = function () {
                                     _engine.sendAction({list: 1, action: 'removetorrent', hash: trigger.items.remove.id });
                                 }
                             },
+                            /*
+                            Transmission
                             remove_files: {
                                 name: _lang_arr[9],
                                 callback: function (key, trigger) {
                                     _engine.sendAction({list: 1, action: 'removedata', hash: trigger.items.remove.id });
                                 }
                             },
+                            */
                             remove_torrent_files: {
                                 name: _lang_arr[10],
                                 callback: function (key, trigger) {
@@ -1966,12 +2000,15 @@ var manager = function () {
                             fl_show(trigger.items[key].id);
                         }
                     },
+                    /*
+                    Transmission
                     labels: {
                         name: _lang_arr[11],
                         className: "labels",
                         label: '',
                         items: {}
                     }
+                    */
                 }
             });
 
@@ -2053,14 +2090,17 @@ var manager = function () {
                             _engine.sendAction($.param({action: 'setprio', p: 0}) + '&' + $.param({f: var_cache.fl_list_ctx_sel_arr, hash: var_cache.fl_id}, true));
                             dom_cache.fl_body.find('input:checked').trigger('click');
                         }
-                    },
+                    }
+                    /*
+                    Transmission
+                    ,
                     s1: '-',
                     download: {
                         name: _lang_arr[90],
                         callback: function (key, trigger) {
                             /**
                              * @namespace chrome.tabs.create
-                             */
+                             /
                             var webUi_url = ((_settings.ssl) ? 'https' : 'http') + "://" + _settings.login + ":" + _settings.password + "@" +
                                 _settings.ut_ip + ":" + _settings.ut_port + "/";
                             for (var n = 0, item; item = var_cache.fl_list_ctx_sel_arr[n]; n++) {
@@ -2071,6 +2111,7 @@ var manager = function () {
                             dom_cache.fl_body.find('input:checked').trigger('click');
                         }
                     }
+                    */
                 }
             });
 
@@ -2211,7 +2252,14 @@ var manager = function () {
             }
 
         },
-        setStatus: setStatus
+        setStatus: setStatus,
+        setAltSpeedState: function(state) {
+            if (state === true) {
+                $('a.alt_speed').addClass('active');
+            } else {
+                $('a.alt_speed').removeClass('active');
+            }
+        }
     };
 }();
 $(function () {

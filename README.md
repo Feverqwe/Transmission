@@ -1,7 +1,7 @@
 µTorrent easy client
 ============
 
-This extension allows easy integrate in browser µTorrent bittorrent client!
+This extension allows easy integrate in browser Transmission bittorrent client!
 
 **Allow:**
 

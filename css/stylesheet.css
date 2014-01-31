@@ -81,6 +81,13 @@ ul.menu a.add_file{
 ul.menu a.add_magnet{
     background-image: url("/images/magnet.png");
 }
+ul.menu a.alt_speed{
+    background-image: url("/images/alt_speed.png");
+}
+ul.menu a.alt_speed.active{
+    background-image: url("/images/alt_speed_active.png");
+    box-shadow: inset 0 0 3px 0px #000;
+}
 ul.menu a.btn:hover {
     border: 1px solid #a9acb1;
 }
@@ -221,6 +228,7 @@ table td.progress div.val {
 }
 div.torrent-list-layer table td.controls div.btns {
     height: 18px;
+    text-align: center;
 }
 div.torrent-list-layer table td.controls div.btns > a {
     width: 18px;

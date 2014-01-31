@@ -1,4 +1,5 @@
 var options = function() {
+    var isTransmission = true;
     var _engine = (chrome.extension.getBackgroundPage()).engine;
     var set_place_holder = function() {
         var def_settings = _engine.def_settings;
@@ -40,11 +41,13 @@ var options = function() {
             }
         });
         write_sortable_tables();
-        $('select[name="folder_arr"]').empty().off().on('click', function() {
-            _engine.sendAction({action: 'list-dirs'});
-            return 1;
-        });
-        $('input[name="add_folder"]').prop('disabled', !$('input[name="context_labels"]').prop('checked'));
+        if (!isTransmission) {
+            $('select[name="folder_arr"]').empty().off().on('click', function() {
+                _engine.sendAction({action: 'list-dirs'});
+                return 1;
+            });
+            $('input[name="add_folder"]').prop('disabled', !$('input[name="context_labels"]').prop('checked'));
+        }
     };
     var saveAll = function() {
         localStorage['lang'] = $('select[name="language"]').val();
@@ -295,7 +298,7 @@ var options = function() {
                 reset_table($("ul.fl_colums"), _engine.getDefFlColums());
             });
             $('input[name="add_folder"]').on('click', function() {
-                var arr = [$('select[name="folder_arr"]').val(), $(this).parent().children('input[type=text]').val()];
+                var arr = [isTransmission?'':$('select[name="folder_arr"]').val(), $(this).parent().children('input[type=text]').val()];
                 if (arr[1].length < 1)
                     return;
                 $('select[name="folders"]').append(new Option(arr[1], JSON.stringify(arr)));
@@ -310,13 +313,15 @@ var options = function() {
                 _engine.updateSettings(lang_arr);
                 chk_settings();
             });
-            $('input[name="context_labels"]').on('click', function() {
-                if (this.checked) {
-                    $('input[name="add_folder"]')[0].disabled = false;
-                } else {
-                    $('input[name="add_folder"]')[0].disabled = true;
-                }
-            });
+            if (!isTransmission) {
+                $('input[name="context_labels"]').on('click', function() {
+                    if (this.checked) {
+                        $('input[name="add_folder"]')[0].disabled = false;
+                    } else {
+                        $('input[name="add_folder"]')[0].disabled = true;
+                    }
+                });
+            }
             if (chrome.storage) {
                 $('input[name="save_in_cloud"]').on('click', function() {
                     var obj = {};
