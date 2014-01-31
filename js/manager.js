@@ -51,7 +51,9 @@ var manager = function () {
         //статус отображения списка файлов
         fl_show: false,
         //масств id файлов, генерируется при появлении контекстного меню файлов
-        fl_list_ctx_sel_arr: []
+        fl_list_ctx_sel_arr: [],
+        //триггер на случай если меню файл-листа скрыто
+        fl_bottom_hide: false
     };
     var dom_cache = {};
     var options = {
@@ -119,6 +121,14 @@ var manager = function () {
         if (width > var_cache.body_width) {
             width = var_cache.body_width;
             style_text += 'div.file-list {max-width:' + var_cache.body_width + 'px; border-radius: 0;}';
+        }
+        if (width < 100) {
+            dom_cache.fl_bottom.hide();
+            var_cache.fl_bottom_hide = true;
+        } else
+        if (var_cache.fl_bottom_hide === true) {
+            dom_cache.fl_bottom.show();
+            var_cache.fl_bottom_hide = false;
         }
         var fl_body_height = window.innerHeight - 34 - 19;
         var fl_table_height = fl_body_height - 34;

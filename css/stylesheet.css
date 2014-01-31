@@ -382,7 +382,7 @@ div.file-list ul.bottom-menu a:active {
 }
 div.file-list ul.bottom-menu li.path {
     position: relative;
-    width: 85%;
+    width: calc(100% - 70px);
 }
 div.file-list ul.bottom-menu li.path input {
     font-size: 1em;
