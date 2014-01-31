@@ -24,6 +24,8 @@ java -jar compiler.jar --js .\js\lang.js --js .\js\options.js --js_output_file .
 java -jar compiler.jar --js .\js\lang.js --js .\js\background.js --js_output_file .\build\js\background.js
 :: make manager.js
 java -jar compiler.jar --js .\js\notifer.js --js .\js\jquery.selectBox.js --js .\js\jquery.contextMenu.js --js .\js\manager.js --js_output_file .\build\js\manager.js
+:: make graph.js
+java -jar compiler.jar --js .\js\graph.js --js_output_file .\build\js\graph.js
 :: make stylesheet.css
 copy .\css\stylesheet.css+.\css\jquery.contextMenu.css+.\css\jquery.selectBox.css .\build\css\stylesheet.css
 :: clear
