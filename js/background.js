@@ -466,7 +466,13 @@ var engine = function () {
             params = url;
         }
         if (params.hash !== undefined) {
-            params.hash = parseInt(params.hash.substr(5));
+            if (typeof params.hash !== 'object') {
+                params.hash = parseInt(params.hash.substr(5));
+            } else {
+                for (var i = 0, item; item = params.hash[i]; i++) {
+                    params.hash[i] = parseInt(item.substr(5));
+                }
+            }
         }
         if (params.p !== undefined) {
             params.p = parseInt(params.p);
@@ -647,9 +653,9 @@ var engine = function () {
         }
         if (typeof data === 'string') {
             if (isTransmission && data.cid !== undefined) {
-                data += '&cid' + data.cid;
+                data += '&cid=' + data.cid;
             } else {
-                data += '&cid' + var_cache.client.cid;
+                data += '&cid=' + var_cache.client.cid;
             }
         } else {
             if (isTransmission && data.cid !== undefined) {
