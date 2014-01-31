@@ -1251,6 +1251,9 @@ var manager = function () {
         if (current_speed === 0) {
             current_speed = 512;
         }
+        if (current_speed < Math.round(count / 2)) {
+            current_speed = Math.round(count / 2);
+        }
         var arr = new Array(count);
         for (var i = 0; i < count; i++) {
             arr[i] = Math.round((i + 1) / Math.round(count / 2) * current_speed);
