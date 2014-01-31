@@ -195,7 +195,7 @@ var engine = function () {
             }
         });
     };
-    var readTransmStatus = function(code) {
+    var getStatusTransmission2uTorrent = function(code) {
         var uCode = 0;
         var Status = "";
         /*
@@ -306,7 +306,7 @@ var engine = function () {
                         utStatus[0] = 144;
                         utStatus[1] = field.errorString || "Unknown error!";
                     } else {
-                        utStatus = readTransmStatus(field.status);
+                        utStatus = getStatusTransmission2uTorrent(field.status);
                     }
                     item[0] = 'trID_'+field.id;
                     item[1] = utStatus[0];
@@ -371,7 +371,7 @@ var engine = function () {
                             field.fileStats = [];
                         }
                         var fn = field.files.length;
-                        if (field.files.length > field.fileStats.length) {
+                        if (fn > field.fileStats.length) {
                             fn = 0;
                             console.log("Files more fileStats!");
                         }
@@ -386,17 +386,10 @@ var engine = function () {
                              * dune = 2
                              * prio = 3
                              */
-                            if (s_item.priority === 0) {
-                                s_item.priority = 2;
-                            }
-                            if (s_item.priority === 1) {
-                                s_item.priority = 3;
-                            }
-                            if (s_item.priority === -1) {
-                                s_item.priority = 1;
-                            }
                             if (s_item.wanted === false) {
                                 s_item.priority = 0;
+                            } else {
+                                s_item.priority += 2;
                             }
                             file[0] = f_item.name;
                             file[1] = f_item.length;
@@ -410,8 +403,9 @@ var engine = function () {
                 ut['torrentc'] = 1;
             } else
             if (key === 'removed') {
-                if (value.length > 0) {
-                    for (var i = 0, len = value.length; i < len; i++) {
+                var val_len = value.length;
+                if (val_len > 0) {
+                    for (var i = 0; i < val_len; i++) {
                         value[i] = 'trID_'+value[i];
                     }
                     ut['torrentm'] = value;
@@ -652,14 +646,12 @@ var engine = function () {
             return;
         }
         if (typeof data === 'string') {
-            data += '&token=' + var_cache.client.token;
             if (isTransmission && data.cid !== undefined) {
                 data += '&cid' + data.cid;
             } else {
                 data += '&cid' + var_cache.client.cid;
             }
         } else {
-            data.token = var_cache.client.token;
             if (isTransmission && data.cid !== undefined) {
                 data.cid = data.cid;
             } else {
@@ -1038,7 +1030,7 @@ var engine = function () {
         }
         var dir, label;
         var item = settings.folders_array[id];
-        if (settings.context_labels) {
+        if (!isTransmission && settings.context_labels) {
             label = item[1];
         } else {
             dir = {download_dir: item[0], path: item[1]};

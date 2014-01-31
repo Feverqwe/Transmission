@@ -2002,8 +2002,9 @@ var manager = function () {
                         callback: function (key, trigger) {
                             fl_show(trigger.items[key].id);
                         }
-                    },
-                    /*
+                    }
+                    /**
+                    ,
                     Transmission
                     labels: {
                         name: _lang_arr[11],
@@ -2094,7 +2095,7 @@ var manager = function () {
                             dom_cache.fl_body.find('input:checked').trigger('click');
                         }
                     }
-                    /*
+                    /**
                     Transmission
                     ,
                     s1: '-',
