@@ -1188,7 +1188,7 @@ var manager = function () {
                 var_cache.fl_list[i] = item;
             }
         }
-        if (var_cache.fl_loading === true) {
+        if (list_len !== 0 && var_cache.fl_loading === true) {
             var_cache.fl_loading_dom.remove();
             var_cache.fl_loading = false;
         }
