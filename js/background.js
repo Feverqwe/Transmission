@@ -33,6 +33,10 @@ var engine = function () {
     var settings = {};
     var loadSettings = function () {
         $.each(def_settings, function (key, item) {
+            if (isTransmission && key === 'context_labels') {
+                settings[key] = item.v;
+                return 1;
+            }
             var value = localStorage[key];
             if (value === undefined) {
                 settings[key] = item.v;
