@@ -20,8 +20,8 @@ var graph = function () {
         if (values_len === 0) {
             return;
         }
-        if ( values_len > _limit ) {
-            startItem = values_len - _limit;
+        if ( values_len > _limit + 1 ) {
+            startItem = values_len - _limit - 1;
         }
         end = traf0[values_len - 1].time;
         start = end - _limit;
