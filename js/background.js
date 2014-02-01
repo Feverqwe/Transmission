@@ -478,9 +478,9 @@ var engine = function () {
             params = url;
         }
         if (params.hash !== undefined) {
-            if (typeof params.hash !== 'object') {
+            if (typeof params.hash === 'string') {
                 params.hash = parseInt(params.hash.substr(5));
-            } else {
+            } else if (typeof params.hash === 'object') {
                 for (var i = 0, item; item = params.hash[i]; i++) {
                     params.hash[i] = parseInt(item.substr(5));
                 }
