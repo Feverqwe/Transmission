@@ -1135,6 +1135,8 @@ var engine = function () {
             engine.bgTimer.start();
             var_cache.get_token_count = 0;
             engine.cache = var_cache.client = {};
+            var_cache.traffic[0].values = [];
+            var_cache.traffic[1].values = [];
             createCtxMenu();
         },
         sendFile: sendFile,
