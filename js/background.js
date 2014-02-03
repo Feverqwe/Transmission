@@ -663,13 +663,15 @@ var engine = function () {
             });
             return;
         }
+        var _data;
         if (typeof data === 'string') {
-            data += '&cid=' + var_cache.client.cid;
+            _data = data + '&cid=' + var_cache.client.cid;
         } else {
-            if (isTransmission && data.cid !== undefined) {
-                data.cid = data.cid;
+            _data = $.extend({}, data);
+            if (isTransmission && _data.cid === undefined) {
+                _data.cid = var_cache.client.cid;
             } else {
-                data.cid = var_cache.client.cid;
+                _data = $.extend({cid: var_cache.client.cid}, data);
             }
         }
         if (data.torrent_file !== undefined) {
@@ -698,7 +700,7 @@ var engine = function () {
                 };
                 xhr.onerror = function () {
                     showNotifi(error_icon, xhr.status, xhr.statusText, 'addFile');
-                    setStatus('sendFile', [xhr.status, xhr.statusText, data]);
+                    setStatus('sendFile', [xhr.status, xhr.statusText, _data]);
                     //400 - invalid request, когда token протухает
                     if (var_cache.client.sendAction_error > 3 || xhr.status === 409) {
                         var_cache.client.token = undefined;
@@ -721,15 +723,14 @@ var engine = function () {
             };
             return;
         }
-        var data = uTorrent2Transmission(data);
-        if (data.onload !== undefined) {
-            onload = data.onload;
+        var tr_data = uTorrent2Transmission(_data);
+        if (tr_data.onload !== undefined) {
+            onload = tr_data.onload;
         }
-        data = data.data;
         $.ajax({
             type: 'POST',
             dataType: 'json',
-            data: data,
+            data: tr_data.data,
             url: var_cache.webui_url,
             beforeSend: function (xhr) {
                 xhr.setRequestHeader("X-Transmission-Session-Id", var_cache.client.token || '');
@@ -746,7 +747,7 @@ var engine = function () {
                 readResponse(data);
             },
             error: function (xhr, textStatus) {
-                setStatus('sendAction', [xhr.status, textStatus, data]);
+                setStatus('sendAction', [xhr.status, textStatus, _data]);
                 if (var_cache.client.sendAction_error > 3 || xhr.status === 409) {
                     var_cache.client.token = undefined;
                     sendAction(data, onload);
