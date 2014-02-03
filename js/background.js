@@ -670,8 +670,6 @@ var engine = function () {
             _data = $.extend({}, data);
             if (isTransmission && _data.cid === undefined) {
                 _data.cid = var_cache.client.cid;
-            } else {
-                _data = $.extend({cid: var_cache.client.cid}, data);
             }
         }
         if (data.torrent_file !== undefined) {
