@@ -1435,9 +1435,9 @@ var manager = function () {
             items.recheck = 1;
         }
         if (isTransmission) {
-            sel_en[2] = 0; //may be torrent-reannounce?
-            sel_en[4] = 0;
-            sel_en[5] = 0;
+            items.force_start = 0; //may be torrent-reannounce?
+            items.pause = 0;
+            items.unpause = 0;
         }
         return items;
     };
