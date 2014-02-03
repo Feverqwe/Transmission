@@ -664,11 +664,7 @@ var engine = function () {
             return;
         }
         if (typeof data === 'string') {
-            if (isTransmission && data.cid !== undefined) {
-                data += '&cid=' + data.cid;
-            } else {
-                data += '&cid=' + var_cache.client.cid;
-            }
+            data += '&cid=' + var_cache.client.cid;
         } else {
             if (isTransmission && data.cid !== undefined) {
                 data.cid = data.cid;
