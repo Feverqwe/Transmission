@@ -1393,92 +1393,53 @@ var manager = function () {
         fl_show(id);
         mgTimer.start();
     };
-    var tr_readStatus = function (i) {
-        //показывает что можно, а что нельзя в контекстном меню торрента - скрывает
-        var minus_par = {};
-        var sel_en = [];
-        var minusSt = function (i) {
-            //читает код статуса тооррента
-            if (i >= 128) {
-                //Loaded
-                minus_par[128] = true;
-                sel_en[2] = 0;
-                sel_en[3] = 0;
-                return i - 128;
-            } else if (i >= 64) {
-                //Queued
-                minus_par[64] = true;
-                sel_en[1] = 0;
-                sel_en[3] = 1;
-                return i - 64;
-            } else if (i >= 32) {
-                //Paused
-                minus_par[32] = true;
-                sel_en[1] = 1;
-                sel_en[5] = 1;
-                sel_en[6] = 1;
-                return i - 32;
-            } else if (i >= 16) {
-                //Error
-                minus_par[16] = true;
-                sel_en[6] = 1;
-                sel_en[1] = 1;
-                return i - 16;
-            } else if (i >= 8) {
-                //Checked
-                minus_par[8] = true;
-                sel_en[6] = 1;
-                return i - 8;
-            } else if (i >= 4) {
-                //Start after check
-                minus_par[4] = true;
-                sel_en[4] = 1;
-                sel_en[1] = 0;
-                sel_en[2] = 1;
-                sel_en[3] = 1;
-                return i - 4;
-            } else if (i >= 2) {
-                //Checking
-                minus_par[2] = true;
-                sel_en[6] = 0;
-                sel_en[3] = 1;
-                if (!minus_par[32])
-                    sel_en[2] = 1;
-                return i - 2;
-            } else if (i >= 1) {
-                //Started
-                minus_par[1] = true;
-                if (minus_par[32] === undefined) {
-                    sel_en[1] = 0;
-                    sel_en[2] = 1;
-                    sel_en[3] = 1;
-                    sel_en[4] = 1;
-                    sel_en[5] = 0;
-                }
-                if (minus_par[8] && minus_par[1] && minus_par[64] === undefined) {
-                    sel_en[1] = 1;
-                }
-                sel_en[6] = 0;
-                return i - 1;
-            } else
-                return i;
+    var tr_readStatus = function (state) {
+        var items = {
+            force_start: 0,
+            pause: 0,
+            unpause: 0,
+            start: 0,
+            stop: 0,
+            recheck: 0
         };
-        sel_en[1] = 1; //start
-        sel_en[2] = 1; //force_start
-        sel_en[3] = 1; //stop
-        sel_en[4] = 0; //pause
-        sel_en[5] = 0; //unpause
-        sel_en[6] = 1; //recheck
-        var t = i;
-        while (t > 0) {
-            t = minusSt(t);
+
+        var loaded = !!(state & 128),
+            queued = !!(state & 64),
+            paused = !!(state & 32),
+            error = !!(state & 16),
+            checked = !!(state & 8),
+            start_after_check = !!(state & 4),
+            checking = !!(state & 2),
+            started = !!(state & 1);
+
+        if ((!started || queued || paused) && !checking) {
+            items.force_start = 1;
+        }
+        if (!(queued || checking) || paused) {
+            items.start = 1;
+        }
+        if (!paused && (checking || started || queued)) {
+            items.pause = 1;
+        }
+        if (checking || started || queued) {
+            items.stop = 1;
+        }
+        if (items.pause === 1) {
+            items.unpause = 0;
+        } else {
+            if ((started || checking) && paused) {
+                items.unpause = 1;
+            }
+        }
+        if (!checking && !started && !queued) {
+            items.recheck = 1;
         }
         if (isTransmission) {
             sel_en[2] = 0; //may be torrent-reannounce?
             sel_en[4] = 0;
             sel_en[5] = 0;
         }
-        return {start: sel_en[1], force_start: sel_en[2], stop: sel_en[3], pause: sel_en[4], unpause: sel_en[5], recheck: sel_en[6]};
+        return items;
     };
     var updateLabesCtx = function (trigger, id) {
         var ul = trigger.items.labels.$node.children('ul');
@@ -1899,18 +1860,16 @@ var manager = function () {
                         var first;
                         $.each(trigger.items, function (key, value) {
                             value.id = id;
-                            if (status[key] !== undefined) {
-                                if (value.a !== status[key]) {
-                                    value.a = status[key];
-                                    if (value.a === 1) {
-                                        value.$node.show();
-                                        if (first === undefined) {
-                                            value.$node.addClass('first');
-                                            first = true;
-                                        }
-                                    } else {
-                                        value.$node.hide();
+                            if (status[key] !== undefined && value.a !== status[key]) {
+                                value.a = status[key];
+                                if (value.a === 1) {
+                                    value.$node.show();
+                                    if (first === undefined) {
+                                        value.$node.addClass('first');
+                                        first = true;
                                     }
+                                } else {
+                                    value.$node.hide();
                                 }
                             }
                             if (key === 'labels') {

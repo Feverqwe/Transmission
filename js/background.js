@@ -220,7 +220,7 @@ var engine = function () {
          TR_STATUS_SEED           = 6  // Seeding
          */
         if (code === 0) {
-            uCode = 136;
+            uCode = 128;
             Status = "Stopped";
         } else
         if (code === 1) {
@@ -232,7 +232,7 @@ var engine = function () {
             Status = "Checking";
         } else
         if (code === 3) {
-            uCode = 233;
+            uCode = 200;
             Status = "Queued to download";
         } else
         if (code === 4) {
@@ -240,14 +240,14 @@ var engine = function () {
             Status = "Downloading";
         } else
         if (code === 5) {
-            uCode = 233;
+            uCode = 200;
             Status = "Queued to seed";
         } else
         if (code === 6) {
             uCode = 201;
             Status = "Seeding";
         } else {
-            uCode = 201;
+            uCode = 152;
             Status = "Unknown";
         }
         return [uCode, Status];
