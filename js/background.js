@@ -667,10 +667,7 @@ var engine = function () {
         if (typeof data === 'string') {
             _data = data + '&cid=' + var_cache.client.cid;
         } else {
-            _data = $.extend({}, data);
-            if (isTransmission && _data.cid === undefined) {
-                _data.cid = var_cache.client.cid;
-            }
+            _data = $.extend({cid: var_cache.client.cid}, data);
         }
         if (data.torrent_file !== undefined) {
             var reader = new FileReader();
