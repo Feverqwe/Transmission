@@ -704,7 +704,7 @@ var engine = function () {
                     }
                     var_cache.client.sendAction_error = (var_cache.client.sendAction_error === undefined) ? 1 : var_cache.client.sendAction_error + 1;
                 };
-                var file_data_pos = reader.result.indexOf(',')
+                var file_data_pos = reader.result.indexOf(',');
                 var params = {
                     method: "torrent-add",
                     arguments: {
