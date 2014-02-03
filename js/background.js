@@ -475,12 +475,12 @@ var engine = function () {
                 }
             }
         } else {
-            params = url;
+            params = $.extend(true, {}, url);
         }
         if (params.hash !== undefined) {
-            if (typeof params.hash === 'string') {
+            if (typeof params.hash !== 'object') {
                 params.hash = parseInt(params.hash.substr(5));
-            } else if (typeof params.hash === 'object') {
+            } else {
                 for (var i = 0, item; item = params.hash[i]; i++) {
                     params.hash[i] = parseInt(item.substr(5));
                 }
@@ -1084,7 +1084,7 @@ var engine = function () {
         });
     };
     var clone_obj = function (obj) {
-        return JSON.parse(JSON.stringify(obj));
+        return $.extend(true, {}, obj);
     };
     return {
         bgTimer: bgTimer,
