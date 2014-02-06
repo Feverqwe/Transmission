@@ -234,7 +234,7 @@ var options = function() {
                 language = 'fr';
             }
         }
-        lang_arr = get_lang(language);
+        window.lang_arr = get_lang(language);
         var lang = lang_arr.settings;
         $('select[name="language"]').val(language);
         $.each(lang, function(k, v) {
