@@ -1,4 +1,4 @@
-µTorrent easy client
+Transmission
 ============
 
 This extension allows easy integrate in browser Transmission bittorrent client!
