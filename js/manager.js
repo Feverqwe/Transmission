@@ -1808,7 +1808,6 @@ var manager = function () {
                 var hash_list = [];
                 $.each(var_cache.tr_list, function (key, value) {
                     if (value[1] !== ((isTransmission)?128:233) || var_cache.tr_list_display[key] === false) {
-                        console.log(value[1]);
                         return 1;
                     }
                     if (var_cache.current_filter.custom === 0 && value[11] !== var_cache.current_filter.label) {
