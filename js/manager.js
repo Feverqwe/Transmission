@@ -522,7 +522,7 @@ var manager = function () {
         } else if (name === 'download') {
             return 2;
         } else if (name === 'progress') {
-            return 2;
+            return 'progress';
         } else if (name === 'priority') {
             return 3;
         }
@@ -530,8 +530,18 @@ var manager = function () {
     var fl_onsort = function (v_a, v_b) {
         var index = var_cache.fl_sort_index;
         var by = var_cache.fl_sort_by;
-        var a = v_a[index];
-        var b = v_b[index];
+        var a,b;
+        if (typeof index === 'string') {
+            if (index === 'progress') {
+                a = v_a[2] * 100 / v_a[1];
+                b = v_b[2] * 100 / v_b[1];
+            } else {
+                return 0;
+            }
+        } else {
+            a = v_a[index];
+            b = v_b[index];
+        }
         if (a === b) {
             return 0;
         } else if (a < b) {
