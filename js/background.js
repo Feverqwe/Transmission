@@ -135,9 +135,12 @@ var engine = function () {
             text
         );
         var_cache[notifi].show();
-        var_cache[timer] = setTimeout(function () {
-            current_notifi.cancel();
-        }, settings.notify_visbl_interval);
+
+        if (settings.notify_visbl_interval > 0) {
+            var_cache[timer] = setTimeout(function () {
+                current_notifi.cancel();
+            }, settings.notify_visbl_interval);
+        }
     };
     var setStatus = function (type, data) {
         if (type === 'getToken') {
