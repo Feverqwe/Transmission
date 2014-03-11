@@ -671,6 +671,15 @@ var manager = function () {
             a = v_a[index];
             b = v_b[index];
         }
+        if (index === 24 && ( a === 0 || b === 0 ) ) {
+            if (a === b) {
+                return 0;
+            } else if (a < b) {
+                return (by === 1) ? 1 : -1;
+            } else if (a > b) {
+                return (by === 1) ? -1 : 1;
+            }
+        }
         if (a === b) {
             return 0;
         } else if (a < b) {

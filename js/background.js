@@ -135,7 +135,6 @@ var engine = function () {
             text
         );
         var_cache[notifi].show();
-
         if (settings.notify_visbl_interval > 0) {
             var_cache[timer] = setTimeout(function () {
                 current_notifi.cancel();
