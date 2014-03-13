@@ -1554,6 +1554,13 @@ var manager = function () {
             }
         });
     };
+    var fl_unckeckCkecked = function() {
+        dom_cache.fl_body.find('input:checked').each(function () {
+            this.checked = false;
+            this.parentNode.parentNode.classList.remove("selected");
+        });
+        fl_select_all_checkbox();
+    };
     return {
         start: function () {
             _engine.setWindow(window);
@@ -2060,7 +2067,7 @@ var manager = function () {
                         priority: 3,
                         callback: function (key, trigger) {
                             _engine.sendAction($.param({action: 'setprio', p: 3}) + '&' + $.param({hash: var_cache.fl_id, f: var_cache.fl_list_ctx_sel_arr}, true));
-                            dom_cache.fl_body.find('input:checked').trigger('click');
+                            fl_unckeckCkecked();
                         }
                     },
                     normal: {
@@ -2069,7 +2076,7 @@ var manager = function () {
                         priority: 2,
                         callback: function (key, trigger) {
                             _engine.sendAction($.param({action: 'setprio', p: 2}) + '&' + $.param({hash: var_cache.fl_id, f: var_cache.fl_list_ctx_sel_arr}, true));
-                            dom_cache.fl_body.find('input:checked').trigger('click');
+                            fl_unckeckCkecked();
                         }
                     },
                     low: {
@@ -2078,7 +2085,7 @@ var manager = function () {
                         name: _lang_arr[87][1],
                         callback: function (key, trigger) {
                             _engine.sendAction($.param({action: 'setprio', p: 1}) + '&' + $.param({hash: var_cache.fl_id, f: var_cache.fl_list_ctx_sel_arr}, true));
-                            dom_cache.fl_body.find('input:checked').trigger('click');
+                            fl_unckeckCkecked();
                         }
                     },
                     s: '-',
@@ -2088,7 +2095,7 @@ var manager = function () {
                         name: _lang_arr[87][0],
                         callback: function (key, trigger) {
                             _engine.sendAction($.param({action: 'setprio', p: 0}) + '&' + $.param({hash: var_cache.fl_id, f: var_cache.fl_list_ctx_sel_arr}, true));
-                            dom_cache.fl_body.find('input:checked').trigger('click');
+                            fl_unckeckCkecked();
                         }
                     }
                     /**
