@@ -1699,9 +1699,9 @@ var manager = function () {
             });
             dom_cache.fl_body.on('click', 'input', function () {
                 if (this.checked) {
-                    $(this).parent().parent().addClass("selected");
+                    this.parentNode.parentNode.classList.add("selected");
                 } else {
-                    $(this).parent().parent().removeClass("selected");
+                    this.parentNode.parentNode.classList.remove("selected");
                 }
                 fl_select_all_checkbox();
             });
@@ -1709,12 +1709,14 @@ var manager = function () {
                 if (this.checked) {
                     var t = dom_cache.fl_body.find('input:visible');
                     for (var n = 0, len = t.length; n < len; n++) {
-                        t.eq(n).prop('checked', true).parent().parent().addClass("selected");
+                        t[n].checked = true;
+                        t[n].parentNode.parentNode.classList.add("selected");
                     }
                 } else {
                     var t = dom_cache.fl_body.find("input:visible");
                     for (var n = 0, len = t.length; n < len; n++) {
-                        t.eq(n).prop('checked', false).parent().parent().removeClass("selected");
+                        t[n].checked = false;
+                        t[n].parentNode.parentNode.classList.remove("selected");
                     }
                 }
             });
