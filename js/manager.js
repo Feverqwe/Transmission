@@ -57,7 +57,7 @@ var manager = function () {
     };
     var dom_cache = {};
     var options = {
-        scroll_width: 15,
+        scroll_width: 17,
         tr_word_wrap: false,
         fl_word_wrap: true,
         moveble_enabled_tr: true,
@@ -133,8 +133,9 @@ var manager = function () {
         var fl_body_height = window.innerHeight - 34 - 19;
         var fl_table_height = fl_body_height - 34;
         var_cache.fl_height = fl_table_height;
+        var_cache.fl_left = ((var_cache.body_width - width) / 2);
         style_text += 'div.file-list {' +
-            'left: ' + ((var_cache.body_width - width) / 2) + "px; " +
+            'left: ' + var_cache.fl_left + "px; " +
             'height: ' + fl_body_height + 'px; ' +
             'width: ' + width + 'px;' +
             '}';
@@ -1645,7 +1646,7 @@ var manager = function () {
             dom_cache.fl_layer.on('scroll', function () {
                 var l = this.scrollLeft;
                 if (l !== 0) {
-                    dom_cache.fl_table_fixed.css('left', -l);
+                    dom_cache.fl_table_fixed.css('left', -l + var_cache.fl_left);
                 } else {
                     dom_cache.fl_table_fixed.css('left', 'auto');
                 }
