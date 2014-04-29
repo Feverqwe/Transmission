@@ -350,6 +350,9 @@ var engine = function () {
                     item[8] = field.rateUpload || 0;
                     item[9] = field.rateDownload || 0;
                     item[10] = field.eta || 0;
+                    if (item[10] < 0) {
+                        item[10] = 0;
+                    }
                     item[12] = field.peersGettingFromUs || 0;
                     var l_c = 0;
                     var s_c = 0;
