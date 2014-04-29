@@ -17,13 +17,18 @@ var notify = function () {
     var getValues = function () {
         var vals = [];
         inputs.forEach(function (item) {
-            var val = item.val();
-            if (val === undefined) {
-                val = undefined;
-            } else if (val === null) {
-                val = undefined;
-            } else if (val.length === 0) {
-                val = undefined;
+            var val;
+            if (item.get(0).type === 'checkbox') {
+                val = item.prop('checked');
+            } else {
+                val = item.val();
+                if (val === undefined) {
+                    val = undefined;
+                } else if (val === null) {
+                    val = undefined;
+                } else if (val.length === 0) {
+                    val = undefined;
+                }
             }
             vals.push(val);
         });
@@ -63,7 +68,7 @@ var notify = function () {
             }
             count++;
         } else if (type === 'input') {
-            var input = $('<input>');
+            var input = $('<input>', _item.attr);
             item.append(input);
             inputs.push(input);
             count++;

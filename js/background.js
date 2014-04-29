@@ -418,6 +418,7 @@ var engine = function () {
                                 count_files_in_first_folder++;
                             }
                             file[0] = f_item.name;
+                            file[15] = f_item.name;
                             file[1] = f_item.length;
                             file[2] = f_item.bytesCompleted;
                             file[3] = s_item.priority;
@@ -656,6 +657,26 @@ var engine = function () {
                 if (params.download_dir !== undefined) {
                     data.arguments['download-dir'] = params.path;
                 }
+            } else
+            if (params.action === 'rename') {
+                data = {
+                    method: "torrent-rename-path",
+                    arguments: {
+                        ids: params.hash,
+                        path: params.path,
+                        name: params.name
+                    }
+                };
+            } else
+            if (params.action === 'move') {
+                data = {
+                    method: "torrent-set-location",
+                    arguments: {
+                        ids: params.hash,
+                        location: params.location,
+                        move: params.move === true
+                    }
+                };
             }
         } else
         if (params.list !== undefined) {

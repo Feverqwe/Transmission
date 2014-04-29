@@ -994,6 +994,7 @@ var manager = function () {
             var_cache.fl_loading_dom.remove();
             var_cache.fl_loading = false;
         }
+        var_cache.fl_tr_folder = undefined;
     };
     var fl_show = function (id) {
         var_cache.fl_id = id;
@@ -1014,6 +1015,7 @@ var manager = function () {
         }
         var folder = var_cache.tr_list[id][26];
         dom_cache.fl_bottom.children('li.path').children('input').attr('title', folder).val(folder).focus();
+        var_cache.fl_tr_folder = folder;
         var_cache.fl_show = true;
     };
     var fl_create_gui_link = function (path, n, level) {
@@ -1146,7 +1148,7 @@ var manager = function () {
         var item = var_cache.fl_list_dom[n];
         if (cl.name !== undefined) {
             var cell = item.children('td.name');
-            var gui = fl_create_gui_link(v[0], n);
+            var gui = fl_create_gui_link(v[0], n, -1);
             cell.children('div').children('span').text(gui.name).prepend(gui.link);
         }
         if (cl.size !== undefined) {
@@ -1212,7 +1214,10 @@ var manager = function () {
             var_cache.fl_loading_dom.remove();
             var_cache.fl_loading = false;
             var folder = var_cache.tr_list[id][26];
-            dom_cache.fl_bottom.children('li.path').children('input').attr('title', folder).val(folder).focus();
+            if (var_cache.fl_tr_folder !== folder) {
+                dom_cache.fl_bottom.children('li.path').children('input').attr('title', folder).val(folder);
+                var_cache.fl_tr_folder = folder;
+            }
         }
         if (update_pos === false && list.length !== var_cache.fl_sort_pos.length) {
             /**
@@ -2004,7 +2009,28 @@ var manager = function () {
                             }
                         }
                     },
-                    's2': '-',
+                    setlocation: {
+                        name: _lang_arr.move[0],
+                        callback: function (key, trigger) {
+                            var id = trigger.items[key].id;
+                            notify([
+                                {type: 'input', attr: {value: var_cache.tr_list[id][26]}, text: _lang_arr.move[1]},
+                                {type: 'select', options: _settings.folders_array, empty: true, o: 'folders', text: _lang_arr[117]}
+                            ], _lang_arr[119][0], _lang_arr[119][1], function (arr) {
+                                if (arr === undefined) {
+                                    return;
+                                }
+                                var new_location;
+                                if (arr[1] === undefined) {
+                                    new_location = arr[0];
+                                } else {
+                                    new_location = _settings.folders_array[arr[1]][1];
+                                }
+                                _engine.sendAction({list: 1, action: 'move', location: new_location, move: true, hash: trigger.items[key].id});
+                            });
+                        }
+                    },
+                    's3': '-',
                     torrent_files: {
                         name: _lang_arr[111],
                         callback: function (key, trigger) {
@@ -2101,6 +2127,24 @@ var manager = function () {
                         callback: function (key, trigger) {
                             _engine.sendAction($.param({action: 'setprio', p: 0}) + '&' + $.param({hash: var_cache.fl_id, f: var_cache.fl_list_ctx_sel_arr}, true));
                             fl_unckeckCkecked();
+                        }
+                    },
+                    rename: {
+                        name: _lang_arr.rename[0],
+                        callback: function (key, trigger) {
+                            var id = var_cache.fl_id;
+                            var file_id = trigger.items[key].id;
+                            var last_slash_pos = var_cache.fl_list[file_id][0].lastIndexOf('/');
+                            notify([
+                                {type: 'input', attr: {value: var_cache.fl_list[file_id][0].substr(last_slash_pos + 1)}, text: _lang_arr.rename[1]}
+                            ], _lang_arr[119][0], _lang_arr[119][1], function (arr) {
+                                if (arr === undefined) {
+                                    return;
+                                }
+                                var path = var_cache.fl_list[file_id][15];
+                                var new_name = arr[0];
+                                _engine.sendAction({list: 1, action: 'rename', path: path, name: new_name, hash: id});
+                            });
                         }
                     }
                     /**

@@ -74,6 +74,8 @@ var get_lang = function(lang) {
         121: 'Enter URL',
         122: ['Can\'t download file', 'File is too large'],
         tsl: 'Temporary Speed Limits',
+        rename: ['Rename', 'Enter new name'],
+        move: ['Move', 'Enter new path'],
         "settings": {
             1: "Transmission",
             2: "Notifications",
@@ -223,6 +225,8 @@ var get_lang = function(lang) {
         121: 'Entrez l\'URL',
         122: ['Vous ne pouvez pas télécharger le fichier', 'Le fichier est trop gros'],
         tsl: 'Temporaire Des Limites De Vitesse',
+        rename: ['Renommer', 'Tapez un nouveau nom'],
+        move: ['Déplacer', 'Tapez le nouveau chemin d\''],
         "settings": {
             1: "Transmission",
             2: "Notifications",
@@ -372,6 +376,8 @@ var get_lang = function(lang) {
         121: 'Введите URL',
         122: ['Не могу загрузить торрент-файл', 'Файл больше 10 мб'],
         tsl: 'Временное ограничение скорости',
+        rename: ['Переименовать', 'Введите новое имя'],
+        move: ['Переместить', 'Введите новый путь'],
         "settings": {
             1: "Transmission",
             2: "Уведомления",
