@@ -423,7 +423,7 @@ var engine = function () {
                             file[3] = s_item.priority;
                             ut['files'][1].push(file);
                         }
-                        if (count_files_in_first_folder === fn) {
+                        if (file_folder !== undefined && count_files_in_first_folder === fn) {
                             if (item[26].substr(-1) === '/') {
                                 item[26] += file_folder;
                             } else {
