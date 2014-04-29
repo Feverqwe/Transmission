@@ -1211,6 +1211,8 @@ var manager = function () {
         if (list_len !== 0 && var_cache.fl_loading === true) {
             var_cache.fl_loading_dom.remove();
             var_cache.fl_loading = false;
+            var folder = var_cache.tr_list[id][26];
+            dom_cache.fl_bottom.children('li.path').children('input').attr('title', folder).val(folder).focus();
         }
         if (update_pos === false && list.length !== var_cache.fl_sort_pos.length) {
             /**

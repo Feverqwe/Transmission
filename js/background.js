@@ -389,6 +389,9 @@ var engine = function () {
                             fn = 0;
                             console.log("Files more fileStats!");
                         }
+                        var file_name_first_slash_position = -1;
+                        var file_folder = undefined;
+                        var count_files_in_first_folder = 0;
                         for (var n = 0; n < fn; n++) {
                             var f_item = field.files[n];
                             var s_item = field.fileStats[n] || {priority: 0};
@@ -405,11 +408,30 @@ var engine = function () {
                             } else {
                                 s_item.priority += 2;
                             }
+                            if (n === 0 && file_folder === undefined) {
+                                file_name_first_slash_position = f_item.name.indexOf('/');
+                                if (file_name_first_slash_position !== -1) {
+                                    file_folder = f_item.name.substr(0, file_name_first_slash_position);
+                                }
+                            }
+                            if (file_folder !== undefined && f_item.name.substr(0, file_name_first_slash_position) === file_folder) {
+                                count_files_in_first_folder++;
+                            }
                             file[0] = f_item.name;
                             file[1] = f_item.length;
                             file[2] = f_item.bytesCompleted;
                             file[3] = s_item.priority;
                             ut['files'][1].push(file);
+                        }
+                        if (count_files_in_first_folder === fn) {
+                            if (item[26].substr(-1) === '/') {
+                                item[26] += file_folder;
+                            } else {
+                                item[26] += '/' + file_folder;
+                            }
+                            ut['files'][1].forEach(function(file) {
+                                file[0] = file[0].substr(file_name_first_slash_position + 1);
+                            });
                         }
                     }
                     ut[type].push(item);
