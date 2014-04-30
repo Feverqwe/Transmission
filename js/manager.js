@@ -2009,6 +2009,7 @@ var manager = function () {
                             }
                         }
                     },
+                    's3': '-',
                     setlocation: {
                         name: _lang_arr.move[0],
                         callback: function (key, trigger) {
@@ -2030,7 +2031,6 @@ var manager = function () {
                             });
                         }
                     },
-                    's3': '-',
                     torrent_files: {
                         name: _lang_arr[111],
                         callback: function (key, trigger) {
