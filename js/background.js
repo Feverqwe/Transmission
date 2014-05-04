@@ -185,6 +185,18 @@ var engine = function () {
             data: {
                 method:'session-get'
             },
+            success: function (data) {
+                setStatus('getToken', [200]);
+                engine.cache = var_cache.client = {
+                    status: var_cache.client.status,
+                    token: ''
+                };
+                if (onload !== undefined) {
+                    onload();
+                }
+                bgTimer.start();
+                return;
+            },
             error: function (xhr, textStatus) {
                 if (xhr.status === 409) {
                     setStatus('getToken', [200]);
