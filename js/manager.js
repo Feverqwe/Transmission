@@ -673,10 +673,10 @@ var manager = function () {
             b = v_b[index];
         }
         if (index === 1) {
-            if (v_a[4] < 1000) {
+            if (a === 201 && v_a[4] < 1000) {
                 a += 50;
             }
-            if (v_b[4] < 1000) {
+            if (b === 201 && v_b[4] < 1000) {
                 b += 50;
             }
         }
