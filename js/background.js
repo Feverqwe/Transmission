@@ -173,7 +173,7 @@ var engine = function () {
             var_cache.get_token_count = 0;
             return;
         }
-        var_cache.get_token_count++
+        var_cache.get_token_count++;
         setStatus('getToken', [-1, 'Getting token...']);
         $.ajax({
             url: var_cache.webui_url,
@@ -195,7 +195,6 @@ var engine = function () {
                     onload();
                 }
                 bgTimer.start();
-                return;
             },
             error: function (xhr, textStatus) {
                 if (xhr.status === 409) {
