@@ -344,7 +344,7 @@ var options = function() {
             });
             if (!isTransmission) {
                 $('input[name="context_labels"]').on('click', function() {
-                    $('input[name="add_folder"]')[0].disabled = this.checked;
+                    $('input[name="add_folder"]')[0].disabled = !this.checked;
                 });
             }
             if (chrome.storage) {
