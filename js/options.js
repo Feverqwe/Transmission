@@ -54,9 +54,9 @@ var options = function() {
         var def_settings = _engine.def_settings;
         $.each(def_settings, function(key, value) {
             var $el = $('input[name="' + key + '"]');
-            if (value.t === "text" || value.t == "password") {
+            if (value.t === "text" || value.t === "password") {
                 var val = $el.val();
-                if (val.length === 0 && (key !== 'login' || key !== 'password') ) {
+                if (val.length === 0 && (key !== 'login' && key !== 'password') ) {
                     val = value.v;
                 }
                 localStorage[key] = val;
