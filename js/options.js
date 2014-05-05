@@ -56,7 +56,7 @@ var options = function() {
             var $el = $('input[name="' + key + '"]');
             if (value.t === "text" || value.t === "password") {
                 var val = $el.val();
-                if (val.length === 0 && (key !== 'login' && key !== 'password') ) {
+                if (val.length === 0 && key !== 'login' && key !== 'password') {
                     val = value.v;
                 }
                 localStorage[key] = val;

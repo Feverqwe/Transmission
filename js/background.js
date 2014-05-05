@@ -44,6 +44,7 @@ var engine = function () {
             }
             if (item.t === 'checkbox' || item.t === 'number') {
                 if (item.min !== undefined && value < item.min) {
+                    settings[key] = item.min;
                     return 1;
                 }
                 settings[key] = parseInt(value);
@@ -73,7 +74,7 @@ var engine = function () {
         koeficient: {a: 0, size: 60, pos: 15, lang: 80, order: 1},
         // Transmission
         // dostupno: {a: 0, size: 60, pos: 16, lang: 81, order: 1},
-        metka: {a: 0, size: 100, pos: 17, lang: 82, order: 1},
+        // metka: {a: 0, size: 100, pos: 17, lang: 82, order: 1},
         time_dobavleno: {a: 0, size: 120, pos: 18, lang: 83, order: 1},
         time_zavircheno: {a: 0, size: 120, pos: 19, lang: 84, order: 1},
         controls: {a: 1, size: 57, pos: 20, lang: 21, order: 0}
