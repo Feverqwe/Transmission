@@ -178,7 +178,7 @@ var engine = function () {
         $.ajax({
             url: var_cache.webui_url,
             beforeSend: function (xhr) {
-                if (settings.login.length > 0) {
+                if (settings.login.length > 0 || settings.password.length > 0) {
                     xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password));
                 }
             },
@@ -735,7 +735,7 @@ var engine = function () {
                 var xhr = new XMLHttpRequest();
                 xhr.open("POST", var_cache.webui_url, true);
                 xhr.setRequestHeader("X-Transmission-Session-Id", var_cache.client.token || '');
-                if (settings.login.length > 0) {
+                if (settings.login.length > 0 || settings.password.length > 0) {
                     xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password));
                 }
                 xhr.onload = function () {
@@ -788,7 +788,7 @@ var engine = function () {
             url: var_cache.webui_url,
             beforeSend: function (xhr) {
                 xhr.setRequestHeader("X-Transmission-Session-Id", var_cache.client.token || '');
-                if (settings.login.length > 0) {
+                if (settings.login.length > 0 || settings.password.length > 0) {
                     xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password));
                 }
             },
