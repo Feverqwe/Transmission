@@ -169,8 +169,7 @@ var options = function() {
         });
     };
     var ap = function(t, k, v) {
-        t.append(
-            $('<li>', {'class': 'item ui-state-default'}).data('key', k).append( $('<div>', {'class': 'info'}).append(
+        return $('<li>', {'class': 'item ui-state-default'}).data('key', k).append( $('<div>', {'class': 'info'}).append(
                     $('<div>', {text: lang_arr[v.lang][1]}),
                     '[',
                     $('<div>', {text: lang_arr.settings[50]+': '}).append(
@@ -184,36 +183,45 @@ var options = function() {
                     )
                 ),
                 $('<div>', {'class': 'size'}).css('width', v.size +'px')
-            )
-        );
+            );
     };
     var write_sortable_tables = function() {
+        var items;
         var tr_colums = _engine.getColums();
         var tr_table = $("ul.tr_colums");
         tr_table.empty();
+        items = [];
         $.each(tr_colums, function(k, v) {
-            ap(tr_table, k, v);
+            items.push(ap(tr_table, k, v));
         });
+        tr_table.append(items);
         var fl_colums = _engine.getFlColums();
         var fl_table = $("ul.fl_colums");
         fl_table.empty();
+        items = [];
         $.each(fl_colums, function(k, v) {
-            ap(fl_table, k, v);
+            items.push(ap(fl_table, k, v));
         });
-        $("ul.sortable").sortable({placeholder: "ui-state-highlight"});
-        $("ul.sortable").disableSelection();
-        $("ul.sortable").find("div.size").resizable({handles: "e", resize: function(event, ui) {
+        fl_table.append(items);
+        var ul_sortable = $("ul.sortable");
+        ul_sortable.sortable({placeholder: "ui-state-highlight"});
+        ul_sortable.disableSelection();
+        ul_sortable.find("div.size").resizable({handles: "e", resize: function(event, ui) {
                 $(this).parent().children('div').children("div").eq(1).children('label').html(ui.size.width);
             }});
     };
     var reset_table = function(table, arr) {
+        var items;
         table.empty();
+        items = [];
         $.each(arr, function(k, v) {
-            ap(table, k, v);
+            items.push(ap(table, k, v));
         });
-        $("ul.sortable").sortable({placeholder: "ui-state-highlight"});
-        $("ul.sortable").disableSelection();
-        $("ul.sortable").find("div.size").resizable({handles: "e", resize: function(event, ui) {
+        table.append(items);
+        var ul_sortable = $("ul.sortable");
+        ul_sortable.sortable({placeholder: "ui-state-highlight"});
+        ul_sortable.disableSelection();
+        ul_sortable.find("div.size").resizable({handles: "e", resize: function(event, ui) {
                 $(this).parent().children('div').children("div").eq(1).children('label').html(ui.size.width);
             }});
     };
