@@ -74,6 +74,9 @@ var options = function() {
                 if (key === "bg_update_interval" || key === "notify_visbl_interval" || key === "mgr_update_interval") {
                     val = val * 1000;
                 }
+                if (value.min !== undefined && val < value.min) {
+                    val = value.min;
+                }
                 localStorage[key] = val;
             }
         });
