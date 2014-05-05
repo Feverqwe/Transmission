@@ -169,7 +169,23 @@ var options = function() {
         });
     };
     var ap = function(t, k, v) {
-        t.append('<li class="item ui-state-default" data-key="' + k + '"><div class="info"><div>' + lang_arr[v.lang][1] + '</div>[<div>' + lang_arr.settings[50] + ': <label>' + v.size + '</label>px;</div> <div>' + lang_arr.settings[49] + ':<input type="checkbox"' + ((v.a) ? ' checked' : '') + '/>]</div></div><div class="size" style="width:' + v.size + 'px"></div></li>');
+        t.append(
+            $('<li>', {'class': 'item ui-state-default'}).data('key', k).append( $('<div>', {'class': 'info'}).append(
+                    $('<div>', {text: lang_arr[v.lang][1]}),
+                    '[',
+                    $('<div>', {text: lang_arr.settings[50]+': '}).append(
+                        $('<label>', {text: v.size}),
+                        'px;'
+                    ),
+                    ' ',
+                    $('<div>', {text: lang_arr.settings[49]+':'}).append(
+                        $('<input>',{type: 'checkbox', checked: (v.a)?true:false}),
+                        ']'
+                    )
+                ),
+                $('<div>', {'class': 'size'}).css('width', v.size +'px')
+            )
+        );
     };
     var write_sortable_tables = function() {
         var tr_colums = _engine.getColums();
@@ -328,11 +344,7 @@ var options = function() {
             });
             if (!isTransmission) {
                 $('input[name="context_labels"]').on('click', function() {
-                    if (this.checked) {
-                        $('input[name="add_folder"]')[0].disabled = false;
-                    } else {
-                        $('input[name="add_folder"]')[0].disabled = true;
-                    }
+                    $('input[name="add_folder"]')[0].disabled = this.checked;
                 });
             }
             if (chrome.storage) {
