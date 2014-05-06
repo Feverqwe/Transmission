@@ -28,7 +28,8 @@ var engine = function () {
         change_downloads: {v: 0, t: "checkbox"},
         context_menu_trigger: {v: 1, t: "checkbox"},
         folders_array: {v: [], t: "array"},
-        context_labels: {v: 0, t: "checkbox"}
+        context_labels: {v: 0, t: "checkbox"},
+        free_space: {v: 1, t: "checkbox"}
     };
     var settings = {};
     var loadSettings = function () {
@@ -492,12 +493,15 @@ var engine = function () {
                 _send(function(window){
                     window.manager.setAltSpeedState(value === true)
                 });
-            }
+            } else
+            if (key === 'download-dir') {
+                ut_settings.push(['download-dir', '', value]);
+            } else
             if (key === 'download-dir-free-space') {
                 ut_settings.push(['download-dir-free-space', '', value]);
-                _send(function(window){
-                    window.manager.setSpace([['download-dir-free-space', '', value]]);
-                });
+            } else
+            if (key === 'size-bytes') {
+                ut.free_space = value;
             }
         });
         if (up_limit !== -1 && dl_limit !== -1) {
@@ -707,6 +711,14 @@ var engine = function () {
                         ids: params.hash,
                         location: params.location,
                         move: params.move === true
+                    }
+                };
+            } else
+            if (params.action === 'free-space') {
+                data = {
+                    method: "free-space",
+                    arguments: {
+                        path: params.path
                     }
                 };
             }
@@ -933,6 +945,7 @@ var engine = function () {
             var_cache.client.settings = data.settings;
             _send(function (window) {
                 window.manager.setSpeedLimit(var_cache.client.settings);
+                window.manager.setSpace(var_cache.client.settings);
             });
         }
         if (data.files !== undefined) {

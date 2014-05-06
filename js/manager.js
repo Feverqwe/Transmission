@@ -1582,14 +1582,33 @@ var manager = function () {
         fl_select_all_checkbox();
     };
     var setSpace = function(settings) {
+        if (_settings.free_space !== 1) {
+            return;
+        }
         var free_space = undefined;
+        var download_dir = undefined;
         for (var i = 0, item; item = settings[i]; i++) {
             var key = item[0];
             var value = item[2];
             if (key === 'download-dir-free-space') {
                 free_space = value;
+            } else
+            if (key === 'download-dir') {
+                download_dir = value;
             }
         }
+        if (download_dir === undefined && free_space === undefined) {
+            return;
+        }
+        if (free_space === undefined && download_dir !== undefined) {
+            _engine.sendAction({action: 'free-space', path: download_dir}, function(data) {
+                changeSpace( data.free_space );
+            });
+            return;
+        }
+        changeSpace(free_space);
+    };
+    var changeSpace = function(free_space) {
         if (free_space === undefined || free_space === var_cache.free_space) {
             return;
         }
@@ -1598,7 +1617,7 @@ var manager = function () {
         dom_cache.space.addClass('disk').attr('title', _lang_arr.free_space+' ' + size).empty().append(
             $('<div>', {text: size}).css('width', dom_cache.space.width()+'px')
         );
-    };
+    }
     return {
         start: function () {
             _engine.setWindow(window);
