@@ -53,8 +53,10 @@ var manager = function () {
         //масств id файлов, генерируется при появлении контекстного меню файлов
         fl_list_ctx_sel_arr: [],
         //триггер на случай если меню файл-листа скрыто
-        fl_bottom_hide: false
-    };
+        fl_bottom_hide: false,
+        // кол-во свободного места на диске
+        free_space: undefined
+};
     var dom_cache = {};
     var options = {
         scroll_width: 17,
@@ -1588,9 +1590,10 @@ var manager = function () {
                 free_space = value;
             }
         }
-        if (free_space === undefined) {
+        if (free_space === undefined || free_space === var_cache.free_space) {
             return;
         }
+        var_cache.free_space = free_space;
         var size = bytesToSize(free_space);
         dom_cache.space.addClass('disk').attr('title', _lang_arr.free_space+' ' + size).empty().append(
             $('<div>', {text: size}).css('width', dom_cache.space.width()+'px')
