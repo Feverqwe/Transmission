@@ -113,32 +113,39 @@ var engine = function () {
         };
     }();
     var showNotifi = function (icon, title, text, one) {
-        var current_notifi;
-        var notifi = 'showNotifi';
+        var note_id = 'showNotifi';
         if (one !== undefined) {
-            notifi += '_' + one;
+            note_id += '_' + one;
+        } else {
+            note_id += Date.now();
         }
-        var timer = notifi + '_timer';
-        if (one !== undefined && var_cache[notifi] !== undefined) {
+        var timer = note_id + '_timer';
+        if (one !== undefined && var_cache[note_id] !== undefined) {
+            var_cache[note_id] = undefined;
             clearTimeout(var_cache[timer]);
-            var_cache[notifi].cancel();
+            chrome.notifications.clear(note_id, function() {});
         }
         /**
-         * @namespace webkitNotifications.createNotification
+         * @namespace chrome.notifications
          */
         if (title === 0) {
             title = text;
-            text = '';
+            text = undefined;
         }
-        var_cache[notifi] = current_notifi = webkitNotifications.createNotification(
-            icon,
-            title,
-            text
+        chrome.notifications.create(
+            note_id,
+            { type: 'basic',
+              iconUrl: icon,
+              title: title,
+              message: text },
+            function(id) {
+                var_cache[note_id] = id;
+            }
         );
-        var_cache[notifi].show();
         if (settings.notify_visbl_interval > 0) {
             var_cache[timer] = setTimeout(function () {
-                current_notifi.cancel();
+                var_cache[note_id] = undefined;
+                chrome.notifications.clear(note_id, function() {});
             }, settings.notify_visbl_interval);
         }
     };
@@ -299,6 +306,7 @@ var engine = function () {
          */
 
         var ut = {};
+        var ut_settings = [];
         ut['label'] = [];
         arguments = data['arguments'] || [];
         var up_limit = -1;
@@ -485,9 +493,18 @@ var engine = function () {
                     window.manager.setAltSpeedState(value === true)
                 });
             }
+            if (key === 'download-dir-free-space') {
+                ut_settings.push(['download-dir-free-space', '', value]);
+                _send(function(window){
+                    window.manager.setSpace(value)
+                });
+            }
         });
         if (up_limit !== -1 && dl_limit !== -1) {
-            ut['settings'] = [['max_dl_rate', '', dl_limit], ['max_ul_rate', '', up_limit]];
+            ut_settings.push(['max_dl_rate', '', dl_limit], ['max_ul_rate', '', up_limit]);
+        }
+        if (ut_settings.length > 0) {
+            ut['settings'] = ut_settings;
         }
         return ut;
     };

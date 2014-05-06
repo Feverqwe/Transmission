@@ -76,6 +76,7 @@ var get_lang = function(lang) {
         tsl: 'Temporary Speed Limits',
         rename: ['Rename', 'Enter new name'],
         move: ['Move', 'Enter new path'],
+        free_space: 'Free',
         "settings": {
             1: "Transmission",
             2: "Notifications",
@@ -227,6 +228,7 @@ var get_lang = function(lang) {
         tsl: 'Temporaire Des Limites De Vitesse',
         rename: ['Renommer', 'Tapez un nouveau nom'],
         move: ['Déplacer', 'Tapez le nouveau chemin d\''],
+        free_space: 'Disponible',
         "settings": {
             1: "Transmission",
             2: "Notifications",
@@ -378,6 +380,7 @@ var get_lang = function(lang) {
         tsl: 'Временное ограничение скорости',
         rename: ['Переименовать', 'Введите новое имя'],
         move: ['Переместить', 'Введите новый путь'],
+        free_space: 'Свободно',
         "settings": {
             1: "Transmission",
             2: "Уведомления",

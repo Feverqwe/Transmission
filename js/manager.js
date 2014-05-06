@@ -773,7 +773,7 @@ var manager = function () {
             sum_up += item[8];
 
             if (_settings.hide_seeding && item[4] === 1000 && item[1] === 201 ||
-                _settings.hide_finished && item[4] === 1000 && item[1] === 136) {
+                _settings.hide_finished && item[4] === 1000 && item[1] === 128) {
                 continue;
             }
 
@@ -1356,7 +1356,9 @@ var manager = function () {
         if (change_u === true) {
             setUpSpeedDom(var_cache.speed_limit.upload);
         }
-        updateSpeedCtxMenu();
+        if (change_d || change_u) {
+            updateSpeedCtxMenu();
+        }
     };
     var setUpSpeed = function (value) {
         _engine.sendAction({action: 'setsetting', s: 'max_ul_rate', v: value});
@@ -1586,6 +1588,7 @@ var manager = function () {
                 dl_speed: $('.status-panel td.speed.download'),
                 up_speed: $('.status-panel td.speed.upload'),
                 status: $('.status-panel td.status'),
+                space: $('.status-panel td.space'),
                 label_select: $('ul.menu li.select select'),
                 tr_layer: $('.torrent-list-layer'),
                 tr_table_main: $('.torrent-table-body'),
@@ -2323,6 +2326,12 @@ var manager = function () {
             } else {
                 $('a.alt_speed').removeClass('active');
             }
+        },
+        setSpace: function(value) {
+            var size = bytesToSize(value);
+            dom_cache.space.addClass('disk').attr('title', _lang_arr.free_space+' ' + size).append(
+                $('<div>', {text: size}).css('width', dom_cache.space.width()+'px')
+            );
         }
     };
 }();
