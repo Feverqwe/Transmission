@@ -496,7 +496,7 @@ var engine = function () {
             if (key === 'download-dir-free-space') {
                 ut_settings.push(['download-dir-free-space', '', value]);
                 _send(function(window){
-                    window.manager.setSpace(value)
+                    window.manager.setSpace([['download-dir-free-space', '', value]]);
                 });
             }
         });

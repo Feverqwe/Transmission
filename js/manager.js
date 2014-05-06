@@ -1579,6 +1579,23 @@ var manager = function () {
         });
         fl_select_all_checkbox();
     };
+    var setSpace = function(settings) {
+        var free_space = undefined;
+        for (var i = 0, item; item = settings[i]; i++) {
+            var key = item[0];
+            var value = item[2];
+            if (key === 'download-dir-free-space') {
+                free_space = value;
+            }
+        }
+        if (free_space === undefined) {
+            return;
+        }
+        var size = bytesToSize(free_space);
+        dom_cache.space.addClass('disk').attr('title', _lang_arr.free_space+' ' + size).empty().append(
+            $('<div>', {text: size}).css('width', dom_cache.space.width()+'px')
+        );
+    };
     return {
         start: function () {
             _engine.setWindow(window);
@@ -1699,6 +1716,7 @@ var manager = function () {
             });
 
             setSpeedLimit(_engine.cache.settings || []);
+            setSpace(_engine.cache.settings || []);
             _engine.sendAction({action: 'getsettings'});
 
             if (isTransmission) {
@@ -2327,12 +2345,7 @@ var manager = function () {
                 $('a.alt_speed').removeClass('active');
             }
         },
-        setSpace: function(value) {
-            var size = bytesToSize(value);
-            dom_cache.space.addClass('disk').attr('title', _lang_arr.free_space+' ' + size).append(
-                $('<div>', {text: size}).css('width', dom_cache.space.width()+'px')
-            );
-        }
+        setSpace: setSpace
     };
 }();
 $(function () {
