@@ -642,3 +642,20 @@ path.line {
     stroke: red;
     stroke-width: 1.5px;
 }
+
+div.drop_layer {
+    display: none;
+    top: 0;
+    left: 0;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    background-color: rgba(0, 0, 0, 0.3);
+    background-image: url(../images/drag.png);
+    background-repeat: no-repeat;
+    background-position: center;
+}
+div.drop_layer.dropped {
+    background-color: transparent;
+}
