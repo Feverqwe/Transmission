@@ -1054,7 +1054,7 @@ var manager = function () {
                 var key = path.join('/');
                 links.push({path: key, name: dir, back: dirs.slice(0, i).join('/')});
                 if (var_cache.fl_list_gui[key] === undefined) {
-                    var_cache.fl_list_gui[key] = {items: [], path: dirs.slice(i), level: i + 1, links: links};
+                    var_cache.fl_list_gui[key] = {items: [], path: dirs.slice(i), level: i + 1, links: links.slice(0)};
                 }
                 if (var_cache.fl_list_gui[key].items.indexOf(n) === -1) {
                     var_cache.fl_list_gui[key].items.push(n);
