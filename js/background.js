@@ -114,6 +114,9 @@ var engine = function () {
         };
     }();
     var showNotifi = function (icon, title, text, one) {
+        if (chrome.notifications === undefined) {
+            return;
+        }
         var note_id = 'showNotifi';
         if (one !== undefined) {
             note_id += '_' + one;
