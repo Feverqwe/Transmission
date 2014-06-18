@@ -29,7 +29,8 @@ var engine = function () {
         context_menu_trigger: {v: 1, t: "checkbox"},
         folders_array: {v: [], t: "array"},
         context_labels: {v: 0, t: "checkbox"},
-        free_space: {v: 1, t: "checkbox"}
+        free_space: {v: 1, t: "checkbox"},
+        get_full_list: {v: 0, t: "checkbox"}
     };
     var settings = {};
     var loadSettings = function () {
@@ -96,7 +97,7 @@ var engine = function () {
             }
             clearInterval(timer);
             timer = setInterval(function () {
-                sendAction({list: 1});
+                sendAction({list: 1, cid: 0});
             }, settings.bg_update_interval);
             bgTimer.isStart = true;
         };
@@ -735,10 +736,14 @@ var engine = function () {
                     fields: ["id", "name", "totalSize", "percentDone", 'downloadedEver', 'uploadedEver', 'rateUpload', 'rateDownload', 'eta', 'peersSendingToUs', 'peersGettingFromUs', 'queuePosition', 'addedDate', 'doneDate', 'downloadDir', 'recheckProgress', 'status', 'error', 'errorString', 'trackerStats']
                 }
             };
-            if (params.cid !== 0) {
-                data.arguments['ids'] = "recently-active";
+            if (settings.get_full_list === 1) {
+              var_cache.client.cid = 0;
             } else {
+              if (params.cid !== 0) {
+                data.arguments['ids'] = "recently-active";
+              } else {
                 var_cache.client.cid = 0;
+              }
             }
         }
         if (dont_get_list === 0 && onload === undefined && params.list !== undefined) {

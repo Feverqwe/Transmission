@@ -149,7 +149,8 @@ var get_lang = function(lang) {
             69: 'Replace the directories on the label (with the addition of the label will be assigned)',
             70: 'Down',
             71: 'Up',
-            72: 'To display the number of available disk space'
+            72: 'To display the number of available disk space',
+            73: 'Always request a full list of torrents'
         }
     };
     var lang_arr_fr = {
@@ -302,7 +303,8 @@ var get_lang = function(lang) {
             69: 'Remplacez les répertoires sur l\'étiquette (avec l\'ajout de l\'étiquette va être affecté)',
             70: 'Vers le bas',
             71: 'Vers le haut',
-            72: 'Pour afficher le nombre d\'espace disque disponible'
+            72: 'Pour afficher le nombre d\'espace disque disponible',
+            73: 'Toujours demander une liste complète des torrents'
         }
     };
     var lang_arr_ru = {
@@ -455,7 +457,8 @@ var get_lang = function(lang) {
             69: 'Заменить каталоги на метки (при добавлении будет присваиваться метка)',
             70: 'Вниз',
             71: 'Вверх',
-            72: 'Отображать количество свободного места на диске'
+            72: 'Отображать количество свободного места на диске',
+            73: 'Всегда запрашивать полный список торрентов'
         }
     };
     if (lang === undefined) {
