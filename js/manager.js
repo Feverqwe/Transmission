@@ -984,7 +984,7 @@ var manager = function () {
     }();
     var getTorrentList = function () {
         mgTimer.stop();
-        _engine.sendAction($.extend({list: 1}, var_cache.fl_param));
+        _engine.sendAction($.extend({list: 1}, (_settings.get_full_list === 1)?{cid: 0}:undefined, var_cache.fl_param));
     };
     var fl_close = function () {
         dom_cache.fl.hide();

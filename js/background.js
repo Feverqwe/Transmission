@@ -736,14 +736,10 @@ var engine = function () {
                     fields: ["id", "name", "totalSize", "percentDone", 'downloadedEver', 'uploadedEver', 'rateUpload', 'rateDownload', 'eta', 'peersSendingToUs', 'peersGettingFromUs', 'queuePosition', 'addedDate', 'doneDate', 'downloadDir', 'recheckProgress', 'status', 'error', 'errorString', 'trackerStats']
                 }
             };
-            if (settings.get_full_list === 1) {
-              var_cache.client.cid = 0;
+            if (params.cid !== 0) {
+              data.arguments['ids'] = "recently-active";
             } else {
-              if (params.cid !== 0) {
-                data.arguments['ids'] = "recently-active";
-              } else {
-                var_cache.client.cid = 0;
-              }
+              var_cache.client.cid = 0;
             }
         }
         if (dont_get_list === 0 && onload === undefined && params.list !== undefined) {
