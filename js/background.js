@@ -1003,7 +1003,7 @@ var engine = function () {
             dl_sum += item[9];
             up_sum += item[8];
         }
-        var time = parseInt((new Date()).getTime()/1000);
+        var time = parseInt(Date.now()/1000);
         var traf0 = var_cache.traffic[0];
         var traf1 = var_cache.traffic[1];
         var values_len = traf0.values.length;
