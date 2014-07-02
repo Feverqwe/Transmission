@@ -417,18 +417,7 @@ var engine = function () {
         xhr.open("GET", url, true);
         xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password));
         xhr.onload = function() {
-            setStatus('getToken', [200]);
-            engine.cache = var_cache.client = {
-                status: var_cache.client.status,
-                token: ''
-            };
-            if (onload !== undefined) {
-                onload();
-            }
-            bgTimer.start();
-        };
-        xhr.onerror = function() {
-            if (xhr.status === 409) {
+            if (xhr.status === 409 || xhr.status < 400) {
                 setStatus('getToken', [200]);
                 engine.cache = var_cache.client = {
                     status: var_cache.client.status,
@@ -440,6 +429,16 @@ var engine = function () {
                 bgTimer.start();
                 return;
             }
+            setStatus('getToken', [xhr.status, xhr.statusText]);
+            if (onerror !== undefined) {
+                onerror();
+            }
+            if (var_cache.client.getToken_error > 10) {
+                bgTimer.stop();
+            }
+            var_cache.client.getToken_error = (var_cache.client.getToken_error === undefined) ? 1 : var_cache.client.getToken_error + 1;
+        };
+        xhr.onerror = function() {
             setStatus('getToken', [xhr.status, xhr.statusText]);
             if (onerror !== undefined) {
                 onerror();

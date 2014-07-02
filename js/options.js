@@ -89,7 +89,7 @@ var options = function() {
             });
         }
     };
-    var saveAll = function() {
+    var saveAll = function(cb) {
         var changes = {};
         changes['lang'] = dom_cache.select_language.val();
         $.each(def_settings, function(key, value) {
@@ -245,7 +245,7 @@ var options = function() {
     var write_sortable_tables = function() {
         var items;
         mono.sendMessage(['getColums', 'getFlColums'], function(data) {
-            var tr_colums = data.getColums();
+            var tr_colums = data.getColums;
             var tr_table = $("ul.tr_colums");
             tr_table.empty();
             items = [];
@@ -253,7 +253,7 @@ var options = function() {
                 items.push(ap(tr_table, k, v));
             });
             tr_table.append(items);
-            var fl_colums = data.getFlColums();
+            var fl_colums = data.getFlColums;
             var fl_table = $("ul.fl_colums");
             fl_table.empty();
             items = [];

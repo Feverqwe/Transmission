@@ -19,7 +19,7 @@ var graph = function () {
         if (values_len === 0) {
             return;
         }
-        if ( values_len > _limit ) {
+        if ( values_len > _limit) {
             startItem = values_len - _limit;
         }
         end = traf0[values_len - 1].time;
@@ -65,13 +65,12 @@ var graph = function () {
         city.append("path")
             .attr("class", "line")
             .attr("d", function (d) {
-                for (var i = 0, item; item = data[i]; i++) {
-                    if (item.name !== d.name) {
-                        continue;
+                data.forEach(function(line) {
+                    if (line.name === d.name) {
+                        d.values = line.values;
+                        return;
                     }
-                    d.values = item.values;
-                    break;
-                }
+                });
                 return line(d.values);
             })
             .style("stroke", function(d) { return (d.name === 'download')?'#3687ED':'#41B541'; });
@@ -79,7 +78,6 @@ var graph = function () {
     };
     var updateLines = function (data) {
         if (created === false) {
-            createLines(data);
             return;
         }
         var min = getInfo(data, true);

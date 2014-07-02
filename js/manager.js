@@ -230,7 +230,7 @@ var manager = function () {
     };
     var sendFile = function(url, folder, label) {
         mono.sendMessage({action: 'sendFile', url: url, folder: folder, label: label}, undefined, 'bg');
-    }
+    };
     var writeLanguage = function () {
         var webUi_url = '';
         if (_settings.login.length === 0) {
@@ -1716,7 +1716,7 @@ var manager = function () {
         dom_cache.space.addClass('disk').attr('title', _lang_arr.free_space+' ' + size).empty().append(
             $('<div>', {text: size}).css('width', dom_cache.space.width()+'px')
         );
-    }
+    };
     var onGetFiles = function(files) {
         notify([
                 {type: 'select', options: var_cache.labels, empty: true, text: _lang_arr[82][0]},
@@ -1748,8 +1748,7 @@ var manager = function () {
         );
     };
     return {
-        boot: function ()
-        {
+        boot: function () {
             if (mono.isFF) {
                 mono.addon.postMessage('isShow');
             }
