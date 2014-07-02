@@ -1,9 +1,219 @@
+var lang_arr;
+if (typeof window === 'undefined') {
+    mono = require("./mono.js");
+    self = require("sdk/self");
+    window = require("sdk/window/utils").getMostRecentBrowserWindow();
+    XMLHttpRequest = require('sdk/net/xhr').XMLHttpRequest;
+
+    sdk_timers = require("sdk/timers");
+    setTimeout = sdk_timers.setTimeout;
+    clearTimeout = sdk_timers.clearTimeout;
+    setInterval = sdk_timers.setInterval;
+    clearInterval = sdk_timers.clearInterval;
+
+    window.Notifications = require("sdk/notifications");
+    window.isModule = true;
+}
+var jQ = {
+    isPlainObject: function( obj ) {
+        var class2type = {};
+        var hasOwn = class2type.hasOwnProperty;
+        if ( typeof obj !== "object" || obj.nodeType || obj === window ) {
+            return false;
+        }
+        if ( obj.constructor &&
+            !hasOwn.call( obj.constructor.prototype, "isPrototypeOf" ) ) {
+            return false;
+        }
+        return true;
+    },
+    each: function(obj, cb) {
+        for (var key in obj) {
+            if (!obj.hasOwnProperty(key)) {
+                continue;
+            }
+            cb(key, obj[key]);
+        }
+    },
+    param: function(obj) {
+        if (typeof obj === 'string') {
+            return obj;
+        }
+        var itemsList = [];
+        for (var key in obj) {
+            if (!obj.hasOwnProperty(key)) {
+                continue;
+            }
+            if (obj[key] === undefined) {
+                obj[key] = '';
+            }
+            itemsList.push(encodeURIComponent(key)+'='+encodeURIComponent(obj[key]));
+        }
+        return itemsList.join('&');
+    },
+    extend: function() {
+        var options, name, src, copy, copyIsArray, clone,
+            target = arguments[0] || {},
+            i = 1,
+            length = arguments.length,
+            deep = false;
+        // Handle a deep copy situation
+        if ( typeof target === "boolean" ) {
+            deep = target;
+
+            // skip the boolean and the target
+            target = arguments[ i ] || {};
+            i++;
+        }
+        // Handle case when target is a string or something (possible in deep copy)
+        if ( typeof target !== "object" && !typeof target === "function" ) {
+            target = {};
+        }
+        // extend jQuery itself if only one argument is passed
+        if ( i === length ) {
+            target = this;
+            i--;
+        }
+        for ( ; i < length; i++ ) {
+            // Only deal with non-null/undefined values
+            if ( (options = arguments[ i ]) != null ) {
+                // Extend the base object
+                for ( name in options ) {
+                    src = target[ name ];
+                    copy = options[ name ];
+
+                    // Prevent never-ending loop
+                    if ( target === copy ) {
+                        continue;
+                    }
+                    // Recurse if we're merging plain objects or arrays
+                    if ( deep && copy && ( jQ.isPlainObject(copy) || (copyIsArray = Array.isArray(copy)) ) ) {
+                        if ( copyIsArray ) {
+                            copyIsArray = false;
+                            clone = src && Array.isArray(src) ? src : [];
+                        } else {
+                            clone = src && jQ.isPlainObject(src) ? src : {};
+                        }
+                        // Never move original objects, clone them
+                        target[ name ] = jQ.extend( deep, clone, copy );
+                        // Don't bring in undefined values
+                    } else if ( copy !== undefined ) {
+                        target[ name ] = copy;
+                    }
+                }
+            }
+        }
+        // Return the modified object
+        return target;
+    }
+};
+
+var init = function(env, lang) {
+    if (env !== undefined) {
+        window.get_lang = lang.get_lang;
+        mono = mono.init(env);
+    }
+
+    mono.pageId = 'bg';
+    var actionReader = function(message, cb) {
+        if (message === 'lang_arr') {
+            return cb(lang_arr);
+        }
+        if (message === 'settings') {
+            return cb(engine.settings);
+        }
+        if (message === 'getColums') {
+            return engine.getColums(cb);
+        }
+        if (message === 'getFlColums') {
+            return engine.getFlColums(cb);
+        }
+        if (message === 'cache') {
+            return cb(engine.cache);
+        }
+        if (message === 'def_settings') {
+            return cb(engine.def_settings);
+        }
+        if (message === 'getTraffic') {
+            return cb(engine.traffic);
+        }
+        if (message.action === 'sendAction') {
+            if (cb) {
+                engine.sendAction(message.data, function() {
+                    cb();
+                });
+            } else {
+                engine.sendAction(message.data);
+            }
+            return;
+        }
+        if (message.action === 'setTrColums') {
+            return engine.setTrColums(message.data);
+        }
+        if (message.action === 'setFlColums') {
+            return engine.setFlColums(message.data);
+        }
+        if (message.action === 'sendFile') {
+            return engine.sendFile(message.url, message.folder, message.label);
+        }
+        if (message.action === 'updateSettings') {
+            return engine.updateSettings(message.data, cb);
+        }
+        if (message === 'getToken') {
+            return engine.getToken(function(){
+                cb(1);
+            }, function(){
+                cb(0);
+            });
+        }
+        if (message === 'getDefColums') {
+            return cb(engine.getDefColums());
+        }
+        if (message === 'getDefFlColums') {
+            return cb(engine.getDefFlColums());
+        }
+        mono('>', message);
+    };
+    mono.onMessage(function(message, response) {
+        if (Array.isArray(message)) {
+            var c_wait = message.length;
+            var c_ready = 0;
+            var resultList = {};
+            var ready = function(key, data) {
+                c_ready+= 1;
+                resultList[key] = data;
+                if (c_wait === c_ready) {
+                    response(resultList);
+                }
+            };
+            message.forEach(function(action) {
+                actionReader(action, function (data) {
+                    ready(action, data);
+                });
+            });
+            return;
+        }
+        actionReader(message, response);
+    });
+
+    mono.storage.get('lang', function(options) {
+        lang_arr = window.get_lang(options.lang || window.navigator.language.substr(0,2));
+        engine.boot();
+    });
+};
+if (window.isModule) {
+    exports.init = init;
+} else {
+    init();
+}
+
 var engine = function () {
     var isTransmission = true;
     var complete_icon = 'images/notification_done.png';
     var add_icon = 'images/notification_add.png';
     var error_icon = 'images/notification_error.png';
     var var_cache = {
+        startTime: parseInt(Date.now()/1000),
         client: {},
         traffic: [{name:'download', values: []}, {name:'upload', values: []}],
         //лимит на кол-во получений токена, сбрасывается при первом успешном sendAction
@@ -33,30 +243,37 @@ var engine = function () {
         get_full_list: {v: 0, t: "checkbox"}
     };
     var settings = {};
-    var loadSettings = function () {
-        $.each(def_settings, function (key, item) {
-            if (isTransmission && key === 'context_labels') {
-                settings[key] = item.v;
-                return 1;
-            }
-            var value = localStorage[key];
-            if (value === undefined) {
-                settings[key] = item.v;
-                return 1;
-            }
-            if (item.t === 'checkbox' || item.t === 'number') {
-                if (item.min !== undefined && value < item.min) {
-                    settings[key] = item.min;
+    var loadSettings = function (cb) {
+        var keys = [];
+        for (var key in def_settings) {
+            keys.push(key);
+        }
+        mono.storage.get(keys, function(options) {
+            jQ.each(def_settings, function (key, item) {
+                if (isTransmission && key === 'context_labels') {
+                    settings[key] = item.v;
                     return 1;
                 }
-                settings[key] = parseInt(value);
-            } else if (item.t === 'text' || item.t === 'password') {
-                settings[key] = value;
-            } else if (item.t === 'array') {
-                settings[key] = JSON.parse(value);
-            }
+                var value = options[key];
+                if (value === undefined) {
+                    settings[key] = item.v;
+                    return 1;
+                }
+                if (item.t === 'checkbox' || item.t === 'number') {
+                    if (item.min !== undefined && value < item.min) {
+                        settings[key] = item.min;
+                        return 1;
+                    }
+                    settings[key] = parseInt(value);
+                } else if (item.t === 'text' || item.t === 'password') {
+                    settings[key] = value;
+                } else if (item.t === 'array') {
+                    settings[key] = JSON.parse(value);
+                }
+            });
+            var_cache.webui_url = ((settings.ssl) ? 'https' : 'http') + "://" + settings.ut_ip + ':' + settings.ut_port + '/' + settings.ut_path;
+            cb && cb();
         });
-        var_cache.webui_url = ((settings.ssl) ? 'https' : 'http') + "://" + settings.ut_ip + ':' + settings.ut_port + '/' + settings.ut_path;
     };
     var table_colums = {
         name: {a: 1, size: 200, pos: 1, lang: 13, order: 1},
@@ -115,43 +332,51 @@ var engine = function () {
         };
     }();
     var showNotifi = function (icon, title, text, one) {
-        if (chrome.notifications === undefined) {
+        if (mono.isModule) {
+            if (title === 0) {
+                title = text;
+                text = undefined;
+            }
+            window.Notifications.notify({title: title, text: text, iconURL: icon });
             return;
         }
-        var note_id = 'showNotifi';
-        if (one !== undefined) {
-            note_id += '_' + one;
-        } else {
-            note_id += Date.now();
-        }
-        var timer = note_id + '_timer';
-        if (one !== undefined && var_cache[note_id] !== undefined) {
-            var_cache[note_id] = undefined;
-            clearTimeout(var_cache[timer]);
-            chrome.notifications.clear(note_id, function() {});
-        }
-        /**
-         * @namespace chrome.notifications
-         */
-        if (title === 0) {
-            title = text;
-            text = undefined;
-        }
-        chrome.notifications.create(
-            note_id,
-            { type: 'basic',
-              iconUrl: icon,
-              title: title,
-              message: text },
-            function(id) {
-                var_cache[note_id] = id;
+        if (mono.isChrome && chrome.notifications !== undefined) {
+            var note_id = 'showNotifi';
+            if (one !== undefined) {
+                note_id += '_' + one;
+            } else {
+                note_id += Date.now();
             }
-        );
-        if (settings.notify_visbl_interval > 0) {
-            var_cache[timer] = setTimeout(function () {
+            var timer = note_id + '_timer';
+            if (one !== undefined && var_cache[note_id] !== undefined) {
                 var_cache[note_id] = undefined;
+                clearTimeout(var_cache[timer]);
                 chrome.notifications.clear(note_id, function() {});
-            }, settings.notify_visbl_interval);
+            }
+            /**
+             * @namespace chrome.notifications
+             */
+            if (title === 0) {
+                title = text;
+                text = undefined;
+            }
+            chrome.notifications.create(
+                note_id,
+                { type: 'basic',
+                    iconUrl: icon,
+                    title: title,
+                    message: text },
+                function(id) {
+                    var_cache[note_id] = id;
+                }
+            );
+            if (settings.notify_visbl_interval > 0) {
+                var_cache[timer] = setTimeout(function () {
+                    var_cache[note_id] = undefined;
+                    chrome.notifications.clear(note_id, function() {});
+                }, settings.notify_visbl_interval);
+            }
+            return;
         }
     };
     var setStatus = function (type, data) {
@@ -172,9 +397,7 @@ var engine = function () {
                 }
                 var_cache.client.status = data[0] + ', ' + data[1];
             }
-            _send(function (window) {
-                window.manager.setStatus(var_cache.client.status);
-            });
+            mono.sendMessage({action: 'setStatus', data: var_cache.client.status}, undefined, 'mgr');
         } else {
             //for debug
             //console.log(type, data);
@@ -188,50 +411,45 @@ var engine = function () {
         }
         var_cache.get_token_count++;
         setStatus('getToken', [-1, 'Getting token...']);
-        $.ajax({
-            url: var_cache.webui_url,
-            beforeSend: function (xhr) {
-                if (settings.login.length > 0 || settings.password.length > 0) {
-                    xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password));
-                }
-            },
-            data: {
-                method:'session-get'
-            },
-            success: function (data) {
+
+        var url = var_cache.webui_url + '?' + jQ.param({method:'session-get'});
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", url, true);
+        xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password));
+        xhr.onload = function() {
+            setStatus('getToken', [200]);
+            engine.cache = var_cache.client = {
+                status: var_cache.client.status,
+                token: ''
+            };
+            if (onload !== undefined) {
+                onload();
+            }
+            bgTimer.start();
+        };
+        xhr.onerror = function() {
+            if (xhr.status === 409) {
                 setStatus('getToken', [200]);
                 engine.cache = var_cache.client = {
                     status: var_cache.client.status,
-                    token: ''
+                    token: xhr.getResponseHeader("X-Transmission-Session-Id")
                 };
                 if (onload !== undefined) {
                     onload();
                 }
                 bgTimer.start();
-            },
-            error: function (xhr, textStatus) {
-                if (xhr.status === 409) {
-                    setStatus('getToken', [200]);
-                    engine.cache = var_cache.client = {
-                        status: var_cache.client.status,
-                        token: xhr.getResponseHeader("X-Transmission-Session-Id")
-                    };
-                    if (onload !== undefined) {
-                        onload();
-                    }
-                    bgTimer.start();
-                    return;
-                }
-                setStatus('getToken', [xhr.status, textStatus]);
-                if (onerror !== undefined) {
-                    onerror();
-                }
-                if (var_cache.client.getToken_error > 10) {
-                    bgTimer.stop();
-                }
-                var_cache.client.getToken_error = (var_cache.client.getToken_error === undefined) ? 1 : var_cache.client.getToken_error + 1;
+                return;
             }
-        });
+            setStatus('getToken', [xhr.status, xhr.statusText]);
+            if (onerror !== undefined) {
+                onerror();
+            }
+            if (var_cache.client.getToken_error > 10) {
+                bgTimer.stop();
+            }
+            var_cache.client.getToken_error = (var_cache.client.getToken_error === undefined) ? 1 : var_cache.client.getToken_error + 1;
+        };
+        xhr.send();
     };
     var getStatusTransmission2uTorrent = function(code) {
         var uCode = 0;
@@ -316,7 +534,7 @@ var engine = function () {
         arguments = data['arguments'] || [];
         var up_limit = -1;
         var dl_limit = -1;
-        $.each(arguments, function(key, value) {
+        jQ.each(arguments, function(key, value) {
             if (key === 'torrents') {
                 var fileMode = 0;
                 if (value.length === 1 && 'fileStats' in value[0]) {
@@ -540,7 +758,7 @@ var engine = function () {
                 }
             }
         } else {
-            params = $.extend(true, {}, url);
+            params = jQ.extend(true, {}, url);
         }
         if (params.hash !== undefined) {
             if (typeof params.hash !== 'object') {
@@ -760,7 +978,7 @@ var engine = function () {
         if (typeof data === 'string') {
             _data = data + '&cid=' + var_cache.client.cid;
         } else {
-            _data = $.extend({cid: var_cache.client.cid}, data);
+            _data = jQ.extend({cid: var_cache.client.cid}, data);
         }
         if (data.torrent_file !== undefined) {
             var reader = new FileReader();
@@ -815,35 +1033,33 @@ var engine = function () {
         if (tr_data.onload !== undefined) {
             onload = tr_data.onload;
         }
-        $.ajax({
-            type: 'POST',
-            dataType: 'json',
-            data: tr_data.data,
-            url: var_cache.webui_url,
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader("X-Transmission-Session-Id", var_cache.client.token || '');
-                if (settings.login.length > 0 || settings.password.length > 0) {
-                    xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password));
-                }
-            },
-            success: function (data) {
-                var_cache.get_token_count = 0;
-                var data = Transmission2uTorrentAPI(data);
-                if (onload !== undefined) {
-                    onload(data);
-                }
-                readResponse(data);
-            },
-            error: function (xhr, textStatus) {
-                setStatus('sendAction', [xhr.status, textStatus, _data]);
-                if (var_cache.client.sendAction_error > 3 || xhr.status === 409) {
-                    var_cache.client.token = undefined;
-                    sendAction(data, onload);
-                    return;
-                }
-                var_cache.client.sendAction_error = (var_cache.client.sendAction_error === undefined) ? 1 : var_cache.client.sendAction_error + 1;
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', var_cache.webui_url, true);
+        xhr.responseType = 'json';
+        xhr.setRequestHeader("X-Transmission-Session-Id", var_cache.client.token || '');
+        if (settings.login.length > 0 || settings.password.length > 0) {
+            xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password));
+        }
+        xhr.onload = function(e) {
+            var data = xhr.response;
+            var_cache.get_token_count = 0;
+            var data = Transmission2uTorrentAPI(data);
+            if (onload !== undefined) {
+                onload(data);
             }
-        });
+            readResponse(data);
+        };
+        xhr.onerror = function() {
+            setStatus('sendAction', [xhr.status, xhr.statusText, _data]);
+            if (var_cache.client.sendAction_error > 3 || xhr.status === 409) {
+                var_cache.client.token = undefined;
+                sendAction(data, onload);
+                return;
+            }
+            var_cache.client.sendAction_error = (var_cache.client.sendAction_error === undefined) ? 1 : var_cache.client.sendAction_error + 1;
+        };
+        xhr.send(jQ.param(tr_data.data));
     };
     var readResponse = function (data) {
         /**
@@ -869,18 +1085,14 @@ var engine = function () {
                     }
                 }
             }
-            _send(function (window) {
-                window.manager.deleteItem(data.torrentm);
-            });
+            mono.sendMessage({action: 'deleteItem', data: data.torrentm}, undefined, 'mgr');
         }
         if (data.torrents !== undefined) {
             //Full torrent list
             var old_arr = (var_cache.client.torrents || []).slice(0);
             var_cache.client.torrents = data.torrents;
             trafficCounter(data.torrents);
-            _send(function (window) {
-                window.manager.updateList(data.torrents, 1);
-            });
+            mono.sendMessage({action: 'updateList', data1: data.torrents, data2: 1}, undefined, 'mgr');
             showOnCompleteNotification(old_arr, data.torrents);
             showActiveCount(data.torrents);
         } else if (data.torrentp !== undefined) {
@@ -905,9 +1117,7 @@ var engine = function () {
             }
             var_cache.client.torrents = list;
             trafficCounter(data.torrentp);
-            _send(function (window) {
-                window.manager.updateList(list, 1);
-            });
+            mono.sendMessage({action: 'updateList', data1: list, data2: 1}, undefined, 'mgr');
             showOnCompleteNotification(old_arr, data.torrentp);
             showActiveCount(list);
             if (var_cache.newFileListener !== undefined) {
@@ -915,17 +1125,13 @@ var engine = function () {
             }
         }
         if (data['download-dirs'] !== undefined) {
-            _sendOptions(function (window) {
-                window.options.setDirList(data['download-dirs']);
-            });
+            mono.sendMessage({action: 'setDirList', data: data['download-dirs']}, undefined, 'opt');
         }
         if (data.label !== undefined) {
             var labels = var_cache.client.labels || [];
             if (data.label.length !== labels.length) {
                 var_cache.client.labels = data.label;
-                _send(function (window) {
-                    window.manager.setLabels(data.label);
-                });
+                mono.sendMessage({action: 'setLabels', data: data.label}, undefined, 'mgr');
             } else {
                 for (var i = 0, item_d; item_d = data.label[i]; i++) {
                     var found = false;
@@ -937,9 +1143,7 @@ var engine = function () {
                     }
                     if (!found) {
                         var_cache.client.labels = data.label;
-                        _send(function (window) {
-                            window.manager.setLabels(data.label);
-                        });
+                        mono.sendMessage({action: 'setLabels', data: data.label}, undefined, 'mgr');
                         break;
                     }
                 }
@@ -947,30 +1151,12 @@ var engine = function () {
         }
         if (data.settings !== undefined) {
             var_cache.client.settings = data.settings;
-            _send(function (window) {
-                window.manager.setSpeedLimit(var_cache.client.settings);
-                window.manager.setSpace(var_cache.client.settings);
-            });
+            mono.sendMessage([{action: 'setSpeedLimit', data: var_cache.client.settings},
+                {action: 'setSpace', data: var_cache.client.settings}], undefined, 'mgr');
         }
         if (data.files !== undefined) {
-            _send(function (window) {
-                window.manager.setFileList(data.files);
-            });
+            mono.sendMessage({action: 'setFileList', data: data.files}, undefined, 'mgr');
         }
-    };
-    var _send = function (cb) {
-        if (var_cache.popup === undefined || var_cache.popup.window === null || var_cache.popup.manager === undefined) {
-            delete var_cache.popup;
-            return;
-        }
-        cb(var_cache.popup);
-    };
-    var _sendOptions = function (cb) {
-        if (var_cache.options === undefined || var_cache.options.window === null || var_cache.options.options === undefined) {
-            delete var_cache.options;
-            return;
-        }
-        cb(var_cache.options);
     };
     var showOnCompleteNotification = function (old_array, new_array) {
         if (!settings.notify_on_dl_comp || old_array.length === 0) {
@@ -999,7 +1185,7 @@ var engine = function () {
             dl_sum += item[9];
             up_sum += item[8];
         }
-        var time = parseInt(Date.now()/1000);
+        var time = parseInt(Date.now()/1000) - var_cache.startTime;
         var traf0 = var_cache.traffic[0];
         var traf1 = var_cache.traffic[1];
         var values_len = traf0.values.length;
@@ -1016,6 +1202,9 @@ var engine = function () {
         }
     };
     var showActiveCount = function (arr) {
+        if (!mono.isChrome) {
+            return;
+        }
         if (!settings.show_active_tr_on_icon) {
             return;
         }
@@ -1052,19 +1241,20 @@ var engine = function () {
             }
             if (settings.change_downloads) {
                 var ch_label = {label: 'download', custom: 1};
-                _send(function (window) {
-                    window.manager.setLabel(ch_label);
-                });
-                localStorage.selected_label = JSON.stringify(ch_label);
+                mono.sendMessage({action: 'setLabel', data: ch_label}, undefined, 'mgr');
+                mono.storage.set({selected_label: JSON.stringify(ch_label)});
             }
             showNotifi(add_icon, item[2], lang_arr[102], 'addFile');
             var_cache.newFileListener = undefined;
         };
     };
-    var downloadFile = function (url, cb) {
+    var downloadFile = function (url, cb, referer) {
         var xhr = new XMLHttpRequest();
         xhr.open('GET', url, true);
         xhr.responseType = 'blob';
+        if (referer !== undefined) {
+            xhr.setRequestHeader('Referer', referer);
+        }
         xhr.onprogress = function (e) {
             /**
              * @namespace e.total
@@ -1092,7 +1282,7 @@ var engine = function () {
         if (typeof url === "string") {
             if (url.substr(0, 7).toLowerCase() === 'magnet:') {
                 sendAction({list: 1}, function () {
-                    sendAction($.extend({action: 'add-url', s: url}, dir), function (data) {
+                    sendAction(jQ.extend({action: 'add-url', s: url}, dir), function (data) {
                         setOnFileAddListener(label);
                         if (data.error !== undefined) {
                             showNotifi(error_icon, lang_arr[23], data.error, 'addFile');
@@ -1103,12 +1293,15 @@ var engine = function () {
                 });
             } else {
                 downloadFile(url, function (file) {
+                    if (url.substr(0,5) === 'blob:') {
+                        window.URL.revokeObjectURL(url);
+                    }
                     sendFile(file, dir, label);
                 });
             }
         } else {
             sendAction({list: 1}, function () {
-                sendAction($.extend({action: 'add-file', torrent_file: url}, dir), function (data) {
+                sendAction(jQ.extend({action: 'add-file', torrent_file: url}, dir), function (data) {
                     setOnFileAddListener(label);
                     if (data.error !== undefined) {
                         showNotifi(error_icon, lang_arr[23], data.error, 'addFile');
@@ -1140,39 +1333,185 @@ var engine = function () {
         sendFile(link, dir, label);
     };
     var createCtxMenu = function () {
-        /**
-         * @namespace chrome.contextMenus.removeAll
-         * @namespace chrome.contextMenus.create
-         */
-        chrome.contextMenus.removeAll(function () {
+        if (mono.isModule) {
+            var contentScript = (function() {
+                var onClick = function() {
+                    self.on("click", function(node) {
+                        var href = node.href;
+                        if (!href) {
+                            return cb({error: 0});
+                        }
+                        if (href.substr(0, 7).toLowerCase() === 'magnet:') {
+                            return self.postMessage(node.href);
+                        }
+                        var downloadFile = function (url, cb) {
+                            var xhr = new XMLHttpRequest();
+                            xhr.open('GET', url, true);
+                            xhr.responseType = 'blob';
+                            xhr.onprogress = function (e) {
+                                if (e.total > 1048576 * 10 || e.loaded > 1048576 * 10) {
+                                    xhr.abort();
+                                    cb({error: 0});
+                                }
+                            };
+                            xhr.onload = function () {
+                                cb( URL.createObjectURL(xhr.response) );
+                            };
+                            xhr.onerror = function () {
+                                if (xhr.status === 0) {
+                                    cb({error: 1, url: url, referer: window.location.href});
+                                } else {
+                                    cb({error: 1, status: xhr.status, statusText: xhr.statusText});
+                                }
+                            };
+                            xhr.send();
+                        };
+                        downloadFile(href, self.postMessage);
+                    });
+                };
+                var minifi = function(str) {
+                    var list = str.split('\n');
+                    var newList = [];
+                    list.forEach(function(line) {
+                        newList.push(line.trim());
+                    });
+                    return newList.join('');
+                };
+                var onClickString = onClick.toString();
+                var n_pos =  onClickString.indexOf('\n')+1;
+                onClickString = onClickString.substr(n_pos, onClickString.length - 1 - n_pos).trim();
+                return minifi(onClickString);
+            })();
+            var cm = require("sdk/context-menu");
+            if (var_cache.topLevel) {
+                var_cache.topLevel.parentMenu.removeItem(var_cache.topLevel);
+            }
             if (!settings.context_menu_trigger) {
                 return;
             }
-            chrome.contextMenus.create({
-                id: 'main',
-                title: lang_arr[104],
-                contexts: ["link"],
-                onclick: onCtxMenuCall
-            }, function () {
-                if (settings.folders_array.length === 0) {
+            if (settings.folders_array.length === 0) {
+                var_cache.topLevel = cm.Item({
+                    label: lang_arr[104],
+                    context: cm.SelectorContext("a"),
+                    image: self.data.url('./icons/icon-16.png'),
+                    contentScript: contentScript,
+                    onMessage: function (data) {
+                        if (typeof data === 'object') {
+                            if (data.error === 0) {
+                                return showNotifi(error_icon, lang_arr[122][0],  lang_arr[122][1], 'addFile');
+                            }
+                            if (data.error === 1) {
+                                if (data.url) {
+                                    return downloadFile(data.url, function(data) {
+                                        sendFile(data);
+                                    }, data.referer);
+                                }
+                                return showNotifi(error_icon, data.status, lang_arr[103], 'addFile');
+                            }
+                            if (data.error === 2) {
+                                return showNotifi(error_icon, data.status, data.statusText, 'addFile');
+                            }
+                        }
+                        sendFile(data);
+                    }
+                });
+            } else {
+                var onMessage = function(data) {
+                    var _this = this;
+                    if (typeof data === 'object') {
+                        if (data.error === 0) {
+                            return showNotifi(error_icon, lang_arr[122][0],  lang_arr[122][1], 'addFile');
+                        }
+                        if (data.error === 1) {
+                            if (data.url) {
+                                return downloadFile(data.url, function(data) {
+                                    onCtxMenuCall({
+                                        linkUrl: data,
+                                        menuItemId: _this.data
+                                    }, data.referer);
+                                });
+                            }
+                            return showNotifi(error_icon, data.status, lang_arr[103], 'addFile');
+                        }
+                        if (data.error === 2) {
+                            return showNotifi(error_icon, data.status, data.statusText, 'addFile');
+                        }
+                    }
+                    onCtxMenuCall({
+                        linkUrl: data,
+                        menuItemId: this.data
+                    });
+                };
+                var items = [];
+                for (var i = 0, item; item = settings.folders_array[i]; i++) {
+                    items.push( cm.Item({ label: item[1], data: String(i), context: cm.SelectorContext("a"), onMessage: onMessage, contentScript: contentScript }) );
+                }
+                var_cache.topLevel = cm.Menu({
+                    label: lang_arr[104],
+                    context: cm.SelectorContext("a"),
+                    image: self.data.url('./icons/icon-16.png'),
+                    items: items
+                });
+            }
+            return;
+        }
+        if (mono.isChrome) {
+            /**
+             * @namespace chrome.contextMenus.removeAll
+             * @namespace chrome.contextMenus.create
+             */
+            chrome.contextMenus.removeAll(function () {
+                if (!settings.context_menu_trigger) {
                     return;
                 }
-                for (var i = 0, item; item = settings.folders_array[i]; i++) {
-                    chrome.contextMenus.create({
-                        id: String(i),
-                        parentId: 'main',
-                        title: item[1],
-                        contexts: ["link"],
-                        onclick: onCtxMenuCall
-                    });
-                }
+                chrome.contextMenus.create({
+                    id: 'main',
+                    title: lang_arr[104],
+                    contexts: ["link"],
+                    onclick: onCtxMenuCall
+                }, function () {
+                    if (settings.folders_array.length === 0) {
+                        return;
+                    }
+                    for (var i = 0, item; item = settings.folders_array[i]; i++) {
+                        chrome.contextMenus.create({
+                            id: String(i),
+                            parentId: 'main',
+                            title: item[1],
+                            contexts: ["link"],
+                            onclick: onCtxMenuCall
+                        });
+                    }
+                });
             });
-        });
+        }
     };
     var clone_obj = function (obj) {
-        return $.extend(true, {}, obj);
+        return jQ.extend(true, {}, obj);
     };
     return {
+        boot: function() {
+            if (mono.isModule) {
+                complete_icon = self.data.url(complete_icon);
+                add_icon = self.data.url(add_icon);
+                error_icon = self.data.url(error_icon);
+            }
+            engine.loadSettings(function() {
+                engine.createCtxMenu();
+                bgTimer.start();
+            });
+            if (mono.isChrome) {
+                /**
+                 * @namespace chrome.browserAction.setBadgeBackgroundColor
+                 */
+                chrome.browserAction.setBadgeBackgroundColor({
+                    color: [0, 0, 0, 40]
+                });
+                chrome.browserAction.setBadgeText({
+                    text: ''
+                });
+            }
+        },
         bgTimer: bgTimer,
         loadSettings: loadSettings,
         settings: settings,
@@ -1181,65 +1520,52 @@ var engine = function () {
         cache: var_cache.client,
         traffic: var_cache.traffic,
         getToken: getToken,
-        getColums: function () {
-            return (localStorage.colums !== undefined) ? JSON.parse(localStorage.colums) : clone_obj(table_colums);
+        getColums: function (cb) {
+            mono.storage.get('colums', function(storage) {
+                var value = storage.colums;
+                if (value === undefined) {
+                    return cb(clone_obj(table_colums));
+                }
+                cb( JSON.parse(value) );
+            });
         },
         getDefColums: function () {
             return clone_obj(table_colums);
         },
-        getFlColums: function () {
-            return (localStorage.fl_colums !== undefined) ? JSON.parse(localStorage.fl_colums) : clone_obj(filelist_colums);
+        getFlColums: function (cb) {
+            mono.storage.get('fl_colums', function(storage) {
+                var value = storage.fl_colums;
+                if (value === undefined) {
+                    return cb(clone_obj(filelist_colums));
+                }
+                cb( JSON.parse(value) );
+            });
         },
         getDefFlColums: function () {
             return clone_obj(filelist_colums);
         },
         setFlColums: function (a) {
-            localStorage.fl_colums = JSON.stringify(a);
+            mono.storage.set({ fl_colums: JSON.stringify(a) });
         },
         setTrColums: function (a) {
-            localStorage.colums = JSON.stringify(a);
+            mono.storage.set({ colums: JSON.stringify(a) });
         },
-        setColums: function (a) {
-            //setTrColums
-            localStorage.colums = JSON.stringify(a);
-        },
-        setWindow: function (window) {
-            var_cache.popup = window;
-        },
-        setOptionsWindow: function (window) {
-            var_cache.options = window;
-        },
-        getDefSettings: function () {
-            return clone_obj(def_settings);
-        },
-        updateSettings: function (lang) {
-            if (lang) {
-                window.lang_arr = lang;
+        updateSettings: function (lang_type, cb) {
+            if (lang_type) {
+                lang_arr = window.get_lang(lang_type);
             }
-            loadSettings();
-            engine.bgTimer.stop();
-            engine.bgTimer.start();
-            var_cache.get_token_count = 0;
-            engine.cache = var_cache.client = {};
-            var_cache.traffic[0].values = [];
-            var_cache.traffic[1].values = [];
-            createCtxMenu();
+            loadSettings(function() {
+                engine.bgTimer.stop();
+                engine.bgTimer.start();
+                var_cache.get_token_count = 0;
+                engine.cache = var_cache.client = {};
+                var_cache.traffic[0].values = [];
+                var_cache.traffic[1].values = [];
+                createCtxMenu();
+                cb && cb();
+            });
         },
         sendFile: sendFile,
         createCtxMenu: createCtxMenu
     };
 }();
-(function () {
-    engine.loadSettings();
-    engine.createCtxMenu();
-    engine.bgTimer.start();
-    /**
-     * @namespace chrome.browserAction.setBadgeBackgroundColor
-     */
-    chrome.browserAction.setBadgeBackgroundColor({
-        color: [0, 0, 0, 40]
-    });
-    chrome.browserAction.setBadgeText({
-        text: ''
-    });
-})();
