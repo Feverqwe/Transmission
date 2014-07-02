@@ -712,9 +712,7 @@ var engine = function () {
             } else
             if (key === 'alt-speed-enabled') {
                 var_cache.client.alt_speed = value;
-                _send(function(window){
-                    window.manager.setAltSpeedState(value === true)
-                });
+                mono.sendMessage({action: 'setAltSpeedState', data: value === true}, undefined, 'mgr');
             } else
             if (key === 'download-dir') {
                 ut_settings.push(['download-dir', '', value]);

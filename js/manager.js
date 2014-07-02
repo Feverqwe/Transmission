@@ -1,10 +1,75 @@
 (function () {
-    window._engine = chrome.extension.getBackgroundPage().engine;
-    window._lang_arr = chrome.extension.getBackgroundPage().lang_arr;
-    window._settings = _engine.settings;
-    if (_settings.login === undefined || _settings.password === undefined) {
-        window.location = "options.html";
-    }
+    /**
+     * @namespace $
+     */
+    mono.pageId = 'mgr';
+    var actionReader = function(message, cb) {
+        if (message.action === 'setStatus') {
+            return manager.setStatus(message.data);
+        }
+        if (message.action === 'deleteItem') {
+            return manager.deleteItem(message.data);
+        }
+        if (message.action === 'setAltSpeedState') {
+            return manager.setAltSpeedState(message.data);
+        }
+        if (message.action === 'setSpace') {
+            return manager.setSpace(message.data);
+        }
+        if (message.action === 'updateList') {
+            return manager.updateList(message.data1, message.data2);
+        }
+        if (message.action === 'setLabels') {
+            return manager.setLabels(message.data);
+        }
+        if (message.action === 'setSpeedLimit') {
+            return manager.setSpeedLimit(message.data);
+        }
+        if (message.action === 'setFileList') {
+            return manager.setFileList(message.data);
+        }
+        if (message.action === 'setLabel') {
+            return manager.setLabel(message.data);
+        }
+        if (message === 'sleep') {
+            if (manager.noSleep) {
+                setTimeout(function(){
+                    if (manager.noSleep) {
+                        delete manager.noSleep;
+                        mono.addon.postMessage('isShow');
+                    }
+                }, 60*1000);
+                return;
+            }
+            window.location = 'sleep.html';
+            return;
+        }
+        mono('>', message);
+    };
+    mono.onMessage(function(message, response) {
+        if (Array.isArray(message)) {
+            var c_wait = message.length;
+            var c_ready = 0;
+            var resultList = {};
+            var ready = function(key, data) {
+                c_ready+= 1;
+                resultList[key] = data;
+                if (c_wait === c_ready) {
+                    response(resultList);
+                }
+            };
+            message.forEach(function(action) {
+                actionReader(action, function (data) {
+                    ready(action, data);
+                });
+            });
+            return;
+        }
+        actionReader(message, response);
+    });
+    $(function () {
+        manager.boot();
+    });
 })();
 var manager = function () {
     var isTransmission = true;
@@ -87,10 +152,14 @@ var manager = function () {
         if (width > 800) {
             width = 800;
         }
+        if (width < 723) {
+            width = 723;
+        }
         var style = $('<style>', {'class': 'torrent-style', text: style_text});
         dom_cache.body.children('style.torrent-style').remove();
         dom_cache.body.append(style);
         dom_cache.body.css('width', width);
+        mono.sendMessage({action: 'resize', width: width}, undefined, 'service');
         var_cache.body_width = dom_cache.body.width();
         dom_cache.tr_fixed_head.html(head);
         dom_cache.tr_head.html(head.clone());
@@ -134,7 +203,11 @@ var manager = function () {
             dom_cache.fl_bottom.show();
             var_cache.fl_bottom_hide = false;
         }
-        var fl_body_height = window.innerHeight - 34 - 19;
+        var winHeight = _settings.window_height;
+        if (options.window_mode) {
+            winHeight = window.innerHeight;
+        }
+        var fl_body_height = winHeight - 34 - 19;
         var fl_table_height = fl_body_height - 34;
         var_cache.fl_height = fl_table_height;
         var_cache.fl_left = ((var_cache.body_width - width) / 2);
@@ -152,6 +225,15 @@ var manager = function () {
         dom_cache.fl_fixed_head.html(head);
         dom_cache.fl_head.html(head.clone());
     };
+    var sendAction = function (data, onload) {
+        if (onload) {
+            console.log('Need onload!')
+        }
+        mono.sendMessage({action: 'sendAction', data: data}, undefined, 'bg');
+    };
+    var sendFile = function(url, folder, label) {
+        mono.sendMessage({action: 'sendFile', url: url, folder: folder, label: label}, undefined, 'bg');
+    }
     var writeLanguage = function () {
         var webUi_url = '';
         if (_settings.login.length === 0) {
@@ -227,7 +309,7 @@ var manager = function () {
         var label = data.label;
         var custom = data.custom;
         var_cache.current_filter = {label: label, custom: custom};
-        localStorage.selected_label = JSON.stringify(var_cache.current_filter);
+        mono.storage.set({selected_label: JSON.stringify(var_cache.current_filter)});
         if (custom === 0) {
             dom_cache.body.children('style.tr_filter').remove();
             $('<style>', {'class': 'tr_filter', text: '.torrent-table-body tbody > tr{display: none;}.torrent-table-body tbody > tr[data-label="' + label + '"]{display: table-row;}'})
@@ -264,7 +346,7 @@ var manager = function () {
         }
         var_cache.status = text;
         if (text === undefined) {
-            dom_cache.status.html($('<img>', {src: '/images/status_update.gif'}));
+            dom_cache.status.html($('<img>', {src: 'images/status_update.gif'}));
         } else {
             dom_cache.status.text(text);
         }
@@ -942,16 +1024,25 @@ var manager = function () {
             var time_calc = Math.round(parseInt(str_w) / parseInt(size) * 3.5);
             var move_name = 'moveble' + '_' + size + '_' + str_w;
             if (dom_cache.body.children('style.' + move_name).length === 0) {
-                styles.push($('<style>', {'class': move_name, text: '@-webkit-keyframes a_' + move_name
+                var kf_style = ''
                     + '{'
                     + '0%{margin-left:2px;}'
                     + '50%{margin-left:-' + (str_w - size) + 'px;}'
                     + '90%{margin-left:6px;}'
                     + '100%{margin-left:2px;}'
-                    + '}'
+                    + '}';
+                styles.push($('<style>', {'class': move_name, text: ''
+                    + '@-webkit-keyframes a_' + move_name
+                    + kf_style
+                    + '@keyframes a_' + move_name
+                    + kf_style
+                    + '@-moz-keyframes a_' + move_name
+                    + kf_style
                     + 'div.' + move_name + ':hover > span {'
                     + 'overflow: visible;'
                     + '-webkit-animation:a_' + move_name + ' ' + time_calc + 's;'
+                    + '-moz-animation:a_' + move_name + ' ' + time_calc + 's;'
+                    + 'animation:a_' + move_name + ' ' + time_calc + 's;'
                     + '}'}));
             }
             item.parent().attr('class', classname + ' ' + move_name);
@@ -964,6 +1055,9 @@ var manager = function () {
         var timer;
         var start = function () {
             clearInterval(timer);
+            if (window._settings === undefined) {
+                return;
+            }
             timer = setInterval(function () {
                 getTorrentList();
             }, _settings.mgr_update_interval);
@@ -984,7 +1078,7 @@ var manager = function () {
     }();
     var getTorrentList = function () {
         mgTimer.stop();
-        _engine.sendAction($.extend({list: 1}, (_settings.get_full_list === 1)?{cid: 0}:undefined, var_cache.fl_param));
+        sendAction($.extend({list: 1}, (_settings.get_full_list === 1)?{cid: 0}:undefined, var_cache.fl_param));
     };
     var fl_close = function () {
         dom_cache.fl.hide();
@@ -1011,7 +1105,7 @@ var manager = function () {
     var fl_show = function (id) {
         var_cache.fl_id = id;
         var_cache.fl_param = {action: 'getfiles', hash: id};
-        _engine.sendAction(var_cache.fl_param);
+        sendAction(var_cache.fl_param);
         var_cache.tr_list_dom[id].addClass('selected');
         var_cache.fl_layer_dom = $('<div>', {'class': 'file-list-layer-temp'})
             .on('mousedown', function () {
@@ -1365,12 +1459,12 @@ var manager = function () {
         }
     };
     var setUpSpeed = function (value) {
-        _engine.sendAction({action: 'setsetting', s: 'max_ul_rate', v: value});
+        sendAction({action: 'setsetting', s: 'max_ul_rate', v: value});
         var_cache.speed_limit.upload = value;
         setUpSpeedDom(value);
     };
     var setDlSpeed = function (value) {
-        _engine.sendAction({action: 'setsetting', s: 'max_dl_rate', v: value});
+        sendAction({action: 'setsetting', s: 'max_dl_rate', v: value});
         var_cache.speed_limit.download = value;
         setDlSpeedDom(value);
     };
@@ -1394,14 +1488,18 @@ var manager = function () {
             fl_sort(colum, by);
             var_cache.fl_sort_colum = colum;
             var_cache.fl_sort_by = by;
-            localStorage.fl_sort_colum = colum;
-            localStorage.fl_sort_by = by;
+            mono.storage.set({
+                fl_sort_colum: colum,
+                fl_sort_by: by
+            });
         } else {
             tr_sort(colum, by);
             var_cache.tr_sort_colum = colum;
             var_cache.tr_sort_by = by;
-            localStorage.tr_sort_colum = colum;
-            localStorage.tr_sort_by = by;
+            mono.storage.set({
+                tr_sort_colum: colum,
+                tr_sort_by: by
+            });
         }
     };
     var fl_select_all_checkbox = function () {
@@ -1412,7 +1510,7 @@ var manager = function () {
     var trToggleColum = function (key) {
         mgTimer.stop();
         var_cache.tr_colums[key].a = (var_cache.tr_colums[key].a === 1) ? 0 : 1;
-        _engine.setTrColums(var_cache.tr_colums);
+        mono.sendMessage({action: 'setTrColums', data: var_cache.tr_colums}, undefined, 'bg');
         write_tr_head();
         dom_cache.tr_body.empty();
         write_tr_head();
@@ -1421,13 +1519,15 @@ var manager = function () {
         var_cache.tr_list_display = {};
         var_cache.tr_sort_pos = [];
         var_cache.tr_sortInsert = false;
-        tr_list(_engine.cache.torrents || []);
-        mgTimer.start();
+        mono.sendMessage('cache', function(response) {
+            tr_list(response.torrents || []);
+            mgTimer.start();
+        }, 'bg');
     };
     var flToggleColum = function (key) {
         mgTimer.stop();
         var_cache.fl_colums[key].a = (var_cache.fl_colums[key].a === 1) ? 0 : 1;
-        _engine.setFlColums(var_cache.fl_colums);
+        mono.sendMessage({action: 'setFlColums', data: var_cache.fl_colums}, undefined, 'bg');
         var id = var_cache.fl_id;
         fl_close();
         write_fl_head();
@@ -1494,7 +1594,7 @@ var manager = function () {
                 };
                 items.del_label.$node.prependTo(trigger.items.labels.$node.children('ul'));
                 items.del_label.$node.on('click', function () {
-                    _engine.sendAction({list: 1, action: 'setprops', s: 'label', hash: trigger.items.labels.id, v: ''});
+                    sendAction({list: 1, action: 'setprops', s: 'label', hash: trigger.items.labels.id, v: ''});
                     $('#context-menu-layer').trigger('mousedown');
                 });
             }
@@ -1520,7 +1620,7 @@ var manager = function () {
                         if (label === undefined) {
                             return;
                         }
-                        _engine.sendAction({list: 1, action: 'setprops', s: 'label', hash: trigger.items.labels.id, v: label});
+                        sendAction({list: 1, action: 'setprops', s: 'label', hash: trigger.items.labels.id, v: label});
                     });
                     $('#context-menu-layer').trigger('mousedown');
                 });
@@ -1539,7 +1639,7 @@ var manager = function () {
                 };
                 items['_' + label].$node.appendTo(trigger.items.labels.$node.children('ul'));
                 items['_' + label].$node.on('click', function () {
-                    _engine.sendAction({list: 1, action: 'setprops', s: 'label', hash: trigger.items.labels.id, v: $(this).data('key')});
+                    sendAction({list: 1, action: 'setprops', s: 'label', hash: trigger.items.labels.id, v: $(this).data('key')});
                     $('#context-menu-layer').trigger('mousedown');
                 });
             }
@@ -1644,14 +1744,42 @@ var manager = function () {
                     }
                 }
                 for (var i = 0, len = files.length; i < len; i++) {
-                    _engine.sendFile(files[i], folder, label);
+                    sendFile(URL.createObjectURL(files[i]), folder, label);
                 }
+                delete manager.noSleep;
             }
         );
-    }
+    };
     return {
-        start: function () {
-            _engine.setWindow(window);
+        boot: function ()
+        {
+            if (mono.isFF) {
+                mono.addon.postMessage('isShow');
+            }
+            mono.storage.get([
+                'login', 'password',
+                'tr_sort_colum', 'tr_sort_by',
+                'fl_sort_colum', 'fl_sort_by',
+                'selected_label'], function (options) {
+                if (options.login === undefined || options.password === undefined) {
+                    return window.location = "options.html";
+                }
+                var_cache.onBootOptions = options;
+                mono.sendMessage(['lang_arr', 'settings',
+                    'getColums', 'getFlColums',
+                    'cache'], function (response) {
+                    var onBootVars = {};
+                    onBootVars.cache = response.cache;
+                    window._lang_arr = response.lang_arr;
+                    window._settings = response.settings;
+                    mono.sendMessage({action: 'resize', height: _settings.window_height}, undefined, 'service');
+                    var_cache.tr_colums = response.getColums;
+                    var_cache.fl_colums = response.getFlColums;
+                    manager.start(onBootVars);
+                }, 'bg');
+            });
+        },
+        start: function (onBootVars) {
             dom_cache = {
                 body: $('body'),
                 menu: $('ul.menu'),
@@ -1678,6 +1806,13 @@ var manager = function () {
             };
             writeLanguage();
 
+            if (mono.isFF) {
+                dom_cache.up_speed.append( $('<div>', {class: 'btn setup', title: _lang_arr.setup}).on('click', function(e) {
+                    e.preventDefault();
+                    window.location = "options.html";
+                }) );
+            }
+
             if (options.tr_word_wrap) {
                 dom_cache.body.append($('<style>', {text: 'div.torrent-list-layer td div {white-space: normal;word-wrap: break-word;}'}));
             }
@@ -1685,13 +1820,15 @@ var manager = function () {
                 dom_cache.body.append($('<style>', {text: 'div.fl-layer td div {white-space: normal;word-wrap: break-word;}'}));
             }
 
-            manager.isMe = 1;
-            $.each(chrome.extension.getViews({type: 'popup'}), function (n, window) {
-                if (window.manager !== undefined && window.manager.isMe === 1) {
-                    delete  window.manager.isMe;
-                }
-            });
-            options.window_mode = (manager.isMe === 1);
+            if (mono.isChrome) {
+                manager.isMe = 1;
+                $.each(chrome.extension.getViews({type: 'popup'}), function (n, window) {
+                    if (window.manager !== undefined && window.manager.isMe === 1) {
+                        delete  window.manager.isMe;
+                    }
+                });
+                options.window_mode = (manager.isMe === 1);
+            }
 
             if (options.window_mode === false) {
                 dom_cache.body.append($('<style>', {text: '.torrent-list-layer{max-height: ' + (_settings.window_height - 54) + 'px; min-height: ' + (_settings.window_height - 54) + 'px}'}));
@@ -1703,21 +1840,19 @@ var manager = function () {
                 dom_cache.body.append($('<style>', {text: '.torrent-list-layer{max-height: calc(100% - 54px);min-height: calc(100% - 54px);}'}));
             }
 
-            if (localStorage.tr_sort_colum !== undefined) {
-                var_cache.tr_sort_colum = localStorage.tr_sort_colum;
+            if (var_cache.onBootOptions.tr_sort_colum !== undefined) {
+                var_cache.tr_sort_colum = var_cache.onBootOptions.tr_sort_colum;
             }
-            if (localStorage.tr_sort_by !== undefined) {
-                var_cache.tr_sort_by = parseInt(localStorage.tr_sort_by);
+            if (var_cache.onBootOptions.tr_sort_by !== undefined) {
+                var_cache.tr_sort_by = parseInt(var_cache.onBootOptions.tr_sort_by);
             }
-            if (localStorage.fl_sort_colum !== undefined) {
-                var_cache.fl_sort_colum = localStorage.fl_sort_colum;
+            if (var_cache.onBootOptions.fl_sort_colum !== undefined) {
+                var_cache.fl_sort_colum = var_cache.onBootOptions.fl_sort_colum;
             }
-            if (localStorage.fl_sort_by !== undefined) {
-                var_cache.fl_sort_by = parseInt(localStorage.fl_sort_by);
+            if (var_cache.onBootOptions.fl_sort_by !== undefined) {
+                var_cache.fl_sort_by = parseInt(var_cache.onBootOptions.fl_sort_by);
             }
 
-            var_cache.tr_colums = _engine.getColums();
-            var_cache.fl_colums = _engine.getFlColums();
             write_tr_head();
             write_fl_head();
             if (options.window_mode === true) {
@@ -1744,8 +1879,8 @@ var manager = function () {
                 dom_cache.tr_table_fixed.css('left', -this.scrollLeft);
             });
 
-            setLabels(_engine.cache.labels || []);
-            var selected_label = localStorage.selected_label;
+            setLabels(onBootVars.cache.labels || []);
+            var selected_label = var_cache.onBootOptions.selected_label;
             if (selected_label !== undefined) {
                 var selected_label = JSON.parse(selected_label);
                 if (selected_label.label !== undefined && selected_label.custom !== undefined) {
@@ -1754,9 +1889,9 @@ var manager = function () {
                 }
             }
 
-            setStatus(_engine.cache.status);
-            tr_list(_engine.cache.torrents || []);
-            _engine.sendAction({list: 1, cid: 0});
+            setStatus(onBootVars.cache.status);
+            tr_list(onBootVars.cache.torrents || []);
+            sendAction({list: 1});
 
             dom_cache.tr_body.on('dblclick', 'tr', function () {
                 var id = $(this).attr('id');
@@ -1769,8 +1904,8 @@ var manager = function () {
                 fl_select_all_checkbox();
             });
 
-            setSpeedLimit(_engine.cache.settings || []);
-            setSpace(_engine.cache.settings || []);
+            setSpeedLimit(onBootVars.cache.settings || []);
+            sendAction({action: 'getsettings'});
             _engine.sendAction({action: 'getsettings'});
 
             if (isTransmission) {
@@ -1826,6 +1961,7 @@ var manager = function () {
             });
             dom_cache.menu.on('click', 'a.add_file', function (e) {
                 e.preventDefault();
+                manager.noSleep = true;
                 $('<input class="file-select" type="file" multiple accept="application/x-bittorrent"/>').on('change',function () {
                     var files = this.files;
                     onGetFiles(files);
@@ -1860,7 +1996,7 @@ var manager = function () {
                                 folder = undefined;
                             }
                         }
-                        _engine.sendFile(url, folder, label);
+                        sendFile(url, folder, label);
                     }
                 );
             });
@@ -1905,13 +2041,11 @@ var manager = function () {
                     hash_list.push(key);
                 });
                 if (hash_list.length > 0) {
-                    _engine.sendAction($.param({list: 1, action: 'pause', hash: hash_list}, true));
+                    sendAction($.param({list: 1, action: 'pause', hash: hash_list}, true));
                 }
             });
             dom_cache.menu.on('click', 'a.refresh', function (e) {
                 e.preventDefault();
-                window._engine = chrome.extension.getBackgroundPage().engine;
-                _engine.setWindow(window);
                 mgTimer.start();
                 _engine.sendAction({list: 1, cid: 0})
             });
@@ -1928,11 +2062,11 @@ var manager = function () {
                     hash_list.push(key);
                 });
                 if (hash_list.length > 0) {
-                    _engine.sendAction($.param({list: 1, action: 'unpause', hash: hash_list}, true));
+                    sendAction($.param({list: 1, action: 'unpause', hash: hash_list}, true));
                 }
             });
             dom_cache.fl_bottom.on('click', 'a.update', function () {
-                _engine.sendAction({action: 'getfiles', hash: var_cache.fl_id});
+                sendAction({action: 'getfiles', hash: var_cache.fl_id});
             });
             dom_cache.fl_bottom.on('click', 'a.close', function () {
                 fl_close();
@@ -1941,17 +2075,17 @@ var manager = function () {
             dom_cache.tr_body.on('click', 'a.start', function (e) {
                 e.preventDefault();
                 var hash = $(this).parents().eq(2).attr('id');
-                _engine.sendAction({list: 1, action: 'start', hash: hash});
+                sendAction({list: 1, action: 'start', hash: hash});
             });
             dom_cache.tr_body.on('click', 'a.pause', function (e) {
                 e.preventDefault();
                 var hash = $(this).parents().eq(2).attr('id');
-                _engine.sendAction({list: 1, action: 'pause', hash: hash});
+                sendAction({list: 1, action: 'pause', hash: hash});
             });
             dom_cache.tr_body.on('click', 'a.stop', function (e) {
                 e.preventDefault();
                 var hash = $(this).parents().eq(2).attr('id');
-                _engine.sendAction({list: 1, action: 'stop', hash: hash});
+                sendAction({list: 1, action: 'stop', hash: hash});
             });
             dom_cache.fl.on('keydown', function (e) {
                 if ( e.keyCode === 27 ) {
@@ -2012,38 +2146,38 @@ var manager = function () {
                     start: {
                         name: _lang_arr[0],
                         callback: function (key, trigger) {
-                            _engine.sendAction({list: 1, action: 'start', hash: trigger.items[key].id });
+                            sendAction({list: 1, action: 'start', hash: trigger.items[key].id });
                         }
                     },
                     force_start: {
                         name: _lang_arr[3],
                         callback: function (key, trigger) {
-                            _engine.sendAction({list: 1, action: 'forcestart', hash: trigger.items[key].id });
+                            sendAction({list: 1, action: 'forcestart', hash: trigger.items[key].id });
                         }
                     },
                     pause: {
                         name: _lang_arr[1],
                         callback: function (key, trigger) {
-                            _engine.sendAction({list: 1, action: 'pause', hash: trigger.items[key].id });
+                            sendAction({list: 1, action: 'pause', hash: trigger.items[key].id });
                         }
                     },
                     unpause: {
                         name: _lang_arr[4],
                         callback: function (key, trigger) {
-                            _engine.sendAction({list: 1, action: 'unpause', hash: trigger.items[key].id });
+                            sendAction({list: 1, action: 'unpause', hash: trigger.items[key].id });
                         }
                     },
                     stop: {
                         name: _lang_arr[2],
                         callback: function (key, trigger) {
-                            _engine.sendAction({list: 1, action: 'stop', hash: trigger.items[key].id });
+                            sendAction({list: 1, action: 'stop', hash: trigger.items[key].id });
                         }
                     },
                     s1: '-',
                     recheck: {
                         name: _lang_arr[5],
                         callback: function (key, trigger) {
-                            _engine.sendAction({list: 1, action: 'recheck', hash: trigger.items[key].id });
+                            sendAction({list: 1, action: 'recheck', hash: trigger.items[key].id });
                         }
                     },
                     remove: {
@@ -2055,7 +2189,7 @@ var manager = function () {
                                 if (cb === undefined) {
                                     return;
                                 }
-                                _engine.sendAction({list: 1, action: 'remove', hash: trigger.items[key].id});
+                                sendAction({list: 1, action: 'remove', hash: trigger.items[key].id});
                             });
                         }
                     },
@@ -2065,7 +2199,7 @@ var manager = function () {
                             remove_torrent: {
                                 name: _lang_arr[8],
                                 callback: function (key, trigger) {
-                                    _engine.sendAction({list: 1, action: 'removetorrent', hash: trigger.items.remove.id });
+                                    sendAction({list: 1, action: 'removetorrent', hash: trigger.items.remove.id });
                                 }
                             },
                             /*
@@ -2073,14 +2207,14 @@ var manager = function () {
                             remove_files: {
                                 name: _lang_arr[9],
                                 callback: function (key, trigger) {
-                                    _engine.sendAction({list: 1, action: 'removedata', hash: trigger.items.remove.id });
+                                     sendAction({list: 1, action: 'removedata', hash: trigger.items.remove.id });
                                 }
                             },
                             */
                             remove_torrent_files: {
                                 name: _lang_arr[10],
                                 callback: function (key, trigger) {
-                                    _engine.sendAction({list: 1, action: 'removedatatorrent', hash: trigger.items.remove.id });
+                                    sendAction({list: 1, action: 'removedatatorrent', hash: trigger.items.remove.id });
                                 }
                             }
                         }
@@ -2103,7 +2237,7 @@ var manager = function () {
                                 } else {
                                     new_location = _settings.folders_array[arr[1]][1];
                                 }
-                                _engine.sendAction({list: 1, action: 'move', location: new_location, move: true, hash: trigger.items[key].id});
+                                sendAction({list: 1, action: 'move', location: new_location, move: true, hash: trigger.items[key].id});
                             });
                         }
                     },
@@ -2173,7 +2307,7 @@ var manager = function () {
                         name: _lang_arr[87][3],
                         priority: 3,
                         callback: function (key, trigger) {
-                            _engine.sendAction($.param({action: 'setprio', p: 3}) + '&' + $.param({hash: var_cache.fl_id, f: var_cache.fl_list_ctx_sel_arr}, true));
+                            sendAction($.param({action: 'setprio', p: 3}) + '&' + $.param({hash: var_cache.fl_id, f: var_cache.fl_list_ctx_sel_arr}, true));
                             fl_unckeckCkecked();
                         }
                     },
@@ -2182,7 +2316,7 @@ var manager = function () {
                         name: _lang_arr[87][2],
                         priority: 2,
                         callback: function (key, trigger) {
-                            _engine.sendAction($.param({action: 'setprio', p: 2}) + '&' + $.param({hash: var_cache.fl_id, f: var_cache.fl_list_ctx_sel_arr}, true));
+                            sendAction($.param({action: 'setprio', p: 2}) + '&' + $.param({hash: var_cache.fl_id, f: var_cache.fl_list_ctx_sel_arr}, true));
                             fl_unckeckCkecked();
                         }
                     },
@@ -2191,7 +2325,7 @@ var manager = function () {
                         priority: 1,
                         name: _lang_arr[87][1],
                         callback: function (key, trigger) {
-                            _engine.sendAction($.param({action: 'setprio', p: 1}) + '&' + $.param({hash: var_cache.fl_id, f: var_cache.fl_list_ctx_sel_arr}, true));
+                            sendAction($.param({action: 'setprio', p: 1}) + '&' + $.param({hash: var_cache.fl_id, f: var_cache.fl_list_ctx_sel_arr}, true));
                             fl_unckeckCkecked();
                         }
                     },
@@ -2201,7 +2335,7 @@ var manager = function () {
                         priority: 0,
                         name: _lang_arr[87][0],
                         callback: function (key, trigger) {
-                            _engine.sendAction($.param({action: 'setprio', p: 0}) + '&' + $.param({hash: var_cache.fl_id, f: var_cache.fl_list_ctx_sel_arr}, true));
+                            sendAction($.param({action: 'setprio', p: 0}) + '&' + $.param({hash: var_cache.fl_id, f: var_cache.fl_list_ctx_sel_arr}, true));
                             fl_unckeckCkecked();
                         }
                     },
@@ -2219,7 +2353,7 @@ var manager = function () {
                                 }
                                 var path = var_cache.fl_list[file_id][15];
                                 var new_name = arr[0];
-                                _engine.sendAction({list: 1, action: 'rename', path: path, name: new_name, hash: id});
+                                sendAction({list: 1, action: 'rename', path: path, name: new_name, hash: id});
                             });
                         }
                     }
@@ -2385,6 +2519,7 @@ var manager = function () {
 
         },
         setStatus: setStatus,
+        mgTimer: mgTimer,
         setAltSpeedState: function(state) {
             if (state === true) {
                 $('a.alt_speed').addClass('active');
