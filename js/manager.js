@@ -2526,6 +2526,3 @@ var manager = function () {
         setSpace: setSpace
     };
 }();
-$(function () {
-    manager.start();
-});
