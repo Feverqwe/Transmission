@@ -4,7 +4,6 @@ var graph = function () {
     var y;
     var line;
     var svg;
-    var currentData;
     //количество пиков на графике 1 пик - 1 секунда
     var _limit = 90;
     var created = false;
@@ -46,6 +45,9 @@ var graph = function () {
     };
 
     var createLines = function (data) {
+        if (created === true) {
+            return;
+        }
         if (data === undefined) {
             return;
         }
@@ -63,6 +65,13 @@ var graph = function () {
         city.append("path")
             .attr("class", "line")
             .attr("d", function (d) {
+                for (var i = 0, item; item = data[i]; i++) {
+                    if (item.name !== d.name) {
+                        continue;
+                    }
+                    d.values = item.values;
+                    break;
+                }
                 return line(d.values);
             })
             .style("stroke", function(d) { return (d.name === 'download')?'#3687ED':'#41B541'; });
@@ -81,6 +90,13 @@ var graph = function () {
         x.domain([start, end]);
         y.domain([min,max]);
         svg.selectAll("path").transition().ease('quad').attr("d", function (d) {
+            for (var i = 0, item; item = data[i]; i++) {
+                if (item.name !== d.name) {
+                    continue;
+                }
+                d.values = item.values;
+                break;
+            }
             return line(d.values);
         });
     };
@@ -103,12 +119,15 @@ var graph = function () {
                 return y(d.pos);
             });
         svg = d3.select("li.graph").append("svg").attr({"width": width, "height": height}).append("g");
-        currentData = _engine.traffic;
-        createLines(currentData);
+        mono.sendMessage('getTraffic', function(data) {
+            createLines(data);
+        }, 'bg');
     };
     return {
         move: function () {
-            updateLines(currentData);
+            mono.sendMessage('getTraffic', function(data) {
+                updateLines(data);
+            }, 'bg');
         },
         run: function () {
             body = $('li.graph');
@@ -131,6 +150,6 @@ var graph = function () {
         } else {
             graph.run();
         }
-    }
+    };
     check();
 })();
