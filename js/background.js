@@ -987,7 +987,7 @@ var engine = function () {
         }
         var onerror, onready;
         if (data.torrent_file !== undefined) {
-            var reader = new FileReader();
+            var reader = new window.FileReader();
             reader.readAsDataURL(data.torrent_file);
             reader.onloadend = function() {
                 var xhr = new XMLHttpRequest();
