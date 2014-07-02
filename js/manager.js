@@ -1887,7 +1887,7 @@ var manager = function () {
 
             setStatus(onBootVars.cache.status);
             tr_list(onBootVars.cache.torrents || []);
-            sendAction({list: 1});
+            sendAction({list: 1, cid: 0});
 
             dom_cache.tr_body.on('dblclick', 'tr', function () {
                 var id = $(this).attr('id');
