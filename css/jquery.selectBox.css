@@ -121,6 +121,11 @@
         color-stop(0.5, rgb(38,98,237)),
         color-stop(0.9, rgb(100,138,241))
     );
+    background-image: -o-linear-gradient(top, #2662ED 50%, #648CF1 90%);
+    background-image: -moz-linear-gradient(top, #2662ED 50%, #648CF1 90%);
+    background-image: -webkit-linear-gradient(top, #2662ED 50%, #648CF1 90%);
+    background-image: -ms-linear-gradient(top, #2662ED 50%, #648CF1 90%);
+    background-image: linear-gradient(to top, #2662ED 50%, #648CF1 90%);
 }
 
 .selectBox-options LI.selectBox-selected A{

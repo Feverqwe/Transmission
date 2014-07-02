@@ -4,6 +4,8 @@ body {
     font-size: 0.84em;
     min-width: 723px;
     -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
 }
 ul {
     padding: 0;
@@ -64,28 +66,28 @@ ul.menu a.btn:active {
     opacity: 0.7;
 }
 ul.menu a.refresh{
-    background-image: url("/images/refresh.png");
+    background-image: url("../images/refresh.png");
 }
 ul.menu a.wui{
-    background-image: url("/images/wui.png");
+    background-image: url("../images/wui.png");
 }
 ul.menu a.start_all{
-    background-image: url("/images/play_all.png");
+    background-image: url("../images/play_all.png");
 }
 ul.menu a.pause_all{
-    background-image: url("/images/pause_all.png");
+    background-image: url("../images/pause_all.png");
 }
 ul.menu a.add_file{
-    background-image: url("/images/add.png");
+    background-image: url("../images/add.png");
 }
 ul.menu a.add_magnet{
-    background-image: url("/images/magnet.png");
+    background-image: url("../images/magnet.png");
 }
 ul.menu a.alt_speed{
-    background-image: url("/images/alt_speed.png");
+    background-image: url("../images/alt_speed.png");
 }
 ul.menu a.alt_speed.active{
-    background-image: url("/images/alt_speed_active.png");
+    background-image: url("../images/alt_speed_active.png");
     box-shadow: inset 0 0 3px 0px #000;
 }
 ul.menu a.btn:hover {
@@ -106,6 +108,11 @@ table thead {
         color-stop(0.3, rgb(208,208,208)),
         color-stop(0.92, rgb(247,247,247))
         );
+    background-image: -o-linear-gradient(top, #D0D0D0 30%, #F7F7F7 92%);
+    background-image: -moz-linear-gradient(top, #D0D0D0 30%, #F7F7F7 92%);
+    background-image: -webkit-linear-gradient(top, #D0D0D0 30%, #F7F7F7 92%);
+    background-image: -ms-linear-gradient(top, #D0D0D0 30%, #F7F7F7 92%);
+    background-image: linear-gradient(to top, #D0D0D0 30%, #F7F7F7 92%);
 }
 table thead th, 
 table tbody td {
@@ -187,6 +194,9 @@ div.torrent-list-layer tr:nth-child(even) {
 table.torrent-table-head {
     position: fixed;
     z-index: 2;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
 }
 table.torrent-table-body thead {
     visibility: hidden;
@@ -223,7 +233,7 @@ table td.progress div.val {
     position: absolute;
     text-align: center;
     z-index: 1;
-    line-height: 15px;
+    line-height: 14px;
     width: 100%;
 }
 div.torrent-list-layer table td.controls div.btns {
@@ -239,13 +249,13 @@ div.torrent-list-layer table td.controls div.btns > a {
     background-position: center center;
 }
 div.torrent-list-layer table td.controls div.btns > a.start { 
-    background-image: url('/images/play.png'); 
+    background-image: url('../images/play.png'); 
 }
 div.torrent-list-layer table td.controls div.btns > a.pause { 
-    background-image: url('/images/pause.png'); 
+    background-image: url('../images/pause.png'); 
 }
 div.torrent-list-layer table td.controls div.btns > a.stop { 
-    background-image: url('/images/stop.png'); 
+    background-image: url('../images/stop.png'); 
 }
 div.torrent-list-layer table td.controls div.btns > a:active {
     opacity: 0.7;
@@ -280,13 +290,15 @@ table.status-panel td.speed {
     background-position-y: 3px;
 }
 table.status-panel td.space.disk {
-    background-image: url(/images/free_space.png);
+    background-image: url(../images/free_space.png);
 }
 table.status-panel td.download {
-    background-image: url(/images/icon_downloading.png);
+    background-image: url(../images/icon_downloading.png);
+    background-position: left center;
 }
 table.status-panel td.upload {
-    background-image: url(/images/icon_uploading.png);
+    background-image: url(../images/icon_uploading.png);
+    background-position: left center;
 }
 ul.context-menu-list label {
     position: absolute;
@@ -310,7 +322,7 @@ div.file-list-loading {
     width: 30px;
     height: 30px;
     z-index: 5;
-    background-image: url('/images/loading.gif')
+    background-image: url('../images/loading.gif')
 }
 div.fl-layer {
     border-bottom: 1px #c0c0c0 solid;
@@ -320,6 +332,9 @@ div.fl-layer {
 table.fl-table-head {
     position: fixed;
     z-index: 2;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
 }
 div.file-list {
     display: none;
@@ -380,10 +395,10 @@ div.file-list ul.bottom-menu a {
     border: 1px solid #fff;
 }
 div.file-list ul.bottom-menu a.update{
-    background-image: url('/images/refresh.png');
+    background-image: url('../images/refresh.png');
 }
 div.file-list ul.bottom-menu a.close{
-    background-image: url('/images/close.png');
+    background-image: url('../images/close.png');
     margin-right:  2px;
 }
 div.file-list ul.bottom-menu a:hover {
@@ -435,21 +450,21 @@ div.fl-layer a.folder.c0 {
     background-color: #acd1ff;
 }
 table thead .sortDown {
-    background-image: url('/images/down.png');
+    background-image: url('../images/down.png');
     background-position: right center;
     background-repeat: no-repeat;
     background-origin: content-box;
     padding-rigth: 3px;
 }
 table thead .sortUp {
-    background-image: url('/images/up.png');
+    background-image: url('../images/up.png');
     background-position: right center;
     background-repeat: no-repeat;
     background-origin: content-box;
     padding-rigth: 3px;
 }
 li.context-menu-item label.context {
-    background-image: url('/images/right.png');
+    background-image: url('../images/right.png');
     background-repeat: no-repeat;
     width: 11px;
     height: 11px;
@@ -469,49 +484,49 @@ li.select div[data-image=all],
     width: 16px;
     height: 16px;
     margin-top: -2px;
-    background-image: url('/images/c_all.png');
+    background-image: url('../images/c_all.png');
 }
 li.select div[data-image=download],
 .selectBox-dropdown-menu div[data-image=download] {
     width: 16px;
     height: 16px;
     margin-top: -2px;
-    background-image: url('/images/c_down.png');
+    background-image: url('../images/c_down.png');
 }
 li.select div[data-image=seeding],
 .selectBox-dropdown-menu div[data-image=seeding] {
     width: 16px;
     height: 16px;
     margin-top: -2px;
-    background-image: url('/images/c_uplo.png');
+    background-image: url('../images/c_uplo.png');
 }
 li.select div[data-image=complite],
 .selectBox-dropdown-menu div[data-image=complite] {
     width: 16px;
     height: 16px;
     margin-top: -2px;
-    background-image: url('/images/c_comp.png');
+    background-image: url('../images/c_comp.png');
 }
 li.select div[data-image=active],
 .selectBox-dropdown-menu div[data-image=active] {
     width: 16px;
     height: 16px;
     margin-top: -2px;
-    background-image: url('/images/c_active.png');
+    background-image: url('../images/c_active.png');
 }
 li.select div[data-image=inacive],
 .selectBox-dropdown-menu div[data-image=inacive] {
     width: 16px;
     height: 16px;
     margin-top: -2px;
-    background-image: url('/images/c_iact.png');
+    background-image: url('../images/c_iact.png');
 }
 .appriseOverlay {
     z-index: 3;
 }
 .selectBox [data-image="all"],
 .selectBox-dropdown-menu [data-image="all"] > a {
-    background: url('/images/c_all.png') left center no-repeat;
+    background: url('../images/c_all.png') left center no-repeat;
     padding-left: 20px !important;
     background-position-x: 3px;
 }
@@ -521,7 +536,7 @@ li.select div[data-image=inacive],
 
 .selectBox [data-image="download"],
 .selectBox-dropdown-menu [data-image="download"] > a {
-    background: url('/images/c_down.png') left center no-repeat;
+    background: url('../images/c_down.png') left center no-repeat;
     padding-left: 20px !important;
     background-position-x: 3px;
 }
@@ -531,7 +546,7 @@ li.select div[data-image=inacive],
 
 .selectBox [data-image="seeding"],
 .selectBox-dropdown-menu [data-image="seeding"] > a {
-    background: url('/images/c_uplo.png') left center no-repeat;
+    background: url('../images/c_uplo.png') left center no-repeat;
     padding-left: 20px !important;
     background-position-x: 3px;
 }
@@ -541,7 +556,7 @@ li.select div[data-image=inacive],
 
 .selectBox [data-image="complite"],
 .selectBox-dropdown-menu [data-image="complite"] > a {
-    background: url('/images/c_comp.png') left center no-repeat;
+    background: url('../images/c_comp.png') left center no-repeat;
     padding-left: 20px !important;
     background-position-x: 3px;
 }
@@ -551,7 +566,7 @@ li.select div[data-image=inacive],
 
 .selectBox [data-image="active"],
 .selectBox-dropdown-menu [data-image="active"] > a {
-    background: url('/images/c_active.png') left center no-repeat;
+    background: url('../images/c_active.png') left center no-repeat;
     padding-left: 20px !important;
     background-position-x: 3px;
 }
@@ -561,7 +576,7 @@ li.select div[data-image=inacive],
 
 .selectBox [data-image="inacive"],
 .selectBox-dropdown-menu [data-image="inacive"] > a {
-    background: url('/images/c_iact.png') left center no-repeat;
+    background: url('../images/c_iact.png') left center no-repeat;
     padding-left: 20px !important;
     background-position-x: 3px;
 }
@@ -658,4 +673,16 @@ div.drop_layer {
 }
 div.drop_layer.dropped {
     background-color: transparent;
+}
+
+div.btn.setup {
+    display: inline-block;
+    float: right;
+    width: 16px;
+    height: 16px;
+    background-image: url(../images/settings.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    margin-right: 2px;
 }

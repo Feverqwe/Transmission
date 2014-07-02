@@ -73,6 +73,7 @@ var get_lang = function(lang) {
         120: 'Add link',
         121: 'Enter URL',
         122: ['Can\'t download file', 'File is too large'],
+        setup: "Settings",
         tsl: 'Temporary Speed Limits',
         rename: ['Rename', 'Enter new name'],
         move: ['Move', 'Enter new path'],
@@ -227,6 +228,7 @@ var get_lang = function(lang) {
         120: 'Ouvrir URL',
         121: 'Entrez l\'URL',
         122: ['Vous ne pouvez pas télécharger le fichier', 'Le fichier est trop gros'],
+        setup: "Configuration",
         tsl: 'Temporaire Des Limites De Vitesse',
         rename: ['Renommer', 'Tapez un nouveau nom'],
         move: ['Déplacer', 'Tapez le nouveau chemin d\''],
@@ -381,6 +383,7 @@ var get_lang = function(lang) {
         120: 'Добавить ссылку',
         121: 'Введите URL',
         122: ['Не могу загрузить торрент-файл', 'Файл больше 10 мб'],
+        setup: "Настройки",
         tsl: 'Временное ограничение скорости',
         rename: ['Переименовать', 'Введите новое имя'],
         move: ['Переместить', 'Введите новый путь'],
@@ -461,18 +464,6 @@ var get_lang = function(lang) {
             73: 'Всегда запрашивать полный список торрентов'
         }
     };
-    if (lang === undefined) {
-        lang = localStorage["lang"];
-    }
-    if (lang === undefined) {
-        lang = 'en';
-        if (chrome.i18n.getMessage("lang") === 'ru') {
-            lang = 'ru';
-        } else
-        if (chrome.i18n.getMessage("lang") === 'fr') {
-            lang = 'fr';
-        }
-    }
     if (lang === 'ru') {
         return lang_arr_ru;
     } else
@@ -482,9 +473,7 @@ var get_lang = function(lang) {
         return lang_arr_en;
     }
 };
-var lang_arr = get_lang();
-window.onload = function() {
-    if (window.options === undefined) {
-        get_lang = null;
-    }
-};
+if (typeof window === 'undefined') {
+    // firefox module
+    exports.get_lang = get_lang;
+}

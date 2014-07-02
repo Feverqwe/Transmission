@@ -6,7 +6,7 @@
         "default_title": "Transmission easy client"
     },
     "background": {
-        "scripts": ["js/jquery-2.1.0.min.js","js/lang.js","js/background.js"]
+        "scripts": ["js/mono.js","js/lang.js","js/background.js"]
     },
     "icons": {
         "128": "images/icon_128.png"

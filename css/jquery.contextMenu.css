@@ -34,7 +34,8 @@
     background-color: #fff;
     position: relative;
     -webkit-user-select: none;
-            user-select: none;
+    -moz-user-select: none;
+    user-select: none;
     padding-left: 15px;
     padding-right: 15px;
     border: 1px solid #fff;
@@ -60,7 +61,8 @@
 .context-menu-item > label > input,
 .context-menu-item > label > textarea {
     -webkit-user-select: text;
-            user-select: text;
+    -moz-user-select: text;
+    user-select: text;
 }
 
 .context-menu-item.hover {
@@ -74,6 +76,11 @@
         color-stop(0.9,#648af1
         )
     );
+    background-image: -o-linear-gradient(top, #2662ED 50%, #648CF1 90%);
+    background-image: -moz-linear-gradient(top, #2662ED 50%, #648CF1 90%);
+    background-image: -webkit-linear-gradient(top, #2662ED 50%, #648CF1 90%);
+    background-image: -ms-linear-gradient(top, #2662ED 50%, #648CF1 90%);
+    background-image: linear-gradient(to top, #2662ED 50%, #648CF1 90%);
     border: 1px solid #1957e4;
     color: #fff;
 }
