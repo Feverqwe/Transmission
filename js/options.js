@@ -1,57 +1,97 @@
+(function () {
+    mono.pageId = 'opt';
+    var actionReader = function(message, cb) {
+        if (message.action === 'setDirList') {
+            return options.setDirList(message.data);
+        }
+        if (message === 'sleep') {
+            window.location = 'sleep.html';
+            return;
+        }
+        mono('>', message);
+    };
+    mono.onMessage(function(message, response) {
+        if (Array.isArray(message)) {
+            var c_wait = message.length;
+            var c_ready = 0;
+            var resultList = {};
+            var ready = function(key, data) {
+                c_ready+= 1;
+                resultList[key] = data;
+                if (c_wait === c_ready) {
+                    response(resultList);
+                }
+            };
+            message.forEach(function(action) {
+                actionReader(action, function (data) {
+                    ready(action, data);
+                });
+            });
+            return;
+        }
+        actionReader(message, response);
+    });
+    $(function () {
+        options.boot();
+    });
+})();
 var options = function() {
     var isTransmission = true;
-    var _engine = (chrome.extension.getBackgroundPage()).engine;
+    var var_cache = {};
+    var dom_cache = {};
+    var currentLanguage = navigator.language.substr(0,2);
+    var def_settings = undefined;
     var set_place_holder = function() {
-        var def_settings = _engine.def_settings;
-        var settings = _engine.settings;
-        $.each(def_settings, function(k, v) {
-            if (v.t === "text" || v.t === "number" || v.t === "password") {
-                var dom_obj = $('input[name="' + k + '"]');
-                dom_obj.removeAttr("value");
-                if (settings[k] === undefined) {
-                    settings[k] = v.v;
-                }
-                if (settings[k] !== v.v) {
-                    if (k === "bg_update_interval" || k === "notify_visbl_interval" || k === "mgr_update_interval") {
-                        dom_obj.attr("value", settings[k] / 1000);
-                    } else {
-                        dom_obj.attr("value", settings[k]);
+        mono.sendMessage('settings', function(settings) {
+            $.each(def_settings, function (k, v) {
+                if (v.t === "text" || v.t === "number" || v.t === "password") {
+                    var dom_obj = $('input[name="' + k + '"]');
+                    dom_obj.removeAttr("value");
+                    if (settings[k] === undefined) {
+                        settings[k] = v.v;
+                    }
+                    if (settings[k] !== v.v) {
+                        if (k === "bg_update_interval" || k === "notify_visbl_interval" || k === "mgr_update_interval") {
+                            dom_obj.attr("value", settings[k] / 1000);
+                        } else {
+                            dom_obj.attr("value", settings[k]);
+                        }
+                    }
+                    if (v.v !== undefined) {
+                        if (k === "bg_update_interval" || k === "notify_visbl_interval" || k === "mgr_update_interval") {
+                            dom_obj.attr("placeholder", v.v / 1000);
+                        } else {
+                            dom_obj.attr("placeholder", v.v);
+                        }
+                    }
+                } else if (v.t === "checkbox") {
+                    $('input[name="' + k + '"]').prop('checked', settings[k]);
+                } else if (v.t === "array") {
+                    if (k === "folders_array") {
+                        var arr = settings[k];
+                        var $select = dom_cache.sel_folders;
+                        $select.empty();
+                        for (var n = 0, len = arr.length; n < len; n++) {
+                            $select.append($('<option>', {text: arr[n][1], value: JSON.stringify(arr[n])}));
+                        }
                     }
                 }
-                if (v.v !== undefined) {
-                    if (k === "bg_update_interval" || k === "notify_visbl_interval" || k === "mgr_update_interval") {
-                        dom_obj.attr("placeholder", v.v / 1000);
-                    } else {
-                        dom_obj.attr("placeholder", v.v);
-                    }
-                }
-            } else
-            if (v.t === "checkbox") {
-                $('input[name="' + k + '"]').prop('checked', settings[k]);
-            } else
-            if (v.t === "array") {
-                if (k === "folders_array") {
-                    var arr = settings[k];
-                    var $select =  $('select[name="folders"]');
-                    $select.empty();
-                    for (var n = 0, len = arr.length; n < len; n++) {
-                        $select.append( $('<option>', {text: arr[n][1], value: JSON.stringify(arr[n])}) );
-                    }
-                }
-            }
-        });
-        write_sortable_tables();
+            });
+            write_sortable_tables();
+        }, 'bg');
         if (!isTransmission) {
-            $('select[name="folder_arr"]').empty().off().on('click', function() {
-                _engine.sendAction({action: 'list-dirs'});
+            dom_cache.sel_folder_arr.empty().off().on('click', function () {
+                if ($(this).children().length !== 0) {
+                    return;
+                }
+                mono.sendMessage({action: 'sendAction', data: {action: 'list-dirs'} }, undefined, 'bg');
                 return 1;
             });
-            $('input[name="add_folder"]').prop('disabled', !$('input[name="context_labels"]').prop('checked'));
         }
     };
     var saveAll = function() {
-        localStorage['lang'] = $('select[name="language"]').val();
-        var def_settings = _engine.def_settings;
+        var changes = {};
+        changes['lang'] = dom_cache.select_language.val();
         $.each(def_settings, function(key, value) {
             var $el = $('input[name="' + key + '"]');
             if (value.t === "text" || value.t === "password") {
@@ -59,11 +99,11 @@ var options = function() {
                 if (val.length === 0 && key !== 'login' && key !== 'password') {
                     val = value.v;
                 }
-                localStorage[key] = val;
+                changes[key] = val;
             } else
             if (value.t === "checkbox") {
                 var val = ($el.prop('checked'))?1:0;
-                localStorage[key] = val;
+                changes[key] = val;
             } else
             if (value.t === "number") {
                 var val = $el.val();
@@ -77,70 +117,87 @@ var options = function() {
                 if (value.min !== undefined && val < value.min) {
                     val = value.min;
                 }
-                localStorage[key] = val;
+                changes[key] = val;
             }
         });
-        var $f_select = $('select[name="folders"]').children('option');
+        var $f_select = dom_cache.sel_folders.children('option');
         var f_select_len = $f_select.length;
         var folders_arr = new Array(f_select_len);
         for (var n = 0; n < f_select_len; n++) {
             folders_arr[n] = JSON.parse($f_select.eq(n).val());
         }
-        localStorage['folders_array'] = JSON.stringify(folders_arr);
+        changes['folders_array'] = JSON.stringify(folders_arr);
 
-        var tr_colums = _engine.getColums();
-        var table = $('ul.tr_colums');
-        var new_obj = {};
-        var items = table.children('li');
-        var c = items.length;
-        for (var n = 0; n < c; n++) {
-            var item = items.eq(n);
-            var key = item.data('key');
-            var active = (item.children('div.info').children('div').eq(2).children('input').eq(0)[0].checked) ? 1 : 0;
-            var size = parseInt(item.children('div.info').children('div').eq(1).children('label').text());
-            new_obj[key] = tr_colums[key];
-            new_obj[key].size = size;
-            new_obj[key].a = active;
-        }
-        localStorage['colums'] = JSON.stringify(new_obj);
-        var fl_colums = _engine.getFlColums();
-        var table = $('ul.fl_colums');
-        var new_obj = {};
-        var items = table.children('li');
-        var c = items.length;
-        for (var n = 0; n < c; n++) {
-            var item = items.eq(n);
-            var key = item.data('key');
-            var active = (item.children('div.info').children('div').eq(2).children('input').eq(0)[0].checked) ? 1 : 0;
-            var size = parseInt(item.children('div.info').children('div').eq(1).children('label').text());
-            new_obj[key] = fl_colums[key];
-            new_obj[key].size = size;
-            new_obj[key].a = active;
-        }
-        localStorage['fl_colums'] = JSON.stringify(new_obj);
+        mono.storage.set(changes, function() {
+            cb && cb();
+        });
+
+        mono.sendMessage(['getColums', 'getFlColums'], function(data) {
+            var tr_colums = data.getColums;
+            var table = $('ul.tr_colums');
+            var new_obj = {};
+            var items = table.children('li');
+            var c = items.length;
+            for (var n = 0; n < c; n++) {
+                var item = items.eq(n);
+                var key = item.data('key');
+                var active = (item.children('div.info').children('div').eq(2).children('input').eq(0)[0].checked) ? 1 : 0;
+                var size = parseInt(item.children('div.info').children('div').eq(1).children('label').text());
+                new_obj[key] = tr_colums[key];
+                new_obj[key].size = size;
+                new_obj[key].a = active;
+            }
+            mono.storage.set({colums: JSON.stringify(new_obj)});
+
+            var fl_colums = data.getFlColums;
+            var table = $('ul.fl_colums');
+            var new_obj = {};
+            var items = table.children('li');
+            var c = items.length;
+            for (var n = 0; n < c; n++) {
+                var item = items.eq(n);
+                var key = item.data('key');
+                var active = (item.children('div.info').children('div').eq(2).children('input').eq(0)[0].checked) ? 1 : 0;
+                var size = parseInt(item.children('div.info').children('div').eq(1).children('label').text());
+                new_obj[key] = fl_colums[key];
+                new_obj[key].size = size;
+                new_obj[key].a = active;
+            }
+            mono.storage.set({fl_colums: JSON.stringify(new_obj)});
+        }, 'bg');
     };
     var getBackup = function() {
-        $('textarea[name="backup"]').val(JSON.stringify(localStorage));
+        mono.storage.get(undefined, function(data) {
+            $('textarea[name="backup"]').val(JSON.stringify(data));
+        });
     };
     var stngsRestore = function(text) {
+        var rst;
         try {
-            var rst = JSON.parse(text);
-            localStorage.clear();
-            for (var key in rst)
-            {
-                var value = rst[key];
-                if (value === undefined || key === 'length')
-                    continue;
-                localStorage[key] = value;
-            }
-            write_language();
-            _engine.updateSettings(lang_arr);
-            set_place_holder();
-            $('a[data-page="setup"]').trigger('click');
-            chk_settings();
+            rst = JSON.parse(text);
         } catch (err) {
             alert(lang_arr.settings[51] + "\n" + err);
         }
+        if (rst === undefined) {
+            return;
+        }
+        mono.storage.clear();
+        var changes = {};
+        for (var key in rst)
+        {
+            var value = rst[key];
+            if (value === undefined || key === 'length')
+                continue;
+            changes[key] = value;
+        }
+        mono.storage.set(changes, function() {
+            write_language(rst.lang || currentLanguage);
+            mono.sendMessage({action: 'updateSettings', data: lang_arr.t}, function() {
+                set_place_holder();
+                $('a[data-page="setup"]').trigger('click');
+                chk_settings();
+            }, 'bg');
+        });
     };
     var make_bakup_form = function() {
         $('div.backup_form div').children('a.backup_tab').on('click', function(e) {
@@ -187,28 +244,30 @@ var options = function() {
     };
     var write_sortable_tables = function() {
         var items;
-        var tr_colums = _engine.getColums();
-        var tr_table = $("ul.tr_colums");
-        tr_table.empty();
-        items = [];
-        $.each(tr_colums, function(k, v) {
-            items.push(ap(tr_table, k, v));
-        });
-        tr_table.append(items);
-        var fl_colums = _engine.getFlColums();
-        var fl_table = $("ul.fl_colums");
-        fl_table.empty();
-        items = [];
-        $.each(fl_colums, function(k, v) {
-            items.push(ap(fl_table, k, v));
-        });
-        fl_table.append(items);
-        var ul_sortable = $("ul.sortable");
-        ul_sortable.sortable({placeholder: "ui-state-highlight"});
-        ul_sortable.disableSelection();
-        ul_sortable.find("div.size").resizable({handles: "e", resize: function(event, ui) {
+        mono.sendMessage(['getColums', 'getFlColums'], function(data) {
+            var tr_colums = data.getColums();
+            var tr_table = $("ul.tr_colums");
+            tr_table.empty();
+            items = [];
+            $.each(tr_colums, function(k, v) {
+                items.push(ap(tr_table, k, v));
+            });
+            tr_table.append(items);
+            var fl_colums = data.getFlColums();
+            var fl_table = $("ul.fl_colums");
+            fl_table.empty();
+            items = [];
+            $.each(fl_colums, function(k, v) {
+                items.push(ap(fl_table, k, v));
+            });
+            fl_table.append(items);
+            var ul_sortable = $("ul.sortable");
+            ul_sortable.sortable({placeholder: "ui-state-highlight"});
+            ul_sortable.disableSelection();
+            ul_sortable.find("div.size").resizable({handles: "e", resize: function(event, ui) {
                 $(this).parent().children('div').children("div").eq(1).children('label').html(ui.size.width);
             }});
+        }, 'bg');
     };
     var reset_table = function(table, arr) {
         var items;
@@ -226,8 +285,8 @@ var options = function() {
             }});
     };
     var setDirList = function (arr) {
-        $('input[name="add_folder"]')[0].disabled = false;
-        var f_select = $('select[name="folder_arr"]');
+        dom_cache.inp_add_folder[0].disabled = false;
+        var f_select = dom_cache.sel_folder_arr;
         f_select.empty();
         $(this).unbind('click');
         $.each(arr, function(key, value) {
@@ -249,38 +308,32 @@ var options = function() {
         return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
     };
     var write_language = function(language) {
-        if (language === undefined) {
-            language = localStorage["lang"];
-        }
-        if (language === undefined) {
-            language = 'en';
-            if (chrome.i18n.getMessage("lang") === 'ru') {
-                language = 'ru';
-            } else
-            if (chrome.i18n.getMessage("lang") === 'fr') {
-                language = 'fr';
-            }
-        }
         window.lang_arr = get_lang(language);
+        currentLanguage = window.lang_arr.t;
         var lang = lang_arr.settings;
-        $('select[name="language"]').val(language);
+        dom_cache.select_language.val(language);
         $.each(lang, function(k, v) {
             var el = $('[data-lang=' + k + ']');
-            if (el.length === 0)
+            if (el.length === 0) {
                 return true;
+            }
             var t = el.prop("tagName");
             if (t === "A" || t === "LEGEND" || t === "SPAN" || t === "LI") {
                 el.text(v);
             } else
             if (t === "INPUT") {
                 el.val(v);
-            } else
+            } else {
                 console.log(t);
+            }
         });
         write_sortable_tables();
     };
     var popup = function() {
         var isPopup = false;
+        if (!window.chrome) {
+            return true;
+        }
         var windows = chrome.extension.getViews({type: 'popup'});
         for (var n = 0; n < windows.length; n++) {
             if ("options" in windows[n])
@@ -289,46 +342,79 @@ var options = function() {
         return isPopup;
     };
     var chk_settings = function() {
-        _engine.getToken(function() {
-            $('div.page.save > div.status').css({'background': 'none', 'color': '#009900'}).text(lang_arr.settings[52]).animate({opacity: 0}, 3000, function() {
-                $(this).empty().css("opacity", "1");
-            });
-            if (popup()) {
-                window.location = "manager.html";
+        mono.sendMessage('getToken', function(getToken) {
+            if (getToken === 1) {
+                $('div.page.save > div.status').css({'background': 'none', 'color': '#009900'}).text(lang_arr.settings[52]).animate({opacity: 0}, 3000, function() {
+                    $(this).empty().css("opacity", "1");
+                });
+                if (popup()) {
+                    window.location = "manager.html";
+                }
+            } else {
+                mono.sendMessage('cache', function(cache) {
+                    $('div.page.save > div.status').css({'background': 'none', 'color': '#c40005'}).text(lang_arr.settings[53] + ' ' + cache.status);
+                }, 'bg');
             }
-        }, function() {
-            $('div.page.save > div.status').css({'background': 'none', 'color': '#c40005'}).text(lang_arr.settings[53] + ' ' + _engine.cache.status);
-        });
+        }, 'bg');
     };
     return {
+        boot: function() {
+            if (mono.isFF) {
+                addon.postMessage('isShow');
+                $('input[name="show_active_tr_on_icon"]').parent().parent().parent().hide();
+                $('input[name="notify_visbl_interval"]').parent().parent().parent().hide();
+            }
+            mono.sendMessage({action: 'resize', height: 600}, undefined, 'service');
+            mono.storage.get('lang', function(data) {
+                currentLanguage = data.lang || currentLanguage;
+                mono.sendMessage(['def_settings'], function(data) {
+                    def_settings = data.def_settings;
+                    $(function() {
+                        options.begin();
+                    });
+                }, 'bg');
+            });
+        },
         begin: function() {
-            write_language();
-            _engine.setOptionsWindow(window);
-            $('select[name="language"]').on('change', function() {
-                write_language($(this).val());
+            dom_cache.select_language = $('select[name="language"]');
+            dom_cache.body = $('body');
+            dom_cache.ul_menu = $('ul.menu');
+            dom_cache.ul_tr_colums = $("ul.tr_colums");
+            dom_cache.inp_add_folder = $('input[name="add_folder"]');
+            dom_cache.sel_folder_arr = $('select[name="folder_arr"]');
+            dom_cache.sel_folders = $('select[name="folders"]');
+            dom_cache.ctx_labels = $('input[name="context_labels"]');
+
+            write_language(currentLanguage);
+            dom_cache.select_language.on('change', function() {
+                write_language(this.value);
             });
             $('a.help').on('click', function(e) {
                 e.preventDefault();
                 $(this).parent().parent().children('div').toggle('fast');
             });
-            $('ul.menu').on('click', 'a', function(e) {
+            dom_cache.ul_menu.on('click', 'a', function(e) {
                 e.preventDefault();
-                $('ul.menu').find('a.active').removeClass('active');
+                dom_cache.ul_menu.find('a.active').removeClass('active');
                 $(this).addClass('active');
-                $('body').find('div.page.active').removeClass('active');
-                $('body').find('div.' + $(this).data('page')).addClass('active');
+                dom_cache.body.find('div.page.active').removeClass('active');
+                dom_cache.body.find('div.' + $(this).data('page')).addClass('active');
             });
             $('input[name="tr_reset"]').on("click", function() {
-                reset_table($("ul.tr_colums"), _engine.getDefColums());
+                mono.sendMessage('getDefColums', function(data) {
+                    reset_table(dom_cache.ul_tr_colums, data);
+                }, 'bg');
             });
             $('input[name="fl_reset"]').on("click", function() {
-                reset_table($("ul.fl_colums"), _engine.getDefFlColums());
+                mono.sendMessage('getDefFlColums', function(data) {
+                    reset_table($("ul.fl_colums"), data);
+                }, 'bg');
             });
-            $('input[name="add_folder"]').on('click', function() {
-                var arr = [isTransmission?'':$('select[name="folder_arr"]').val(), $(this).parent().children('input[type=text]').val()];
+            dom_cache.inp_add_folder.on('click', function() {
+                var arr = [isTransmission?'':dom_cache.sel_folder_arr.val(), $(this).parent().children('input[type=text]').val()];
                 if (arr[1].length < 1)
                     return;
-                $('select[name="folders"]').append(new Option(arr[1], JSON.stringify(arr)));
+                dom_cache.sel_folders.append(new Option(arr[1], JSON.stringify(arr)));
                 $(this).parent().children('input[type=text]').val("");
             });
             $('input[name="rm_folder"]').on('click', function() {
@@ -345,26 +431,33 @@ var options = function() {
                 $next.before($this);
             });
             $('input[name="save"]').on('click', function() {
-                saveAll();
                 $('div.page.save > div.status').css('background', 'url(images/loading.gif) center center no-repeat').text('');
-                _engine.updateSettings(lang_arr);
-                chk_settings();
+                saveAll(function() {
+                    mono.sendMessage({action: 'updateSettings', data: lang_arr.t}, function() {
+                        chk_settings();
+                    }, 'bg');
+                });
             });
             if (!isTransmission) {
-                $('input[name="context_labels"]').on('click', function() {
-                    $('input[name="add_folder"]')[0].disabled = !this.checked;
+                dom_cache.ctx_labels.on('click', function() {
+                    dom_cache.inp_add_folder[0].disabled = !this.checked;
                 });
             }
-            if (chrome.storage) {
+            if (window.chrome !== undefined && chrome.storage) {
                 $('input[name="save_in_cloud"]').on('click', function() {
-                    var obj = {};
-                    obj['backup'] = JSON.stringify(localStorage);
-                    chrome.storage.sync.set(obj);
-                    $(this).val(lang_arr.settings[52]);
-                    window.setTimeout(function() {
-                        $('input[name="save_in_cloud"]').val(lang_arr.settings[59]);
-                    }, 3000);
-                    $('input[name="get_from_cloud"]')[0].disabled = false;
+                    var _this = this;
+                    mono.storage.get(undefined, function(data) {
+                        var obj = {
+                            backup: JSON.stringify(data)
+                        };
+                        mono.storage.sync.set(obj, function() {
+                            $(_this).val(lang_arr.settings[52]);
+                            window.setTimeout(function() {
+                                $('input[name="save_in_cloud"]').val(lang_arr.settings[59]);
+                            }, 3000);
+                            $('input[name="get_from_cloud"]')[0].disabled = false;
+                        });
+                    });
                 });
                 $('input[name="get_from_cloud"]').on('click', function() {
                     chrome.storage.sync.get("backup", function(val) {
@@ -392,6 +485,3 @@ var options = function() {
         setDirList: setDirList
     };
 }();
-$(function() {
-    options.begin();
-});

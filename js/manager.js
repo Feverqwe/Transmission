@@ -226,10 +226,7 @@ var manager = function () {
         dom_cache.fl_head.html(head.clone());
     };
     var sendAction = function (data, onload) {
-        if (onload) {
-            console.log('Need onload!')
-        }
-        mono.sendMessage({action: 'sendAction', data: data}, undefined, 'bg');
+        mono.sendMessage({action: 'sendAction', data: data}, onload, 'bg');
     };
     var sendFile = function(url, folder, label) {
         mono.sendMessage({action: 'sendFile', url: url, folder: folder, label: label}, undefined, 'bg');
@@ -1703,7 +1700,7 @@ var manager = function () {
             return;
         }
         if (free_space === undefined && download_dir !== undefined) {
-            _engine.sendAction({action: 'free-space', path: download_dir}, function(data) {
+            sendAction({action: 'free-space', path: download_dir}, function(data) {
                 changeSpace( data.free_space );
             });
             return;
@@ -1905,11 +1902,11 @@ var manager = function () {
             });
 
             setSpeedLimit(onBootVars.cache.settings || []);
+            setSpace(onBootVars.cache.settings || []);
             sendAction({action: 'getsettings'});
-            _engine.sendAction({action: 'getsettings'});
 
             if (isTransmission) {
-                manager.setAltSpeedState(_engine.cache.alt_speed || false);
+                manager.setAltSpeedState(onBootVars.cache.alt_speed || false);
             }
 
             dom_cache.fl_fixed_head.on('click', 'th', function (e) {
@@ -1950,12 +1947,12 @@ var manager = function () {
             dom_cache.menu.on('click', 'a.alt_speed', function(e) {
                 e.preventDefault();
                 if ($(this).hasClass('active')) {
-                    _engine.sendAction({action: 'setsetting', s: 'alt-speed-enabled', v: 0}, function () {
-                        _engine.sendAction({action: 'getsettings'});
+                    sendAction({action: 'setsetting', s: 'alt-speed-enabled', v: 0}, function () {
+                        sendAction({action: 'getsettings'});
                     })
                 } else {
-                    _engine.sendAction({action: 'setsetting', s: 'alt-speed-enabled', v: 1}, function () {
-                        _engine.sendAction({action: 'getsettings'});
+                    sendAction({action: 'setsetting', s: 'alt-speed-enabled', v: 1}, function () {
+                        sendAction({action: 'getsettings'});
                     })
                 }
             });
@@ -2047,7 +2044,7 @@ var manager = function () {
             dom_cache.menu.on('click', 'a.refresh', function (e) {
                 e.preventDefault();
                 mgTimer.start();
-                _engine.sendAction({list: 1, cid: 0})
+                sendAction({list: 1, cid: 0})
             });
             dom_cache.menu.on('click', 'a.start_all', function (e) {
                 e.preventDefault();
