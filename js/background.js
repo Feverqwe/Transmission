@@ -416,8 +416,19 @@ var engine = function () {
         var xhr = new XMLHttpRequest();
         xhr.open("GET", url, true);
         xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password));
-        xhr.onload = function() {
-            if (xhr.status === 409 || xhr.status < 400) {
+        var _onready = function() {
+            setStatus('getToken', [200]);
+            engine.cache = var_cache.client = {
+                status: var_cache.client.status,
+                token: xhr.getResponseHeader("X-Transmission-Session-Id")
+            };
+            if (onload !== undefined) {
+                onload();
+            }
+            bgTimer.start();
+        };
+        var _onerror = function() {
+            if (xhr.status === 409) {
                 setStatus('getToken', [200]);
                 engine.cache = var_cache.client = {
                     status: var_cache.client.status,
@@ -438,16 +449,13 @@ var engine = function () {
             }
             var_cache.client.getToken_error = (var_cache.client.getToken_error === undefined) ? 1 : var_cache.client.getToken_error + 1;
         };
-        xhr.onerror = function() {
-            setStatus('getToken', [xhr.status, xhr.statusText]);
-            if (onerror !== undefined) {
-                onerror();
+        xhr.onload = function() {
+            if (xhr.status !== 200 && xhr.status !== 204) {
+                return _onerror();
             }
-            if (var_cache.client.getToken_error > 10) {
-                bgTimer.stop();
-            }
-            var_cache.client.getToken_error = (var_cache.client.getToken_error === undefined) ? 1 : var_cache.client.getToken_error + 1;
+            _onready();
         };
+        xhr.onerror = _onerror;
         xhr.send();
     };
     var getStatusTransmission2uTorrent = function(code) {
@@ -977,6 +985,7 @@ var engine = function () {
         } else {
             _data = jQ.extend({cid: var_cache.client.cid}, data);
         }
+        var onerror, onready;
         if (data.torrent_file !== undefined) {
             var reader = new FileReader();
             reader.readAsDataURL(data.torrent_file);
@@ -987,7 +996,7 @@ var engine = function () {
                 if (settings.login.length > 0 || settings.password.length > 0) {
                     xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password));
                 }
-                xhr.onload = function () {
+                onready = function () {
                     var_cache.get_token_count = 0;
                     var data;
                     try {
@@ -1001,7 +1010,7 @@ var engine = function () {
                     }
                     readResponse(data);
                 };
-                xhr.onerror = function () {
+                onerror = function () {
                     showNotifi(error_icon, xhr.status, xhr.statusText, 'addFile');
                     setStatus('sendFile', [xhr.status, xhr.statusText, _data]);
                     //400 - invalid request, когда token протухает
@@ -1022,6 +1031,13 @@ var engine = function () {
                 if (data.download_dir !== undefined) {
                     params.arguments['download-dir'] = data.path;
                 }
+                xhr.onload = function() {
+                    if (xhr.status !== 200 && xhr.status !== 204) {
+                        return onerror();
+                    }
+                    onready();
+                };
+                xhr.onerror = onerror;
                 xhr.send(JSON.stringify(params));
             };
             return;
@@ -1038,7 +1054,7 @@ var engine = function () {
         if (settings.login.length > 0 || settings.password.length > 0) {
             xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password));
         }
-        xhr.onload = function(e) {
+        onready = function(e) {
             var data = xhr.response;
             var_cache.get_token_count = 0;
             var data = Transmission2uTorrentAPI(data);
@@ -1047,7 +1063,7 @@ var engine = function () {
             }
             readResponse(data);
         };
-        xhr.onerror = function() {
+        onerror = function() {
             setStatus('sendAction', [xhr.status, xhr.statusText, _data]);
             if (var_cache.client.sendAction_error > 3 || xhr.status === 409) {
                 var_cache.client.token = undefined;
@@ -1056,6 +1072,13 @@ var engine = function () {
             }
             var_cache.client.sendAction_error = (var_cache.client.sendAction_error === undefined) ? 1 : var_cache.client.sendAction_error + 1;
         };
+        xhr.onload = function() {
+            if (xhr.status !== 200 && xhr.status !== 204) {
+                return onerror();
+            }
+            onready();
+        };
+        xhr.onerror = onerror;
         xhr.send(jQ.param(tr_data.data));
     };
     var readResponse = function (data) {
