@@ -107,7 +107,14 @@ var mono = function (env) {
         var rLS = function(cb) {
             mono.LocalStorage.get = function(key) {
                 if (key === undefined || key === null) {
-                    return localStorage;
+                    var copyStorage = {};
+                    for (var item in localStorage) {
+                        if (!localStorage.hasOwnProperty(item)) {
+                            continue;
+                        }
+                        copyStorage[item] = localStorage[item];
+                    }
+                    return copyStorage;
                 }
                 return localStorage[key];
             };
