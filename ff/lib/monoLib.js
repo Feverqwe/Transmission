@@ -134,9 +134,11 @@
                     subscribClientList[to].push(cb);
                 },
                 emit: function(to, message) {
+                    if (to === defaultId) {
+                        return sendAll(message, virtualPageList[pageId]);
+                    }
                     if (route[to] !== undefined) {
-                        sendTo(to, message);
-                        return;
+                        return sendTo(to, message);
                     }
                     subscribServerList[to].forEach(function(item) {
                         item(message);
@@ -214,11 +216,12 @@
         }
 
         for (var virtualPageName in virtualPageList) {
-            if (virtualPageName === pageId) {
+            var vPage = virtualPageList[virtualPageName];
+            if (vPage === page) {
                 continue;
             }
             page.port.on(virtualPageName, function(message) {
-                virtualPageList[virtualPageName].lib.emit(virtualPageName, message);
+                vPage.lib.emit(virtualPageName, message);
             });
         }
     }
