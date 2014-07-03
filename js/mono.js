@@ -72,7 +72,8 @@ var mono = function (env) {
                     var message = {
                         data: 'clear',
                         monoTo: defaultId,
-                        monoFrom: monoLocalStorageServiceName
+                        monoFrom: monoLocalStorageServiceName,
+                        monoService: 1
                     };
                     mono.sendMessage.send(message);
                 });
@@ -303,7 +304,7 @@ var mono = function (env) {
                 if (message.monoResponseId) {
                     return msgTools.cbCaller(message, pageId);
                 }
-                if (serviceList[message.monoFrom] !== undefined) {
+                if (message.monoService !== undefined && serviceList[message.monoFrom] !== undefined) {
                     return serviceList[message.monoFrom].onMessage(message);
                 }
                 var response = msgTools.mkResponse(message, pageId);
