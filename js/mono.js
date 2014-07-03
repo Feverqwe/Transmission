@@ -40,14 +40,6 @@ var mono = function (env) {
     var monoLocalStorage = function(storage) {
         var storage = storage;
         return {
-            sync: function(changes) {
-                if (changes === 'clear') {
-                    return storage = {};
-                }
-                for (var key in changes) {
-                    storage[key] = changes[key];
-                }
-            },
             set: function(key, value) {
                 storage[key] = value;
                 var data = {};
@@ -85,10 +77,12 @@ var mono = function (env) {
                     mono.sendMessage.send(message);
                 });
             },
-            onMessage: function(message) {
-                var mls = monoLocalStorage.sync;
-                if (mls !== undefined) {
-                    mls.sync(message.data);
+            onMessage: function(changes) {
+                if (changes === 'clear') {
+                    return storage = {};
+                }
+                for (var key in changes) {
+                    storage[key] = changes[key];
                 }
             }
         }
