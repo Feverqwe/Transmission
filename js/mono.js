@@ -63,7 +63,7 @@ var mono = function (env) {
                 });
             },
             get: function(key) {
-                if (key === undefined) {
+                if (key === undefined || key === null) {
                     var copyStorage = {};
                     for (var item in storage) {
                         copyStorage[item] = storage[item];
@@ -106,7 +106,7 @@ var mono = function (env) {
         };
         var rLS = function(cb) {
             mono.LocalStorage.get = function(key) {
-                if (key === undefined) {
+                if (key === undefined || key === null) {
                     return localStorage;
                 }
                 return localStorage[key];
