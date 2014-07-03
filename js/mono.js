@@ -33,6 +33,52 @@ var mono = function (env) {
     mono.addon = addon;
     mono.pageId = defaultId;
     mono.debug = {};
+    var serviceList = {};
+
+    var monoLocalStorageServiceName = 'monoLS';
+    var monoLocalStorageName = 'monoLocalStorage';
+    var monoLocalStorage = function(storage) {
+        var storage = storage;
+        return {
+            sync: function(changes) {
+                for (var key in changes) {
+                    storage[key] = changes[key];
+                }
+            },
+            set: function(key, value) {
+                storage[key] = value;
+                var data = {};
+                data[monoLocalStorageName] = storage;
+                mono.storage.set(data, function() {
+                    var message = {
+                        data: {},
+                        monoTo: defaultId,
+                        monoFrom: monoLocalStorageServiceName
+                    };
+                    message.data[key] = value;
+                    mono.sendMessage.send(message);
+                });
+            },
+            get: function(key) {
+                return storage[key];
+            },
+            onMessage: function(message) {
+                var mls = monoLocalStorage.sync;
+                if (mls !== undefined) {
+                    mls.sync(message.data);
+                }
+            }
+        }
+    };
+    mono.LocalStorage = function(cb) {
+        mono.storage.get(monoLocalStorageName, function(data) {
+            var smls = monoLocalStorage(data[monoLocalStorageName] || {});
+            serviceList[monoLocalStorageServiceName] = smls;
+            mono.LocalStorage.get = smls.get;
+            mono.LocalStorage.set = smls.set;
+            cb && cb();
+        });
+    };
 
     var externalStorage = {
         get: function(src, cb) {
@@ -206,6 +252,9 @@ var mono = function (env) {
                 }
                 if (message.monoResponseId) {
                     return msgTools.cbCaller(message, pageId);
+                }
+                if (serviceList[message.monoFrom] !== undefined) {
+                    return serviceList[message.monoFrom].onMessage(message);
                 }
                 var response = msgTools.mkResponse(message, pageId);
                 cb(message.data, response);
