@@ -41,6 +41,9 @@ var mono = function (env) {
         var storage = storage;
         return {
             sync: function(changes) {
+                if (changes === 'clear') {
+                    return storage = {};
+                }
                 for (var key in changes) {
                     storage[key] = changes[key];
                 }
@@ -62,6 +65,19 @@ var mono = function (env) {
             get: function(key) {
                 return storage[key];
             },
+            clear: function() {
+                storage = {};
+                var data = {};
+                data[monoLocalStorageName] = storage;
+                mono.storage.set(data, function() {
+                    var message = {
+                        data: 'clear',
+                        monoTo: defaultId,
+                        monoFrom: monoLocalStorageServiceName
+                    };
+                    mono.sendMessage.send(message);
+                });
+            },
             onMessage: function(message) {
                 var mls = monoLocalStorage.sync;
                 if (mls !== undefined) {
@@ -70,15 +86,38 @@ var mono = function (env) {
             }
         }
     };
-    mono.LocalStorage = function(cb) {
-        mono.storage.get(monoLocalStorageName, function(data) {
-            var smls = monoLocalStorage(data[monoLocalStorageName] || {});
-            serviceList[monoLocalStorageServiceName] = smls;
-            mono.LocalStorage.get = smls.get;
-            mono.LocalStorage.set = smls.set;
+    mono.LocalStorage = function() {
+        var vLS = function(cb) {
+            mono.storage.get(monoLocalStorageName, function(data) {
+                var smls = monoLocalStorage(data[monoLocalStorageName] || {});
+                serviceList[monoLocalStorageServiceName] = smls;
+                mono.LocalStorage.get = smls.get;
+                mono.LocalStorage.set = smls.set;
+                mono.LocalStorage.clear = smls.clear;
+                cb && cb();
+            });
+        };
+        var rLS = function(cb) {
+            mono.LocalStorage.get = function(key) {
+                return localStorage[key];
+            };
+            mono.LocalStorage.set = function(key, value) {
+                localStorage[key] = value;
+            };
+            mono.LocalStorage.clear = function() {
+                localStorage.clear();
+            };
             cb && cb();
-        });
-    };
+        };
+        if (mono.isModule) {
+            return vLS;
+        } else
+        if (window.localStorage !== undefined) {
+            return rLS;
+        } else {
+            return vLS;
+        }
+    }();
 
     var externalStorage = {
         get: function(src, cb) {
