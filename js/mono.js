@@ -7,7 +7,7 @@ var mono = function (env) {
     var mono = function() {
         // mono like console.log
         var args = Array.prototype.slice.call(arguments);
-        args.unshift('monoLog:');
+        args.unshift(mono.pageId,'monoLog:');
         console.log.apply(console, args);
     };
 
