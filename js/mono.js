@@ -63,6 +63,13 @@ var mono = function (env) {
                 });
             },
             get: function(key) {
+                if (key === undefined) {
+                    var copyStorage = {};
+                    for (var item in storage) {
+                        copyStorage[item] = storage[item];
+                    }
+                    return copyStorage;
+                }
                 return storage[key];
             },
             clear: function() {
@@ -99,6 +106,9 @@ var mono = function (env) {
         };
         var rLS = function(cb) {
             mono.LocalStorage.get = function(key) {
+                if (key === undefined) {
+                    return localStorage;
+                }
                 return localStorage[key];
             };
             mono.LocalStorage.set = function(key, value) {
