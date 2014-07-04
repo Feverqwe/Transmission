@@ -50,6 +50,17 @@
                 }
                 cb && cb();
             },
+            remove: function (obj, cb) {
+                if (Array.isArray(obj) === true) {
+                    for (var i = 0, len = obj.length; i < len; i++) {
+                        var key = obj[i];
+                        delete ss.storage[key];
+                    }
+                } else {
+                    delete ss.storage[obj];
+                }
+                cb && cb();
+            },
             clear: function (cb) {
                 var key;
                 for (key in ss.storage) {
@@ -97,6 +108,9 @@
         }
         if (msg.action === 'set') {
             return monoStorage.set(msg.data, response);
+        }
+        if (msg.action === 'remove') {
+            return monoStorage.remove(msg.data, response);
         }
         if (msg.action === 'clear') {
             return monoStorage.clear(response);
