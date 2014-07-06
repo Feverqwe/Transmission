@@ -6,7 +6,9 @@
  * @namespace require
  * @namespace exports
  */
+var XMLHttpRequest = require('sdk/net/xhr').XMLHttpRequest;
 (function() {
+    var self = require("sdk/self");
     var tabs = require("sdk/tabs");
     var serviceList = {};
     var route = {};
@@ -70,19 +72,22 @@
             }
         }
     }();
+    exports.storage = monoStorage;
 
     var sendTo = function(to, message) {
         if (typeof to !== "string") {
             var page = to;
+            if (stateList[page.randId] === false) {
+                return;
+            }
             var type = page.isVirtual?'lib':'port';
             page[type].emit(defaultId, message);
             return;
         }
-        if (stateList[to] === false) {
-            return;
-        }
         for (var i = 0, page; page = route[to][i]; i++) {
-
+            if (stateList[page.randId] === false) {
+                continue;
+            }
             var type = page.isVirtual?'lib':'port';
             page[type].emit(to, message);
         }
@@ -117,9 +122,22 @@
         }
     };
 
+    var xhrList = {};
     serviceList['service'] = function(message) {
         var to = message.monoFrom;
         var msg = message.data;
+        var response;
+        if (message.monoCallbackId !== undefined) {
+            response = function(responseMessage) {
+                responseMessage = {
+                    data: responseMessage,
+                    monoTo: to,
+                    monoFrom: 'monoStorage',
+                    monoResponseId: message.monoCallbackId
+                };
+                sendTo(to, responseMessage);
+            }
+        }
         if (msg.action === 'resize') {
             return route[to].forEach(function(page) {
                 if (msg.width) {
@@ -131,7 +149,43 @@
             });
         }
         if (msg.action === 'openTab') {
-            return tabs.open(msg.url);
+            return tabs.open( (msg.dataUrl)?self.data.url(msg.url):msg.url );
+        }
+        if (msg.action === 'xhr') {
+            var obj = msg.data;
+            var xhr = new XMLHttpRequest();
+            xhr.open(obj.open[0], obj.open[1], obj.open[2], obj.open[3], obj.open[4]);
+            xhr.responseType = obj.responseType;
+            if (obj.mimeType) {
+                xhr.overrideMimeType(obj.mimeType);
+            }
+            if (obj.headers) {
+                for (var key in obj.headers) {
+                    xhr.setRequestHeader(key, obj.headers[key]);
+                }
+            }
+            if (obj.responseType) {
+                xhr.responseType = obj.responseType;
+            }
+            xhr.onload = xhr.onerror = function() {
+                delete xhrList[obj.id];
+                return response({
+                    status: xhr.status,
+                    statusText: xhr.statusText,
+                    response: (obj.responseType)?xhr.response:xhr.responseText
+                });
+            };
+            xhr.send(obj.data);
+            if (obj.id) {
+                xhrList[obj.id] = xhr;
+            }
+        }
+        if (msg.action === 'xhrAbort') {
+            var xhr = xhrList[msg.data];
+            if (xhr) {
+                xhr.abort();
+                delete xhrList[msg.data];
+            }
         }
     };
 
@@ -179,6 +233,46 @@
     };
     exports.virtualAddon = monoVirtualPage;
 
+    var monoVirtualPort = function() {
+        var vPageId = self.options.pageId+Math.floor((Math.random() * 10000) + 1);
+        self.port.emit('monoAttach', vPageId);
+        window.addEventListener('message', function(e) {
+            if (e.data[0] !== '>') {
+                return;
+            }
+            var sepPos = e.data.indexOf(':');
+            if (sepPos === -1) {
+                return;
+            }
+            var pageId = e.data.substr(1, sepPos - 1);
+            if (pageId === self.options.pageId) {
+                pageId = vPageId;
+            }
+            var data = e.data.substr(sepPos+1);
+            var json = JSON.parse(data);
+            if (json.monoFrom === self.options.pageId) {
+                json.monoFrom = vPageId;
+            }
+            self.port.emit(pageId, json);
+        });
+        self.port.on(vPageId, function (message) {
+            if (message.monoTo === vPageId) {
+                message.monoTo = self.options.pageId;
+            }
+            var msg = '<'+self.options.pageId + ':' + JSON.stringify(message);
+            var event = document.createEvent("CustomEvent");
+            event.initCustomEvent("monoMessage", false, false, msg);
+            window.dispatchEvent(event);
+        });
+        self.port.on(self.options.defaultId, function (message) {
+            var msg = '<'+self.options.defaultId + ':' + JSON.stringify(message);
+            var event = document.createEvent("CustomEvent");
+            event.initCustomEvent("monoMessage", false, false, msg);
+            window.dispatchEvent(event);
+        });
+    };
+    exports.virtualPort = monoVirtualPort;
+
     var sendAll = function(message, exPage) {
         for (var i = 0, page; page = route[defaultId][i]; i++) {
             if (page === exPage) {
@@ -193,8 +287,9 @@
         if (route[pageId] === undefined) {
             route[pageId] = [];
         }
+        page.randId = Math.floor((Math.random() * 10000) + 1);
 
-        stateList[pageId] = true;
+        stateList[page.randId] = true;
 
         var type;
         if (page.isVirtual) {
@@ -202,16 +297,35 @@
         } else {
             type = 'port';
             page.on('pageshow', function() {
-                stateList[pageId] = true;
+                stateList[page.randId] = true;
+                // console.log('pageshow', pageId);
             });
             page.on('pagehide', function() {
-                stateList[pageId] = false;
+                stateList[page.randId] = false;
+                // console.log('pagehide', pageId);
             });
             page.on('attach', function() {
-                stateList[pageId] = true;
+                stateList[page.randId] = true;
+                // console.log('attach', pageId);
             });
             page.on('detach', function() {
-                stateList[pageId] = false;
+                stateList[page.randId] = false;
+                for (var i = 0, _page; _page = route[pageId][i]; i++) {
+                    if (page.randId === _page.randId) {
+                        route[pageId].splice(i, 1);
+                        if (route[pageId].length === 0) {
+                            delete route[pageId];
+                        }
+                        break;
+                    }
+                }
+                for (var i = 0, _page; _page = route[defaultId][i]; i++) {
+                    if (page.randId === _page.randId) {
+                        route[defaultId].splice(i, 1);
+                    }
+                }
+                delete stateList[page.randId];
+                // console.log('detach', pageId);
             });
         }
 
