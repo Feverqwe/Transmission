@@ -1,6 +1,2 @@
 /nbproject/
-build*
 /.idea
-ff/lib/lang.js
-ff/lib/background.js
-ff/lib/mono.js
