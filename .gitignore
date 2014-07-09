@@ -1,2 +1,5 @@
 /nbproject/
 /.idea
+/build/
+/build_firefox_sdk/
+build_chrome.zip
