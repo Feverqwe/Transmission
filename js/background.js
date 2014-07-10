@@ -1509,8 +1509,36 @@ var engine = function () {
     var clone_obj = function (obj) {
         return jQ.extend(true, {}, obj);
     };
+    var fastMigration = function(lStorage) {
+        var settings = {};
+        for (var key in def_settings) {
+            var def_item = def_settings[key];
+            var value = lStorage[key];
+            if (value === undefined) {
+                value = def_item.v;
+            }
+            if ( ['number', 'checkbox'].indexOf(def_item.t) !== -1 ) {
+                value = parseInt(value);
+            }
+            if (value) {
+                settings[key] = value;
+            }
+        }
+        if (['ru', 'en', 'fr'].indexOf(lStorage.lang) !== -1) {
+            settings.lang = lStorage.lang;
+        }
+        mono.storage.set(settings, function() {
+            lStorage.migrated = true;
+            window.location.reload();
+        });
+    };
     return {
         boot: function() {
+            if (mono.isChrome) {
+                if ( window.localStorage && localStorage.length > 0 && !localStorage.migrated ) {
+                    fastMigration(localStorage);
+                }
+            }
             if (mono.isModule) {
                 complete_icon = self.data.url(complete_icon);
                 add_icon = self.data.url(add_icon);
