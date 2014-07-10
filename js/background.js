@@ -1264,7 +1264,7 @@ var engine = function () {
             if (settings.change_downloads) {
                 var ch_label = {label: 'download', custom: 1};
                 mono.sendMessage({action: 'setLabel', data: ch_label}, undefined, 'mgr');
-                mono.storage.set({selected_label: JSON.stringify(ch_label)});
+                mono.storage.set({selected_label: ch_label});
             }
             showNotifi(add_icon, item[2], lang_arr[102], 'addFile');
             var_cache.newFileListener = undefined;
@@ -1532,6 +1532,11 @@ var engine = function () {
         if (['ru', 'en', 'fr'].indexOf(lStorage.lang) !== -1) {
             settings.lang = lStorage.lang;
         }
+        ['fl_colums', 'fl_sort_by', 'fl_sort_colum', 'colums', 'tr_sort_by', 'tr_sort_colum'].forEach(function(key) {
+            if (lStorage[key]) {
+                settings[key] = lStorage[key];
+            }
+        });
         mono.storage.set(settings, function() {
             lStorage.migrated = true;
             window.location.reload();

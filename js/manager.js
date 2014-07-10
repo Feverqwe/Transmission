@@ -306,7 +306,7 @@ var manager = function () {
         var label = data.label;
         var custom = data.custom;
         var_cache.current_filter = {label: label, custom: custom};
-        mono.storage.set({selected_label: JSON.stringify(var_cache.current_filter)});
+        mono.storage.set({selected_label: var_cache.current_filter});
         if (custom === 0) {
             dom_cache.body.children('style.tr_filter').remove();
             $('<style>', {'class': 'tr_filter', text: '.torrent-table-body tbody > tr{display: none;}.torrent-table-body tbody > tr[data-label="' + label + '"]{display: table-row;}'})
@@ -1760,6 +1760,9 @@ var manager = function () {
                 if (options.login === undefined || options.password === undefined) {
                     return window.location = "options.html";
                 }
+                if (typeof options.selected_label === 'string'){
+                    options.selected_label = JSON.parse(options.selected_label);
+                }
                 var_cache.onBootOptions = options;
                 mono.sendMessage(['lang_arr', 'settings',
                     'getColums', 'getFlColums',
@@ -1878,7 +1881,6 @@ var manager = function () {
             setLabels(onBootVars.cache.labels || []);
             var selected_label = var_cache.onBootOptions.selected_label;
             if (selected_label !== undefined) {
-                var selected_label = JSON.parse(selected_label);
                 if (selected_label.label !== undefined && selected_label.custom !== undefined) {
                     var selected_label = {label: selected_label.label, custom: selected_label.custom};
                     tr_changeFilter(selected_label);
