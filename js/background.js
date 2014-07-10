@@ -131,6 +131,9 @@ var init = function(env, lang) {
         if (message === 'cache') {
             return cb(engine.cache);
         }
+        if (message === 'trafStartTime') {
+            return cb(engine.trafStartTime);
+        }
         if (message === 'def_settings') {
             return cb(engine.def_settings);
         }
@@ -1212,13 +1215,12 @@ var engine = function () {
         if (values_len > 1 && time - limit > traf0.values[values_len - 1].time) {
             traf0.values = traf0.values.slice(-1);
             traf1.values = traf1.values.slice(-1);
-            values_len = 2;
         }
         traf0.values.push({time: time, pos: dl_sum});
         traf1.values.push({time: time, pos: up_sum});
         if (values_len > limit * 3) {
-            traf0.values = traf0.values.slice(-limit);
-            traf1.values = traf1.values.slice(-limit);
+            traf0.values.splice(0, values_len - limit);
+            traf1.values.splice(0, values_len - limit);
         }
     };
     var showActiveCount = function (arr) {
@@ -1568,6 +1570,7 @@ var engine = function () {
         settings: settings,
         def_settings: def_settings,
         sendAction: sendAction,
+        trafStartTime: var_cache.startTime,
         cache: var_cache.client,
         traffic: var_cache.traffic,
         getToken: getToken,

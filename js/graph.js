@@ -6,7 +6,8 @@ var graph = function () {
     var svg;
     //количество пиков на графике 1 пик - 1 секунда
     var _limit = 90;
-    var created = false;
+    var traffic = undefined;
+    var startTime = 0;
 
     var getInfo = function (data) {
         var min;
@@ -45,9 +46,6 @@ var graph = function () {
     };
 
     var createLines = function (data) {
-        if (created === true) {
-            return;
-        }
         if (data === undefined) {
             return;
         }
@@ -65,21 +63,11 @@ var graph = function () {
         city.append("path")
             .attr("class", "line")
             .attr("d", function (d) {
-                data.forEach(function(line) {
-                    if (line.name === d.name) {
-                        d.values = line.values;
-                        return;
-                    }
-                });
                 return line(d.values);
             })
             .style("stroke", function(d) { return (d.name === 'download')?'#3687ED':'#41B541'; });
-        created = true;
     };
     var updateLines = function (data) {
-        if (created === false) {
-            return;
-        }
         var min = getInfo(data, true);
         var max = min.max;
         var start = min.start;
@@ -88,13 +76,6 @@ var graph = function () {
         x.domain([start, end]);
         y.domain([min,max]);
         svg.selectAll("path").transition().ease('quad').attr("d", function (d) {
-            for (var i = 0, item; item = data[i]; i++) {
-                if (item.name !== d.name) {
-                    continue;
-                }
-                d.values = item.values;
-                break;
-            }
             return line(d.values);
         });
     };
@@ -117,19 +98,40 @@ var graph = function () {
                 return y(d.pos);
             });
         svg = d3.select("li.graph").append("svg").attr({"width": width, "height": height}).append("g");
-        mono.sendMessage('getTraffic', function(data) {
-            createLines(data);
-        }, 'bg');
+        createLines(traffic);
+    };
+    var addData = function (dl_sum, up_sum) {
+        var limit = 90;
+        var time = parseInt(Date.now()/1000) - startTime;
+        var traf0 = traffic[0];
+        var traf1 = traffic[1];
+        var values_len = traf0.values.length;
+        if (values_len > 1 && time - limit > traf0.values[values_len - 1].time) {
+            traf0.values = traf0.values.slice(-1);
+            traf1.values = traf1.values.slice(-1);
+        }
+        traf0.values.push({time: time, pos: dl_sum});
+        traf1.values.push({time: time, pos: up_sum});
+        if (values_len > limit * 3) {
+            traf0.values.splice(0, values_len - limit);
+            traf1.values.splice(0, values_len - limit);
+        }
     };
     return {
-        move: function () {
-            mono.sendMessage('getTraffic', function(data) {
-                updateLines(data);
-            }, 'bg');
+        move: function (dl, up) {
+            if (!traffic) {
+                return;
+            }
+            addData(dl, up);
+            updateLines(traffic);
         },
         run: function () {
             body = $('li.graph');
-            init();
+            mono.sendMessage(['getTraffic', 'trafStartTime'], function(response) {
+                startTime = response.trafStartTime;
+                traffic = response.getTraffic;
+                init();
+            }, 'bg');
         }
     }
 }();
