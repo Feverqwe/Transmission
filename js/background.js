@@ -1519,7 +1519,10 @@ var engine = function () {
             }
             if ( ['number', 'checkbox'].indexOf(def_item.t) !== -1 ) {
                 value = parseInt(value);
-            }
+                if (!isNaN(value)) {
+                    settings[key] = value;
+                }
+            } else
             if (value) {
                 settings[key] = value;
             }
