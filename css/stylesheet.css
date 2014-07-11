@@ -270,6 +270,8 @@ table.status-panel td {
 }
 table.status-panel td.status {
     width: 35%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 table.status-panel td.space {
     padding-left: 18px;
