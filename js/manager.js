@@ -2045,7 +2045,8 @@ var manager = function () {
             dom_cache.menu.on('click', 'a.refresh', function (e) {
                 e.preventDefault();
                 mgTimer.start();
-                sendAction({list: 1, cid: 0})
+                sendAction({list: 1, cid: 0});
+                sendAction({action: 'getsettings'});
             });
             dom_cache.menu.on('click', 'a.start_all', function (e) {
                 e.preventDefault();
