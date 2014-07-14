@@ -128,8 +128,8 @@ var graph = function () {
         run: function () {
             body = $('li.graph');
             mono.sendMessage(['getTraffic', 'trafStartTime'], function(response) {
+                startTime = response.trafStartTime;
                 traffic = response.getTraffic;
-                startTime = traffic[0].values[0].time - 1 || response.trafStartTime;
                 init();
             }, 'bg');
         }
