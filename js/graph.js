@@ -129,7 +129,7 @@ var graph = function () {
             body = $('li.graph');
             mono.sendMessage(['getTraffic', 'trafStartTime'], function(response) {
                 traffic = response.getTraffic;
-                startTime = traffic[0].values[0] - 1 || response.trafStartTime;
+                startTime = traffic[0].values[0].time - 1 || response.trafStartTime;
                 init();
             }, 'bg');
         }
