@@ -1,4 +1,4 @@
-var { ToggleButton } = require('sdk/ui/button/toggle');
+var ToggleButton = require('sdk/ui/button/toggle').ToggleButton;
 var panels = require("sdk/panel");
 var self = require("sdk/self");
 var monoLib = require("./monoLib.js");
