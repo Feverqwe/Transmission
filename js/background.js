@@ -1405,7 +1405,7 @@ var engine = function () {
                 return minifi(onClickString);
             })();
             var cm = require("sdk/context-menu");
-            if (var_cache.topLevel) {
+            if (var_cache.topLevel && var_cache.topLevel.parentMenu) {
                 var_cache.topLevel.parentMenu.removeItem(var_cache.topLevel);
             }
             if (!settings.context_menu_trigger) {
