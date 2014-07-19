@@ -30,7 +30,7 @@ var popup = panels.Panel({
     onHide: function () {
         button.state('window', {checked: false});
         displayState = false;
-        monoLib.sendAll({
+        monoLib.sendToPage(popup, {
             data: 'sleep',
             monoTo: 'monoScope',
             monoFrom: 'system'
@@ -38,7 +38,7 @@ var popup = panels.Panel({
     },
     onShow: function() {
         displayState = true;
-        monoLib.sendAll({
+        monoLib.sendToPage(popup, {
             data: 'wake',
             monoTo: 'monoScope',
             monoFrom: 'system'
@@ -47,7 +47,7 @@ var popup = panels.Panel({
     onMessage: function(msg) {
         if (msg === 'isShow') {
             if (!displayState) {
-                monoLib.sendAll({
+                monoLib.sendToPage(popup, {
                     data: 'sleep',
                     monoTo: 'monoScope',
                     monoFrom: 'system'
