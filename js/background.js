@@ -1283,11 +1283,12 @@ var engine = function () {
                     'background-color: black;'+
                     '">'+count+'</text>'+'</svg>';
                 cb(img, count);
-            }
+            };
             reader.readAsDataURL(xhr.response);
         };
         xhr.send();
     };
+
     var showActiveCount = function (arr) {
         if (!settings.show_active_tr_on_icon) {
             return;
