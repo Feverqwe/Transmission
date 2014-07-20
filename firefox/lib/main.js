@@ -2,7 +2,6 @@ var ToggleButton = require('sdk/ui/button/toggle').ToggleButton;
 var panels = require("sdk/panel");
 var self = require("sdk/self");
 var monoLib = require("./monoLib.js");
-var lang = require("./lang.js");
 
 var button = ToggleButton({
     id: "tTinyOpenBtn",
@@ -65,4 +64,4 @@ monoLib.addPage('mgr', popup);
 monoLib.addPage('opt', popup);
 monoLib.addPage('bg', bg_addon);
 
-bg.init(bg_addon, lang, button);
+bg.init(bg_addon, button);
