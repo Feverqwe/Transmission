@@ -1274,7 +1274,7 @@ var engine = function () {
                     'width="'+size+'" height="'+size+'">'
                     +'<rect rx="4" ry="4" x="'+left_p+'" y="'+(size-box_h)+'" ' +
                     'width="'+box_w+'" height="'+box_h+'" ' +
-                    'style="fill:rgba(60,60,60,0.5);stroke:black;stroke-width:1;"' +
+                    'style="fill:rgba(60,60,60,0.8);stroke:black;stroke-width:1;opacity:0.6;"' +
                     '/>'
                     +'<text fill="white" x="'+(left_p+parseInt( text_p / 2 ))+'" y="'+(size-text_p)+'" style="' +
                     'font-family: Arial;' +
