@@ -361,7 +361,6 @@ var options = function() {
         boot: function() {
             if (mono.isFF) {
                 addon.postMessage('isShow');
-                $('input[name="show_active_tr_on_icon"]').parent().parent().parent().hide();
                 $('input[name="notify_visbl_interval"]').parent().parent().parent().hide();
             }
             mono.sendMessage({action: 'resize', height: 600}, undefined, 'service');

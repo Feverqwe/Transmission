@@ -13,6 +13,7 @@ if (typeof window === 'undefined') {
 
     window.Notifications = require("sdk/notifications");
     window.isModule = true;
+    var ffButton = undefined;
 }
 var jQ = {
     isPlainObject: function( obj ) {
@@ -108,10 +109,11 @@ var jQ = {
     }
 };
 
-var init = function(env, lang) {
+var init = function(env, lang, button) {
     if (env !== undefined) {
         window.get_lang = lang.get_lang;
         mono = mono.init(env);
+        ffButton = button;
     }
 
     mono.pageId = 'bg';
@@ -1223,10 +1225,70 @@ var engine = function () {
             traf1.values.splice(0, values_len - limit);
         }
     };
-    var showActiveCount = function (arr) {
-        if (!mono.isChrome) {
-            return;
+
+    var mkFFIconWithText = function(size, count, cb) {
+        var xhr = new XMLHttpRequest();
+        var url = self.data.url('./icons/icon-'+size+'.png');
+        if (count === 0) {
+            return cb(url);
         }
+        xhr.open('GET', url);
+        xhr.responseType = 'blob';
+        xhr.onload = function() {
+            var reader = new window.FileReader();
+            reader.onloadend = function() {
+                var base64data = reader.result;
+                var pos = base64data.indexOf(';');
+                base64data = base64data.substr(pos);
+                base64data = 'data:image/png'+base64data;
+
+                var box_w = 14;
+                var box_h = 10;
+                var text_p = 2;
+                var fSize = 10;
+                if (count < 10) {
+                    box_w = 8;
+                }
+                if (size === 32) {
+                    box_w = 20;
+                    box_h = 16;
+                    text_p = 2;
+                    fSize = 16;
+                    if (count < 10) {
+                        box_w = 12;
+                    }
+                }
+                if (size === 64) {
+                    box_w = 38;
+                    box_h = 30;
+                    text_p = 4;
+                    fSize = 30;
+                    if (count < 10) {
+                        box_w = 21;
+                    }
+                }
+                var left_p = size - box_w;
+
+                var img = 'data:image/svg+xml;utf8,'+'<svg xmlns="http://www.w3.org/2000/svg" ' +
+                    'style="background: url('+base64data+') center center no-repeat;" ' +
+                    'width="'+size+'" height="'+size+'">'
+                    +'<rect rx="4" ry="4" x="'+left_p+'" y="'+(size-box_h)+'" ' +
+                    'width="'+box_w+'" height="'+box_h+'" ' +
+                    'style="fill:rgba(60,60,60,0.5);stroke:black;stroke-width:1;"' +
+                    '/>'
+                    +'<text fill="white" x="'+(left_p+parseInt( text_p / 2 ))+'" y="'+(size-text_p)+'" style="' +
+                    'font-family: Arial;' +
+                    'font-weight: bolder;' +
+                    'font-size: '+fSize+'px;' +
+                    'background-color: black;'+
+                    '">'+count+'</text>'+'</svg>';
+                cb(img, count);
+            }
+            reader.readAsDataURL(xhr.response);
+        };
+        xhr.send();
+    };
+    var showActiveCount = function (arr) {
         if (!settings.show_active_tr_on_icon) {
             return;
         }
@@ -1236,8 +1298,24 @@ var engine = function () {
                 active++;
             }
         }
-        if (var_cache.client.active_torrent !== active) {
-            var_cache.client.active_torrent = active;
+        if (var_cache.client.active_torrent === active) {
+            return;
+        }
+        var_cache.client.active_torrent = active;
+        if (mono.isFF) {
+            mkFFIconWithText(16, active, function(url16, count) {
+                mkFFIconWithText(32, count, function(url32) {
+                    mkFFIconWithText(64, count, function(url64) {
+                        ffButton.icon = {
+                            "16": url16,
+                            "32": url32,
+                            "64": url64
+                        };
+                    });
+                });
+            });
+        }
+        if (mono.isChrome) {
             /**
              * @namespace chrome.browserAction.setBadgeText
              */
