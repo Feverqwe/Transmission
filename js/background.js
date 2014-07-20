@@ -1269,13 +1269,12 @@ var engine = function () {
                 }
                 var left_p = size - box_w;
 
-                var img = 'data:image/svg+xml;utf8,'+'<svg xmlns="http://www.w3.org/2000/svg" ' +
-                    'style="background: url('+base64data+') center center no-repeat;" ' +
+                var img = 'data:image/svg+xml;utf8,'+'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" ' +
                     'width="'+size+'" height="'+size+'">'
-                    +'<rect rx="4" ry="4" x="'+left_p+'" y="'+(size-box_h)+'" ' +
-                    'width="'+box_w+'" height="'+box_h+'" ' +
-                    'style="fill:rgba(60,60,60,0.8);stroke:black;stroke-width:1;opacity:0.6;"' +
-                    '/>'
+                    +'<image x="0" y="0" width="'+size+'" height="'+size+'" xlink:href="'+base64data+'" />'
+                    +'<rect rx="4" ry="4" x="'+left_p+'" y="'+(size-box_h)+'" '
+                    +'width="'+box_w+'" height="'+box_h+'" '
+                    +'style="fill:rgba(60,60,60,0.8);stroke:black;stroke-width:1;opacity:0.6;"/>'
                     +'<text fill="white" x="'+(left_p+parseInt( text_p / 2 ))+'" y="'+(size-text_p)+'" style="' +
                     'font-family: Arial;' +
                     'font-weight: bolder;' +
