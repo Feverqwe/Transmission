@@ -5,9 +5,10 @@
   "description": "Transmission webUi",
   "author": "Anton V.",
   "license": "MPL 2.0",
-  "version": "1.2.48",
+  "version": "1.2.49",
   "permissions": {
-    "cross-domain-content": ["http://*", "https://*"]
+    "cross-domain-content": ["http://*", "https://*"],
+    "private-browsing": true
   },
   "icon": "data/icons/icon-48.png",
   "icon64": "data/icons/icon-64.png"
