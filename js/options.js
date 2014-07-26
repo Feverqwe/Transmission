@@ -331,7 +331,10 @@ var options = function() {
     };
     var popup = function() {
         var isPopup = false;
-        if (mono.isFF && !mono.noAddon) {
+        if (mono.isFF) {
+            if (mono.noAddon) {
+                return false;
+            }
             return true;
         }
         var windows = chrome.extension.getViews({type: 'popup'});
