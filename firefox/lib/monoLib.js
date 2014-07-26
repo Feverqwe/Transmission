@@ -21,10 +21,21 @@ var XMLHttpRequest = require('sdk/net/xhr').XMLHttpRequest;
         return pageWrapper[pageList.indexOf(page)];
     };
     var addPageInWrapper = function(page) {
+        if (pageList.indexOf(page) !== -1) {
+            return getPageFromWrapper(page);
+        }
         var id = pageList.length;
         pageList.push(page);
         pageWrapper[id] = {page: page};
         return pageWrapper[id];
+    };
+    var delPageFromWrapper = function(page) {
+        var id = pageList.indexOf(page);
+        if (id === -1) {
+            return;
+        }
+        pageList.splice(id, 1);
+        delete pageWrapper[id];
     };
 
     var monoStorage = function() {
@@ -333,10 +344,15 @@ var XMLHttpRequest = require('sdk/net/xhr').XMLHttpRequest;
             page.on('attach', function() {
                 mPage.active = true;
                 map[mPage.index] = mPage;
+                var p = addPageInWrapper(page);
+                p.id = mPage.id;
+                p.index = mPage.index;
+                p.active = mPage.active;
             });
             page.on('detach', function() {
                 delete map[mPage.index];
                 mPage.active = false;
+                delPageFromWrapper(page);
             });
         }
         var type = (page.isVirtual !== undefined)?'lib':'port';
