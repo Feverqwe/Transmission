@@ -60,8 +60,8 @@ var popup = panels.Panel({
 var bg = require("./background.js");
 var bg_addon = monoLib.virtualAddon('bg');
 
+monoLib.addPage('bg', bg_addon);
 monoLib.addPage('mgr', popup);
 monoLib.addPage('opt', popup);
-monoLib.addPage('bg', bg_addon);
 
 bg.init(bg_addon, button);
