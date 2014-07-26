@@ -16,6 +16,7 @@ var XMLHttpRequest = require('sdk/net/xhr').XMLHttpRequest;
     var defaultId = 'monoScope';
     var pageIndex = 0;
     var pageList = [];
+    var sanitizeRegExp = [/href=/img, /data-safe-href=/img];
 
     var getPageFromWrapper = function(page) {
         return pageWrapper[pageList.indexOf(page)];
@@ -112,7 +113,7 @@ var XMLHttpRequest = require('sdk/net/xhr').XMLHttpRequest;
     exports.sendToPage = sendToPage;
 
     var sendAll = function(message, fromPage) {
-        if (fromPage.port !== undefined) {
+        if (fromPage !== undefined && fromPage.port !== undefined) {
             fromPage = getPageFromWrapper(fromPage);
             if (fromPage === undefined) {
                 return;
@@ -153,6 +154,21 @@ var XMLHttpRequest = require('sdk/net/xhr').XMLHttpRequest;
         if (msg.action === 'clear') {
             return monoStorage.clear(response);
         }
+    };
+
+    var sanitizedHTML = function (html) {
+        var chrome = require('chrome');
+        var Cc = chrome.Cc;
+        var Ci = chrome.Ci;
+        var Cu = chrome.Cu;
+
+        var flags = 2;
+
+        html = html.replace(sanitizeRegExp[0], "data-safe-href=");
+        var parser = Cc["@mozilla.org/parserutils;1"].getService(Ci.nsIParserUtils);
+        var sanitizedHTML = parser.sanitize(html, flags);
+        sanitizedHTML = sanitizedHTML.replace(sanitizeRegExp[1], "href=");
+        return sanitizedHTML;
     };
 
     var xhrList = {};
@@ -206,7 +222,7 @@ var XMLHttpRequest = require('sdk/net/xhr').XMLHttpRequest;
                 return response({
                     status: xhr.status,
                     statusText: xhr.statusText,
-                    response: (obj.responseType)?xhr.response:xhr.responseText
+                    response: (obj.responseType)?xhr.response:(obj.safe)?sanitizedHTML(xhr.responseText):xhr.responseText
                 });
             };
             xhr.send(obj.data);
