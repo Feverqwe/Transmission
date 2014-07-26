@@ -116,7 +116,7 @@ var XMLHttpRequest = require('sdk/net/xhr').XMLHttpRequest;
     };
     exports.sendAll = sendAll;
 
-    serviceList['monoStorage'] = function(pageConteiner, message) {
+    serviceList['monoStorage'] = function(mPage, message) {
         var msg = message.data;
         var response;
         if (message.monoCallbackId !== undefined) {
@@ -127,7 +127,7 @@ var XMLHttpRequest = require('sdk/net/xhr').XMLHttpRequest;
                     monoFrom: 'monoStorage',
                     monoResponseId: message.monoCallbackId
                 };
-                sendToPage(pageConteiner, responseMessage);
+                sendToPage(mPage, responseMessage);
             }
         }
         if (msg.action === 'get') {
@@ -145,7 +145,7 @@ var XMLHttpRequest = require('sdk/net/xhr').XMLHttpRequest;
     };
 
     var xhrList = {};
-    serviceList['service'] = function(pageConteiner, message) {
+    serviceList['service'] = function(mPage, message) {
         var msg = message.data;
         var response;
         if (message.monoCallbackId !== undefined) {
@@ -156,18 +156,18 @@ var XMLHttpRequest = require('sdk/net/xhr').XMLHttpRequest;
                     monoFrom: 'service',
                     monoResponseId: message.monoCallbackId
                 };
-                sendToPage(pageConteiner, responseMessage);
+                sendToPage(mPage, responseMessage);
             }
         }
         if (msg.action === 'resize') {
-            if (pageConteiner.active === false) {
+            if (mPage.active === false) {
                 return;
             }
             if (msg.width) {
-                pageConteiner.page.width = msg.width;
+                mPage.page.width = msg.width;
             }
             if (msg.height) {
-                pageConteiner.page.height = msg.height;
+                mPage.page.height = msg.height;
             }
             return;
         }
