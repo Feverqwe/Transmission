@@ -331,7 +331,7 @@ var options = function() {
     };
     var popup = function() {
         var isPopup = false;
-        if (!window.chrome) {
+        if (mono.isFF && !mono.noAddon) {
             return true;
         }
         var windows = chrome.extension.getViews({type: 'popup'});
@@ -360,7 +360,9 @@ var options = function() {
     return {
         boot: function() {
             if (mono.isFF) {
-                addon.postMessage('isShow');
+                if (!mono.noAddon) {
+                    addon.postMessage('isShow');
+                }
                 $('input[name="notify_visbl_interval"]').parent().parent().parent().hide();
             }
             mono.sendMessage({action: 'resize', height: 600}, undefined, 'service');

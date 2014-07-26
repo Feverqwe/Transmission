@@ -2,6 +2,7 @@ var ToggleButton = require('sdk/ui/button/toggle').ToggleButton;
 var panels = require("sdk/panel");
 var self = require("sdk/self");
 var monoLib = require("./monoLib.js");
+var pageMod = require("sdk/page-mod");
 
 var button = ToggleButton({
     id: "tTinyOpenBtn",
@@ -19,6 +20,21 @@ var button = ToggleButton({
             position: button
         });
     }
+});
+
+pageMod.PageMod({
+    include: self.data.url('options.html'),
+    contentScript: '('+monoLib.virtualPort.toString()+')()',
+    contentScriptWhen: 'start',
+    onAttach: function(tab) {
+        monoLib.addPage('opt', tab);
+    }
+});
+
+var sp = require("sdk/simple-prefs");
+sp.on("settingsBtn", function() {
+    var tabs = require("sdk/tabs");
+    tabs.open( self.data.url('options.html') );
 });
 
 var displayState = false;

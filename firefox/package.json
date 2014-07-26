@@ -3,6 +3,14 @@
   "title": "Transmission easy client",
   "id": "jid1-0GMKQAI8A9x5jg",
   "description": "Transmission webUi",
+    "preferences": [
+        {
+            "type": "control",
+            "label": "Settings",
+            "name": "settingsBtn",
+            "title": ""
+        }
+    ],
   "author": "Anton V.",
   "license": "MPL 2.0",
   "version": "1.2.49",
