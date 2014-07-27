@@ -245,7 +245,8 @@ var engine = function () {
         folders_array: {v: [], t: "array"},
         context_labels: {v: 0, t: "checkbox"},
         free_space: {v: 1, t: "checkbox"},
-        get_full_list: {v: 0, t: "checkbox"}
+        get_full_list: {v: 0, t: "checkbox"},
+        tree_view_menu: {v: 0, t: "checkbox"}
     };
     var settings = {};
     var loadSettings = function (cb) {
@@ -1384,8 +1385,8 @@ var engine = function () {
                 sendAction({list: 1}, function () {
                     sendAction(jQ.extend({action: 'add-url', s: url}, dir), function (data) {
                         setOnFileAddListener(label);
-                        if (data.error !== undefined) {
-                            showNotifi(error_icon, lang_arr[23], data.error, 'addFile');
+                        if (data.result && data.result !== 'success') {
+                            showNotifi(error_icon, lang_arr[23], data.result, 'addFile');
                             var_cache.newFileListener = undefined;
                         }
                         sendAction({list: 1});
@@ -1403,8 +1404,8 @@ var engine = function () {
             sendAction({list: 1}, function () {
                 sendAction(jQ.extend({action: 'add-file', torrent_file: url}, dir), function (data) {
                     setOnFileAddListener(label);
-                    if (data.error !== undefined) {
-                        showNotifi(error_icon, lang_arr[23], data.error, 'addFile');
+                    if (data.result && data.result !== 'success') {
+                        showNotifi(error_icon, lang_arr[23], data.result, 'addFile');
                         var_cache.newFileListener = undefined;
                     }
                     sendAction({list: 1});
@@ -1419,20 +1420,163 @@ var engine = function () {
          */
         var link = e.linkUrl;
         var id = e.menuItemId;
-        if (id === 'main') {
+        var updateMenu = false;
+        if (id === 'new') {
+            var path = window.prompt(lang_arr.cmNewPathDialog, var_cache.folders_array[0][1]);
+            if (!path) {
+                return;
+            }
+            var download_dir = var_cache.folders_array[0][0];
+            id = var_cache.folders_array.length;
+            var_cache.folders_array.push([download_dir, path]);
+            settings.folders_array.push([download_dir, path]);
+            updateMenu = true;
+        }
+        if (id === 'main' || id === 'default') {
             sendFile(link);
             return;
         }
         var dir, label;
-        var item = settings.folders_array[id];
+        var item = var_cache.folders_array[id];
         if (!isTransmission && settings.context_labels) {
             label = item[1];
         } else {
             dir = {download_dir: item[0], path: item[1]};
         }
+        if (updateMenu) {
+            mono.storage.set({ folders_array: JSON.stringify(settings.folders_array) }, function() {
+                createCtxMenu();
+            });
+        }
         sendFile(link, dir, label);
     };
+
+    var listToTreeList = function() {
+        var tmp_folders_array = [];
+        var tree = {};
+        var sepType;
+        var treeLen = 0;
+        for (var i = 0, item; item = var_cache.folders_array[i]; i++) {
+            var path = item[1];
+            if (sepType === undefined) {
+                sepType = path.indexOf('/') === -1 ? path.indexOf('\\') === -1 ? undefined : '\\' : '/';
+            } else {
+                if (sepType === '\\') {
+                    item[1] = path.replace(/\//g, '\\');
+                } else {
+                    item[1] = path.replace(/\\/g, '/');
+                }
+            }
+        }
+        if (sepType === undefined) {
+            sepType = '';
+        }
+        for (var i = 0, item; item = var_cache.folders_array[i]; i++) {
+            var _disk = item[0];
+            var path = item[1];
+            if (!path) {
+                continue;
+            }
+            var splitedPath = [];
+            if (path.search(/[a-zA-Z]{1}:(\/\/|\\\\)/) === 0) {
+                var dblSep = sepType+sepType;
+                var disk = path.split(':'+dblSep);
+                if (disk.length === 2) {
+                    disk[0] += ':'+dblSep;
+                    splitedPath.push(disk[0]);
+                    path = disk[1];
+                }
+            }
+            var pathList = path.split(sepType);
+
+            splitedPath = splitedPath.concat(pathList);
+
+            if (splitedPath.slice(-1)[0] === '') {
+                splitedPath.splice(-1);
+            }
+
+            var lastDir = undefined;
+            var folderPath = undefined;
+            for (var m = 0, len = splitedPath.length; m < len; m++) {
+                var cPath = (lastDir !== undefined)?lastDir:tree;
+                var jPath = splitedPath[m];
+                if (folderPath === undefined) {
+                    folderPath = jPath;
+                } else {
+                    if (m === 1 && folderPath.slice(-1) === sepType) {
+                        folderPath += jPath;
+                    } else {
+                        folderPath += sepType + jPath;
+                    }
+                }
+
+                lastDir = cPath[ jPath ];
+                if (lastDir === undefined) {
+                    if (cPath === tree) {
+                        treeLen++;
+                    }
+                    lastDir = cPath[ jPath ] = {
+                        arrayIndex: tmp_folders_array.length,
+                        currentPath: jPath
+                    };
+                    tmp_folders_array.push([ _disk , folderPath ]);
+                }
+            }
+            if (lastDir) {
+                lastDir.end = true;
+            }
+        }
+
+        var smartTree = [];
+
+        var createSubMenu = function(parentId, itemList) {
+            var childList = [];
+            for (var subPath in itemList) {
+                var item = itemList[subPath];
+                if (item.currentPath !== undefined) {
+                    childList.push(item);
+                }
+            }
+            var childListLen = childList.length;
+            if (childListLen === 1 && itemList.end === undefined) {
+                var cPath = itemList.currentPath;
+                if (itemList.currentPath.slice(-1) !== sepType) {
+                    cPath += sepType;
+                }
+                childList[0].currentPath = cPath + childList[0].currentPath;
+                createSubMenu(parentId, childList[0]);
+                return;
+            }
+            var hasChild = childListLen !== 0;
+            var id = (hasChild) ? 'p'+String(itemList.arrayIndex) : String(itemList.arrayIndex);
+            if (itemList.currentPath) {
+                smartTree.push({
+                    id: id,
+                    parentId: parentId,
+                    title: itemList.currentPath
+                });
+                if (hasChild) {
+                    smartTree.push({
+                        id: id.substr(1),
+                        parentId: id,
+                        title: lang_arr.cmCf
+                    });
+                }
+            }
+            childList.forEach(function(item) {
+                createSubMenu(id, item);
+            });
+        };
+
+        for (var item in tree) {
+            createSubMenu('main', tree[item]);
+        }
+
+        return {tree: smartTree, list: tmp_folders_array};
+    };
+
     var createCtxMenu = function () {
+        var_cache.folders_array = settings.folders_array.slice(0);
         if (mono.isModule) {
             var contentScript = (function() {
                 var onClick = function() {
@@ -1493,7 +1637,7 @@ var engine = function () {
             if (!settings.context_menu_trigger) {
                 return;
             }
-            if (settings.folders_array.length === 0) {
+            if (var_cache.folders_array.length === 0) {
                 var_cache.topLevel = cm.Item({
                     label: lang_arr[104],
                     context: cm.SelectorContext("a"),
@@ -1547,9 +1691,39 @@ var engine = function () {
                     });
                 };
                 var items = [];
-                for (var i = 0, item; item = settings.folders_array[i]; i++) {
-                    items.push( cm.Item({ label: item[1], data: String(i), context: cm.SelectorContext("a"), onMessage: onMessage, contentScript: contentScript }) );
+                if (settings.tree_view_menu) {
+                    var treeList = listToTreeList();
+                    var createItems = function(parentId, itemList) {
+                        var menuItemList = [];
+                        for (var i = 0, item; item = itemList[i]; i++) {
+                            if (item.parentId !== parentId) {
+                                continue;
+                            }
+                            var itemOpt = { label: item.title, context: cm.SelectorContext("a") };
+                            var subItems = createItems( item.id, itemList );
+                            if (subItems.length !== 0) {
+                                itemOpt.items = subItems;
+                                menuItemList.push(cm.Menu(itemOpt));
+                            } else {
+                                itemOpt.onMessage = onMessage;
+                                itemOpt.contentScript = contentScript;
+                                itemOpt.data = item.id;
+                                menuItemList.push(cm.Item(itemOpt));
+                            }
+                        }
+                        return menuItemList;
+                    };
+                    items = createItems('main', treeList.tree);
+                    var_cache.folders_array = treeList.list;
+                } else {
+                    for (var i = 0, item; item = var_cache.folders_array[i]; i++) {
+                        items.push(cm.Item({ label: item[1], data: String(i), context: cm.SelectorContext("a"), onMessage: onMessage, contentScript: contentScript }));
+                    }
                 }
+
+                items.push(cm.Item({ label: lang_arr.cmDf, data: 'default', context: cm.SelectorContext("a"), onMessage: onMessage, contentScript: contentScript }));
+                items.push(cm.Item({ label: lang_arr.cmCreateItem, data: 'new', context: cm.SelectorContext("a"), onMessage: onMessage, contentScript: contentScript }));
+
                 var_cache.topLevel = cm.Menu({
                     label: lang_arr[104],
                     context: cm.SelectorContext("a"),
@@ -1557,8 +1731,7 @@ var engine = function () {
                     items: items
                 });
             }
-            return;
-        }
+        } else
         if (mono.isChrome) {
             /**
              * @namespace chrome.contextMenus.removeAll
@@ -1574,18 +1747,46 @@ var engine = function () {
                     contexts: ["link"],
                     onclick: onCtxMenuCall
                 }, function () {
-                    if (settings.folders_array.length === 0) {
+                    if (var_cache.folders_array.length === 0) {
                         return;
                     }
-                    for (var i = 0, item; item = settings.folders_array[i]; i++) {
-                        chrome.contextMenus.create({
-                            id: String(i),
-                            parentId: 'main',
-                            title: item[1],
-                            contexts: ["link"],
-                            onclick: onCtxMenuCall
-                        });
+                    if (settings.tree_view_menu) {
+                        var treeList = listToTreeList();
+                        for (var i = 0, item; item = treeList.tree[i]; i++) {
+                            chrome.contextMenus.create({
+                                id: item.id,
+                                parentId: item.parentId,
+                                title: item.title,
+                                contexts: ["link"],
+                                onclick: onCtxMenuCall
+                            });
+                        }
+                        var_cache.folders_array = treeList.list;
+                    } else {
+                        for (var i = 0, item; item = var_cache.folders_array[i]; i++) {
+                            chrome.contextMenus.create({
+                                id: String(i),
+                                parentId: 'main',
+                                title: item[1],
+                                contexts: ["link"],
+                                onclick: onCtxMenuCall
+                            });
+                        }
                     }
+                    chrome.contextMenus.create({
+                        id: 'default',
+                        parentId: 'main',
+                        title: lang_arr.cmDf,
+                        contexts: ["link"],
+                        onclick: onCtxMenuCall
+                    });
+                    chrome.contextMenus.create({
+                        id: 'new',
+                        parentId: 'main',
+                        title: lang_arr.cmCreateItem,
+                        contexts: ["link"],
+                        onclick: onCtxMenuCall
+                    });
                 });
             });
         }

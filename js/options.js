@@ -447,7 +447,7 @@ var options = function() {
                     dom_cache.inp_add_folder[0].disabled = !this.checked;
                 });
             }
-            if (window.chrome !== undefined && chrome.storage) {
+            if (mono.isChrome && chrome.storage) {
                 $('input[name="save_in_cloud"]').on('click', function() {
                     var _this = this;
                     mono.storage.get(undefined, function(data) {

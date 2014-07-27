@@ -11,7 +11,7 @@ var get_lang = function(lang) {
         7: 'Remove and',
         8: 'Delete torrent',
         9: 'Delete data',
-        10: 'Delete data + torrent',
+        10: 'Del data + torrent',
         11: 'Label',
         12: 'Remove label',
         13: ['Name', 'Name'],
@@ -78,6 +78,10 @@ var get_lang = function(lang) {
         rename: ['Rename', 'Enter new name'],
         move: ['Move', 'Enter new path'],
         free_space: 'Free',
+        cmDf: 'Default directory',
+        cmCf: 'Current directory',
+        cmNewPathDialog: 'Enter new path',
+        cmCreateItem: 'Add directory',
         "settings": {
             1: "Transmission",
             2: "Notifications",
@@ -103,7 +107,7 @@ var get_lang = function(lang) {
             22: "Delete selected",
             23: "Subdirectory",
             24: "Directory (full path)",
-            25: "Automatically switch to the \"Downloading\" section after adding a torrent file successfully",
+            25: "Switch to the \"Downloading\" section after adding a torrent file",
             26: "Enable context menu",
             27: "Reset settings",
             28: "Reset settings",
@@ -113,7 +117,7 @@ var get_lang = function(lang) {
             32: "Show speed chart",
             33: "Hide all seeding torrents",
             34: "Hide all downloaded, non-seeding torrents",
-            35: "Automatically hide notification after",
+            35: "Hide notification after",
             36: "Update torrent list in background every",
             37: "seconds",
             38: "seconds, 0 - don't hide",
@@ -147,11 +151,12 @@ var get_lang = function(lang) {
             66: 'Check the box "Alternative listening port", enter port number 8080',
             67: 'Now enter "Username". "Password", "IP-address" and "Port". If you do not know your "IP-address" try enter 127.0.0.1',
             68: 'Press the button "Save all"',
-            69: 'Replace the directories on the label (with the addition of the label will be assigned)',
+            69: 'Label instead of a directory',
             70: 'Down',
             71: 'Up',
             72: 'To display the number of available disk space',
-            73: 'Always request a full list of torrents'
+            73: 'Tree context menu',
+            74: 'Always request a full list of torrents'
         }
     };
     var lang_arr_fr = {
@@ -233,6 +238,10 @@ var get_lang = function(lang) {
         rename: ['Renommer', 'Tapez un nouveau nom'],
         move: ['Déplacer', 'Tapez le nouveau chemin d\''],
         free_space: 'Disponible',
+        cmDf: 'Répertoire par défaut',
+        cmCf: 'Répertoire courant',
+        cmNewPathDialog: 'Entrez le nouveau chemin',
+        cmCreateItem: 'Ajouter le répertoire',
         "settings": {
             1: "Transmission",
             2: "Notifications",
@@ -306,7 +315,8 @@ var get_lang = function(lang) {
             70: 'Vers le bas',
             71: 'Vers le haut',
             72: 'Pour afficher le nombre d\'espace disque disponible',
-            73: 'Toujours demander une liste complète des torrents'
+            73: 'Arbre menu contextuel',
+            74: 'Toujours demander une liste complète des torrents'
         }
     };
     var lang_arr_ru = {
@@ -388,6 +398,10 @@ var get_lang = function(lang) {
         rename: ['Переименовать', 'Введите новое имя'],
         move: ['Переместить', 'Введите новый путь'],
         free_space: 'Свободно',
+        cmDf: 'Директория по умолчанию',
+        cmCf: 'Текущая директория',
+        cmNewPathDialog: 'Введите путь к новой дирректории',
+        cmCreateItem: 'Добавить директорию',
         "settings": {
             1: "Transmission",
             2: "Уведомления",
@@ -461,7 +475,8 @@ var get_lang = function(lang) {
             70: 'Вниз',
             71: 'Вверх',
             72: 'Отображать количество свободного места на диске',
-            73: 'Всегда запрашивать полный список торрентов'
+            73: 'Древовидное контекстное меню',
+            74: 'Всегда запрашивать полный список торрентов'
         }
     };
     if (lang === 'ru') {
