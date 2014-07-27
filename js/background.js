@@ -1477,9 +1477,10 @@ var engine = function () {
             if (!path) {
                 continue;
             }
+
+            var dblSep = sepType+sepType;
             var splitedPath = [];
             if (path.search(/[a-zA-Z]{1}:(\/\/|\\\\)/) === 0) {
-                var dblSep = sepType+sepType;
                 var disk = path.split(':'+dblSep);
                 if (disk.length === 2) {
                     disk[0] += ':'+dblSep;
@@ -1497,6 +1498,11 @@ var engine = function () {
 
             splitedPath = splitedPath.concat(pathList);
 
+            if (splitedPath[0] === '') {
+                splitedPath.shift();
+                splitedPath[0] = sepType + splitedPath[0];
+            }
+
             if (splitedPath.slice(-1)[0] === '') {
                 splitedPath.splice(-1);
             }
@@ -1509,7 +1515,7 @@ var engine = function () {
                 if (folderPath === undefined) {
                     folderPath = jPath;
                 } else {
-                    if (m === 1 && folderPath.slice(-1) === sepType) {
+                    if (m === 1 && folderPath.slice(-3) === ':'+dblSep) {
                         folderPath += jPath;
                     } else {
                         folderPath += sepType + jPath;
