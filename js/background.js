@@ -435,16 +435,7 @@ var engine = function () {
         };
         var _onerror = function() {
             if (xhr.status === 409) {
-                setStatus('getToken', [200]);
-                engine.cache = var_cache.client = {
-                    status: var_cache.client.status,
-                    token: xhr.getResponseHeader("X-Transmission-Session-Id")
-                };
-                if (onload !== undefined) {
-                    onload();
-                }
-                bgTimer.start();
-                return;
+                return _onready();
             }
             setStatus('getToken', [xhr.status, xhr.statusText]);
             if (onerror !== undefined) {
