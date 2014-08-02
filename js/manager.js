@@ -1779,9 +1779,6 @@ var manager = function () {
             });
         },
         start: function (onBootVars) {
-            mono.storage.get('test', function(storage) {
-                console.log('test#1', storage);
-            });
             dom_cache = {
                 body: $('body'),
                 menu: $('ul.menu'),
@@ -1963,7 +1960,10 @@ var manager = function () {
             dom_cache.menu.on('click', 'a.add_file', function (e) {
                 e.preventDefault();
                 manager.noSleep = true;
-                mono.storage.remove('test');
+                mono.storage.get('test', function(storage) {
+                    console.log(storage);
+                    mono.storage.remove('test');
+                });
                 $('<input class="file-select" type="file" multiple accept="application/x-bittorrent"/>').on('change',function () {
                     mono.storage.set({test: 1});
                     var files = this.files;
