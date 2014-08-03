@@ -246,7 +246,8 @@ var engine = function () {
         context_labels: {v: 0, t: "checkbox"},
         free_space: {v: 1, t: "checkbox"},
         get_full_list: {v: 0, t: "checkbox"},
-        tree_view_menu: {v: 0, t: "checkbox"}
+        tree_view_menu: {v: 0, t: "checkbox"},
+        show_default_dir: {v: 0, t: "checkbox"}
     };
     var settings = {};
     var loadSettings = function (cb) {
@@ -1724,7 +1725,9 @@ var engine = function () {
                     }
                 }
 
-                items.push(cm.Item({ label: lang_arr.cmDf, data: 'default', context: cm.SelectorContext("a"), onMessage: onMessage, contentScript: contentScript }));
+                if (settings.show_default_dir) {
+                    items.push(cm.Item({ label: lang_arr.cmDf, data: 'default', context: cm.SelectorContext("a"), onMessage: onMessage, contentScript: contentScript }));
+                }
                 items.push(cm.Item({ label: lang_arr.cmCreateItem, data: 'new', context: cm.SelectorContext("a"), onMessage: onMessage, contentScript: contentScript }));
 
                 var_cache.topLevel = cm.Menu({
@@ -1776,13 +1779,15 @@ var engine = function () {
                             });
                         }
                     }
-                    chrome.contextMenus.create({
-                        id: 'default',
-                        parentId: 'main',
-                        title: lang_arr.cmDf,
-                        contexts: ["link"],
-                        onclick: onCtxMenuCall
-                    });
+                    if (settings.show_default_dir) {
+                        chrome.contextMenus.create({
+                            id: 'default',
+                            parentId: 'main',
+                            title: lang_arr.cmDf,
+                            contexts: ["link"],
+                            onclick: onCtxMenuCall
+                        });
+                    }
                     chrome.contextMenus.create({
                         id: 'new',
                         parentId: 'main',

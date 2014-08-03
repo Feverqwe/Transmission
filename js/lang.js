@@ -81,7 +81,7 @@ var get_lang = function(lang) {
         cmDf: 'Default directory',
         cmCf: 'Current directory',
         cmNewPathDialog: 'Enter new path',
-        cmCreateItem: 'Add directory',
+        cmCreateItem: 'Add item',
         "settings": {
             1: "Transmission",
             2: "Notifications",
@@ -156,7 +156,8 @@ var get_lang = function(lang) {
             71: 'Up',
             72: 'To display the number of available disk space',
             73: 'Tree context menu',
-            74: 'Always request a full list of torrents'
+            74: 'Display the default directory',
+            75: 'Always request a full list of torrents'
         }
     };
     var lang_arr_fr = {
@@ -241,7 +242,7 @@ var get_lang = function(lang) {
         cmDf: 'Répertoire par défaut',
         cmCf: 'Répertoire courant',
         cmNewPathDialog: 'Entrez le nouveau chemin',
-        cmCreateItem: 'Ajouter le répertoire',
+        cmCreateItem: 'Ajouter...',
         "settings": {
             1: "Transmission",
             2: "Notifications",
@@ -316,7 +317,8 @@ var get_lang = function(lang) {
             71: 'Vers le haut',
             72: 'Pour afficher le nombre d\'espace disque disponible',
             73: 'Arbre menu contextuel',
-            74: 'Toujours demander une liste complète des torrents'
+            74: 'Afficher le répertoire par défaut',
+            75: 'Toujours demander une liste complète des torrents'
         }
     };
     var lang_arr_ru = {
@@ -401,7 +403,7 @@ var get_lang = function(lang) {
         cmDf: 'Путь по умолчанию',
         cmCf: 'Текущая директория',
         cmNewPathDialog: 'Введите путь к новой дирректории',
-        cmCreateItem: 'Добавить путь',
+        cmCreateItem: 'Добавить...',
         "settings": {
             1: "Transmission",
             2: "Уведомления",
@@ -476,7 +478,8 @@ var get_lang = function(lang) {
             71: 'Вверх',
             72: 'Отображать количество свободного места на диске',
             73: 'Древовидное контекстное меню',
-            74: 'Всегда запрашивать полный список торрентов'
+            74: 'Отображать директорию по умолчанию',
+            75: 'Всегда запрашивать полный список торрентов'
         }
     };
     if (lang === 'ru') {
