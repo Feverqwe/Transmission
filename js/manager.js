@@ -1761,7 +1761,11 @@ var manager = function () {
                     return window.location = "options.html";
                 }
                 if (typeof options.selected_label === 'string'){
-                    options.selected_label = JSON.parse(options.selected_label);
+                    try {
+                        options.selected_label = JSON.parse(options.selected_label);
+                    } catch (e) {
+                        options.selected_label = undefined;
+                    }
                 }
                 var_cache.onBootOptions = options;
                 mono.sendMessage(['lang_arr', 'settings',
