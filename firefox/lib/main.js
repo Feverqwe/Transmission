@@ -23,11 +23,20 @@ var button = ToggleButton({
 });
 
 pageMod.PageMod({
-    include: self.data.url('options.html'),
+    include: self.data.url('options.html') +'*',
     contentScript: '('+monoLib.virtualPort.toString()+')()',
     contentScriptWhen: 'start',
     onAttach: function(tab) {
         monoLib.addPage('opt', tab);
+    }
+});
+
+pageMod.PageMod({
+    include: self.data.url('manager.html')+'*',
+    contentScript: '('+monoLib.virtualPort.toString()+')()',
+    contentScriptWhen: 'start',
+    onAttach: function(tab) {
+        monoLib.addPage('mgr', tab);
     }
 });
 
