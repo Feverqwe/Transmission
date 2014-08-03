@@ -1811,12 +1811,12 @@ var manager = function () {
             };
             writeLanguage();
 
-            if (mono.isFF) {
+            /*if (mono.isFF) {
                 dom_cache.up_speed.append( $('<div>', {class: 'btn setup', title: _lang_arr.setup}).on('click', function(e) {
                     e.preventDefault();
                     window.location = "options.html";
                 }) );
-            }
+            }*/
 
             if (options.tr_word_wrap) {
                 dom_cache.body.append($('<style>', {text: 'div.torrent-list-layer td div {white-space: normal;word-wrap: break-word;}'}));
@@ -1833,6 +1833,9 @@ var manager = function () {
                     }
                 });
                 options.window_mode = (manager.isMe === 1);
+            }
+            if (mono.isFF && mono.noAddon) {
+                options.window_mode = true;
             }
 
             if (options.window_mode === false) {
