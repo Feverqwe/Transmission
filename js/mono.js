@@ -4,6 +4,15 @@
  * Mono cross-browser engine.
  */
 var mono = function (env) {
+    /**
+     * @namespace chrome
+     * @namespace chrome.app
+     * @namespace chrome.app.getDetails
+     *
+     * @namespace safari.self.identifier
+     *
+     * @namespace addon
+     */
     var mono = function() {
         // mono like console.log
         var args = Array.prototype.slice.call(arguments);
@@ -138,7 +147,7 @@ var mono = function (env) {
             return value;
         },
         get: function (src, cb) {
-            var key, value, obj = {};
+            var key, obj = {};
             if (src === undefined || src === null) {
                 for (key in localStorage) {
                     if (!localStorage.hasOwnProperty(key) || key === 'length') {
@@ -213,6 +222,9 @@ var mono = function (env) {
     localStorageMode.chunkItem = 'monoChunk';
 
     var monoStorage = function() {
+        /**
+         * @namespace require
+         */
         var ss = require("sdk/simple-storage");
         return {
             get: function (src, cb) {
@@ -270,6 +282,12 @@ var mono = function (env) {
     };
 
     var gmStorage = {
+        /**
+         * @namespace GM_listValues
+         * @namespace GM_getValue
+         * @namespace GM_setValue
+         * @namespace GM_deleteValue
+         */
         get: function (src, cb) {
             var key, obj = {};
             if (src === undefined || src === null) {
@@ -323,6 +341,9 @@ var mono = function (env) {
     };
 
     var storage_fn = function(mode) {
+        /**
+         * @namespace widget.preferences
+         */
         if (mono.isModule) {
             if (monoStorage.get === undefined) {
                 monoStorage = monoStorage();
@@ -361,16 +382,18 @@ var mono = function (env) {
         return {
             cbCollector: function (message, cb) {
                 mono.debug.messages && mono('cbCollector', message);
-                if (cb !== undefined) {
-                    if (cbStack.length > mono.messageStack) {
-                        mono('Stack overflow!');
-                        delete cbObj[cbStack.shift()];
-                    }
-                    id++;
-                    message.monoCallbackId = idPrefix+id;
-                    cbObj[idPrefix+id] = cb;
-                    cbStack.push(idPrefix+id);
+                if (cb === undefined) {
+                    return;
                 }
+                !messagesEnable && mono.onMessage(function(){});
+                if (cbStack.length > mono.messageStack) {
+                    mono('Stack overflow!');
+                    delete cbObj[cbStack.shift()];
+                }
+                id++;
+                message.monoCallbackId = idPrefix+id;
+                cbObj[idPrefix+id] = cb;
+                cbStack.push(idPrefix+id);
             },
             cbCaller: function(message, pageId) {
                 mono.debug.messages && mono('cbCaller', message);
@@ -413,11 +436,35 @@ var mono = function (env) {
                 }
                 delete cbObj[monoResponseId];
                 cbStack.splice(cbStack.indexOf(monoResponseId), 1);
+            },
+            readFilter: function(params, cb) {
+                cb.private = params.private;
+                if (params.filter === undefined) {
+                    params.filter = [mono.pageId];
+                } else
+                if (!Array.isArray(params.filter)) {
+                    params.filter = [params.filter];
+                }
+                cb.filter = params.filter;
+            },
+            filter: function(message, cb) {
+                if (message.monoTo === defaultId) {
+                    if (cb.private !== undefined) {
+                        return 1;
+                    }
+                } else
+                if (cb.filter.indexOf(message.monoTo) === -1) {
+                    return 1;
+                }
+                return undefined;
             }
         }
     }();
 
     var ffVirtualPort = function() {
+        /**
+         * @namespace postMessage
+         */
         var onCollector = [];
         mono.addon = addon = {
             port: {
@@ -453,14 +500,15 @@ var mono = function (env) {
             addon.port.emit('mono', message);
         },
         on: function(cb) {
-            var firstOn = messagesEnable;
+            var firstEvent = messagesEnable;
             messagesEnable = true;
-            var pageId = mono.pageId;
+            msgTools.readFilter(this, cb);
+            var pageId = cb.filter[0];
             var onMessage = function(message) {
-                if (message.monoTo !== pageId && message.monoTo !== defaultId) {
+                if (msgTools.filter(message, cb)) {
                     return;
                 }
-                if (firstOn === false && message.monoResponseId) {
+                if (firstEvent === false && message.monoResponseId) {
                     return msgTools.cbCaller(message, pageId);
                 }
                 var response = msgTools.mkResponse(message, pageId);
@@ -471,6 +519,10 @@ var mono = function (env) {
     };
 
     var chMessaging = {
+        /**
+         * @namespace chrome.runtime
+         * @namespace chrome.tabs.query
+         */
         currentTab: function (message) {
             chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
                 if (tabs[0] === undefined) {
@@ -490,17 +542,18 @@ var mono = function (env) {
             chrome.runtime.sendMessage(message);
         },
         on: function(cb) {
-            var firstOn = messagesEnable;
+            var firstEvent = messagesEnable;
             messagesEnable = true;
-            var pageId = mono.pageId;
+            msgTools.readFilter(this, cb);
+            var pageId = cb.filter[0];
             chrome.runtime.onMessage.addListener(function(message, sender) {
-                if (message.monoTo !== pageId && message.monoTo !== defaultId) {
+                if (msgTools.filter(message, cb)) {
                     return;
                 }
                 if (sender.tab !== undefined) {
                     message.tabId = sender.tab.id;
                 }
-                if (firstOn === false && message.monoResponseId) {
+                if (firstEvent === false && message.monoResponseId) {
                     return msgTools.cbCaller(message, pageId);
                 }
                 var response = msgTools.mkResponse(message, pageId);
@@ -510,6 +563,12 @@ var mono = function (env) {
     };
 
     var opMessaging = {
+        /**
+         * @namespace opera.extension
+         * @namespace opera.extension.tabs
+         * @namespace opera.extension.tabs.getSelected
+         * @namespace opera.extension.broadcastMessage
+         */
         cbList: [],
         currentTab: function (message) {
             var currentTab = opera.extension.tabs.getSelected();
@@ -530,30 +589,36 @@ var mono = function (env) {
             opera.extension.broadcastMessage(message);
         },
         on: function(cb) {
+            msgTools.readFilter(this, cb);
             opMessaging.cbList.push(cb);
             if (opMessaging.cbList.length > 1) {
                 return;
             }
             messagesEnable = true;
-            var pageId = mono.pageId;
             opera.extension.onmessage = function(event) {
                 var message = event.data;
-                if (message.monoTo !== pageId && message.monoTo !== defaultId) {
-                    return;
-                }
                 message.source = event.source;
                 if (message.monoResponseId) {
-                    return msgTools.cbCaller(message, pageId);
+                    return msgTools.cbCaller(message, message.monoTo);
                 }
-                var response = msgTools.mkResponse(message, pageId);
-                opMessaging.cbList.forEach(function(cb) {
-                    cb(message.data, response);
-                });
+                var response = msgTools.mkResponse(message, message.monoTo);
+                for (var i = 0, itemCb; itemCb = opMessaging.cbList[i]; i++) {
+                    if (msgTools.filter(message, itemCb)) {
+                        continue;
+                    }
+                    itemCb(message.data, response);
+                }
             };
         }
     };
 
     var sfMessaging = {
+        /**
+         * @namespace safari.application
+         * @namespace safari.application.activeBrowserWindow.activeTab
+         * @namespace safari.extension.globalPage
+         * @namespace safari.application.browserWindows
+         */
         currentTab: function (message) {
             var currentTab = safari.application.activeBrowserWindow.activeTab;
             if (currentTab.page === undefined) {
@@ -591,16 +656,17 @@ var mono = function (env) {
             safari.self.tab.dispatchMessage("message", message);
         },
         on: function (cb) {
-            var firstOn = messagesEnable;
+            var firstEvent = messagesEnable;
             messagesEnable = true;
-            var pageId = mono.pageId;
+            msgTools.readFilter(this, cb);
+            var pageId = cb.filter[0];
             var onMessage = function(event) {
                 var message = event.message;
-                if (message.monoTo !== pageId && message.monoTo !== defaultId) {
+                if (msgTools.filter(message, cb)) {
                     return;
                 }
                 message.source = event.target;
-                if (firstOn === false && message.monoResponseId) {
+                if (firstEvent === false && message.monoResponseId) {
                     return msgTools.cbCaller(message, pageId);
                 }
                 var response = msgTools.mkResponse(message, pageId);
@@ -626,10 +692,7 @@ var mono = function (env) {
             gmMessaging.gotMsg(message);
         },
         on: function (cb) {
-            if (this) {
-                cb.private = this.private;
-                cb.filter = this.filter;
-            }
+            msgTools.readFilter(this, cb);
             opMessaging.cbList.push(cb);
             if (opMessaging.cbList.length > 1) {
                 return;
@@ -640,17 +703,12 @@ var mono = function (env) {
                     return msgTools.cbCaller(message, message.monoTo);
                 }
                 var response = msgTools.mkResponse(message, message.monoTo);
-                opMessaging.cbList.forEach(function(cb) {
-                    if (message.monoTo === defaultId) {
-                        if (cb.private !== undefined) {
-                            return 1;
-                        }
-                    } else
-                    if (cb.filter !== undefined && cb.filter !== message.monoTo) {
-                        return 1;
+                for (var i = 0, itemCb; itemCb = gmMessaging.cbList[i]; i++) {
+                    if (msgTools.filter(message, itemCb)) {
+                        continue;
                     }
-                    cb(message.data, response);
-                });
+                    itemCb(message.data, response);
+                }
             };
         }
     };
