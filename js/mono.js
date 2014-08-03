@@ -86,7 +86,11 @@ var mono = function (env) {
                 index++;
                 chunk = localStorage[keyPrefix+index];
             }
-            return JSON.parse(data);
+            var value = undefined;
+            try {
+                value = JSON.parse(data);
+            } catch (e) {}
+            return value;
         },
         setObj: function(key, value) {
             value = JSON.stringify(value);
@@ -510,7 +514,9 @@ var mono = function (env) {
         currentTab: function (message) {
             var currentTab = opera.extension.tabs.getSelected();
             message.monoTo = defaultId;
-            currentTab.postMessage(message);
+            try {
+                currentTab.postMessage(message);
+            } catch (e) {}
         },
         send: function(message) {
             var source = message.source;
