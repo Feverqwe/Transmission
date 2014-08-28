@@ -182,14 +182,14 @@ div.torrent-list-layer table .status div {
     text-align: center;
 }
 div.fl-layer tr:nth-child(even) {
-      background-color:  #f3f6fa;  
+      background-color:  #f3f6fa;
 }
 /*div.torrent-list-layer, div.torrent-list-layer table.torrent-table-body {
     background-position-y: 1px;
     background-image:-webkit-repeating-linear-gradient(top, #fff 0px, #fff 18px, #f3f6fa 18px, #f3f6fa 36px);
 }*/
 div.torrent-list-layer tr:nth-child(even) {
-      background-color:  #f3f6fa;  
+      background-color:  #f3f6fa;
 }
 table.torrent-table-head {
     position: fixed;
@@ -221,6 +221,7 @@ table td.progress div.progress_b {
     position: relative;
     color: #fff;
     margin-left: -1px;
+    text-align: center;
 }
 table td.progress div.progress_b_i {
     position: absolute;
@@ -228,13 +229,15 @@ table td.progress div.progress_b_i {
     background-color: #3687ED;
     border-radius: 3px;
     z-index: 0;
+    top: 0;
+    left: 0;
 }
 table td.progress div.val {
-    position: absolute;
-    text-align: center;
+    position: relative;
     z-index: 1;
-    line-height: 14px;
-    width: 100%;
+    display: inline;
+    line-height: -moz-block-height;
+    vertical-align: top;
 }
 div.torrent-list-layer table td.controls div.btns {
     height: 18px;
