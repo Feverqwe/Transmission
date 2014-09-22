@@ -107,10 +107,6 @@ var manager = function () {
         tr_sort_colum: 'name',
         //текущая сортировка по возр. или убыванию. для торрентов
         tr_sort_by: 1,
-        //триггер который блокирует сортировку, пока текущая не завершится для файлов
-        fl_sortInsert: false,
-        //триггер который блокирует сортировку, пока текущая не завершится для торрентов
-        tr_sortInsert: false,
         //номер item в массиве информации о торренте, получается из названия столбца.
         tr_sort_index: undefined,
         //номер item в массиве информации о файле, получается из названия столбца.
@@ -636,13 +632,62 @@ var manager = function () {
             return (by === 1) ? 1 : -1;
         }
     };
-    var fl_sort_insert_in_list = function (list) {
+    var fl_sort_insert_in_list = function (sortedList) {
+        var currentList = var_cache.fl_sort_pos.slice(0);
+        var newPaste = [];
+        var fromIndex = undefined;
+        var elList = undefined;
+
+        for (var i = 0, item; item = sortedList[i]; i++) {
+            if (currentList[i] === item[14]) {
+                continue;
+            }
+            fromIndex = i;
+
+            elList = document.createDocumentFragment();
+            var id= undefined;
+            while (sortedList[i] !== undefined && (id = sortedList[i][14]) !== currentList[i]) {
+                var pos = currentList.indexOf(id, i);
+                if (pos !== -1) {
+                    currentList.splice(pos, 1);
+                }
+                currentList.splice(i, 0, id);
+
+                elList.appendChild(var_cache.fl_list_dom[id][0]);
+                i++;
+            }
+
+            newPaste.push({
+                pos: fromIndex,
+                list: elList
+            });
+        }
+
+        var table = dom_cache.fl_body[0];
+        for (i = 0, item; item = newPaste[i]; i++) {
+            if (item.pos === 0) {
+                var firstChild = table.firstChild;
+                if (firstChild === null) {
+                    table.appendChild(item.list);
+                } else {
+                    table.insertBefore(item.list, firstChild)
+                }
+            } else
+            if (table.childNodes[item.pos] !== undefined) {
+                table.insertBefore(item.list, table.childNodes[item.pos]);
+            } else {
+                table.appendChild(item.list);
+            }
+        }
+
+        var_cache.fl_sort_pos = currentList;
+    };
+    var fl_sort_insert_in_list_ = function (list) {
         var list_len = list.length;
         if (list_len !== var_cache.fl_sort_pos.length) {
             console.log('Bad list size!');
             return;
         }
-        var_cache.fl_sortInsert = true;
         var indexs = var_cache.fl_sort_pos.slice(0);
         var dune = false;
         var break_index = 0;
@@ -666,13 +711,8 @@ var manager = function () {
             }
         }
         var_cache.fl_sort_pos = indexs;
-        var_cache.fl_sortInsert = false;
     };
     var fl_sort = function (colum, by) {
-        if (var_cache.fl_sortInsert === true) {
-            console.log('Order skip');
-            return;
-        }
         if (colum === undefined) {
             colum = var_cache.fl_sort_colum;
         }
@@ -782,13 +822,62 @@ var manager = function () {
             return (by === 1) ? 1 : -1;
         }
     };
-    var tr_sort_insert_in_list = function (list) {
+    var tr_sort_insert_in_list = function (sortedList) {
+        var currentList = var_cache.tr_sort_pos.slice(0);
+        var newPaste = [];
+        var fromIndex = undefined;
+        var elList = undefined;
+
+        for (var i = 0, item; item = sortedList[i]; i++) {
+            if (currentList[i] === item[0]) {
+                continue;
+            }
+            fromIndex = i;
+
+            elList = document.createDocumentFragment();
+            var id= undefined;
+            while (sortedList[i] !== undefined && (id = sortedList[i][0]) !== currentList[i]) {
+                var pos = currentList.indexOf(id, i);
+                if (pos !== -1) {
+                    currentList.splice(pos, 1);
+                }
+                currentList.splice(i, 0, id);
+
+                elList.appendChild(var_cache.tr_list_dom[id][0]);
+                i++;
+            }
+
+            newPaste.push({
+                pos: fromIndex,
+                list: elList
+            });
+        }
+
+        var table = dom_cache.tr_body[0];
+        for (i = 0, item; item = newPaste[i]; i++) {
+            if (item.pos === 0) {
+                var firstChild = table.firstChild;
+                if (firstChild === null) {
+                    table.appendChild(item.list);
+                } else {
+                    table.insertBefore(item.list, firstChild)
+                }
+            } else
+            if (table.childNodes[item.pos] !== undefined) {
+                table.insertBefore(item.list, table.childNodes[item.pos]);
+            } else {
+                table.appendChild(item.list);
+            }
+        }
+
+        var_cache.tr_sort_pos = currentList;
+    };
+    var tr_sort_insert_in_list_ = function (list) {
         var list_len = list.length;
         if (list_len !== var_cache.tr_sort_pos.length) {
             console.log('Bad list size!');
             return;
         }
-        var_cache.tr_sortInsert = true;
         var indexs = var_cache.tr_sort_pos.slice(0);
         var dune = false;
         var break_index = 0;
@@ -812,13 +901,8 @@ var manager = function () {
             }
         }
         var_cache.tr_sort_pos = indexs;
-        var_cache.tr_sortInsert = false;
     };
     var tr_sort = function (colum, by) {
-        if (var_cache.tr_sortInsert === true) {
-            console.log('Order skip');
-            return;
-        }
         if (colum === undefined) {
             colum = var_cache.tr_sort_colum;
         }
@@ -1087,7 +1171,6 @@ var manager = function () {
         var_cache.fl_list_gui = [];
         var_cache.fl_list_gui_display = [];
         var_cache.fl_sort_pos = [];
-        var_cache.fl_sortInsert = false;
         var_cache.fl_param = {};
         var_cache.tr_list_dom[var_cache.fl_id].removeClass('selected');
         dom_cache.body.children('style.fl_filter').remove();
@@ -1517,7 +1600,6 @@ var manager = function () {
         var_cache.tr_list_dom = {};
         var_cache.tr_list_display = {};
         var_cache.tr_sort_pos = [];
-        var_cache.tr_sortInsert = false;
         mono.sendMessage('cache', function(response) {
             tr_list(response.torrents || []);
             mgTimer.start();
