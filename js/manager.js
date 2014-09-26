@@ -932,6 +932,9 @@ var manager = function () {
         tr_sort_insert_in_list(list);
     };
     var tr_list = function (list) {
+        if (window._settings === undefined) {
+          return;
+        }
         var id_list = new Array(list.length);
         var created_list = [];
         var sum_dl = 0;
