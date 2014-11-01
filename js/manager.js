@@ -1795,7 +1795,7 @@ var manager = function () {
         changeSpace(free_space);
     };
     var changeSpace = function(free_space) {
-        if (free_space === undefined || free_space === var_cache.free_space) {
+        if (free_space === undefined || free_space < 0 || free_space === var_cache.free_space) {
             return;
         }
         var_cache.free_space = free_space;
