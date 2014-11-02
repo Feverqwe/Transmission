@@ -233,7 +233,8 @@ var engine = function () {
         client: {},
         traffic: [{name:'download', values: []}, {name:'upload', values: []}],
         //лимит на кол-во получений токена, сбрасывается при первом успешном sendAction
-        get_token_count: 0
+        get_token_count: 0,
+        rmLastScrapeResult: /"lastScrapeResult":"[^"]*","/gm
     };
     var def_settings = {
         ssl: {v: 0, t: "checkbox"},
@@ -1059,13 +1060,21 @@ var engine = function () {
 
         var xhr = new XMLHttpRequest();
         xhr.open('POST', var_cache.webui_url, true);
-        xhr.responseType = 'json';
+        xhr.responseType = 'text';
         xhr.setRequestHeader("X-Transmission-Session-Id", var_cache.client.token || '');
         if (settings.login.length > 0 || settings.password.length > 0) {
             xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password));
         }
         onready = function(e) {
-            var data = xhr.response;
+            var data = xhr.responseText;
+
+            data = data.replace(var_cache.rmLastScrapeResult, '"lastScrapeResult":"","');
+            try {
+                data = JSON.parse(data);
+            } catch (e) {
+                data = null;
+            }
+
             var_cache.get_token_count = 0;
             var data = Transmission2uTorrentAPI(data);
             if (onload !== undefined) {
