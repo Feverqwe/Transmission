@@ -1,9 +1,17 @@
 var lang_arr;
 if (typeof window === 'undefined') {
-    mono = require("./mono.js");
     self = require("sdk/self");
+    var ffLoader = require('toolkit/loader');
+    var ffDataLoader = ffLoader.Loader({
+        paths: {
+            'data/': self.data.url('js/')
+        },
+        name: self.name,
+        prefixURI: 'resource://'+self.id.slice(1, -1)+'/'
+    });
+    mono = ffLoader.main(ffDataLoader, "data/mono");
     window = require("sdk/window/utils").getMostRecentBrowserWindow();
-    window.get_lang = require("./lang.js").get_lang;
+    window.get_lang = ffLoader.main(ffDataLoader, "data/lang").get_lang;
     XMLHttpRequest = require('sdk/net/xhr').XMLHttpRequest;
 
     sdk_timers = require("sdk/timers");
@@ -112,7 +120,10 @@ var jQ = {
 
 var init = function(env, button) {
     if (env !== undefined) {
-        mono = mono.init(env);
+        mono = mono.init(env, {
+            setTimeout: sdk_timers.setTimeout,
+            simpleStorage: require("sdk/simple-storage")
+        });
         ffButton = button;
     }
 
@@ -278,6 +289,7 @@ var engine = function () {
                     settings[key] = JSON.parse(value);
                 }
             });
+
             var_cache.webui_url = ((settings.ssl) ? 'https' : 'http') + "://" + settings.ut_ip + ':' + settings.ut_port + '/' + settings.ut_path;
             cb && cb();
         });
@@ -1921,7 +1933,7 @@ var engine = function () {
         updateSettings: function (lang_type, cb) {
             if (lang_type) {
                 if (mono.isFF) {
-                    window.get_lang = require("./lang.js").get_lang;
+                    window.get_lang = ffLoader.main(ffDataLoader, "data/lang").get_lang;
                 }
                 lang_arr = window.get_lang(lang_type);
             }

@@ -3,17 +3,19 @@
  *
  * Mono cross-browser engine.
  */
-var mono = function (env) {
-    "use strict";
-    /**
-     * @namespace chrome
-     * @namespace chrome.app
-     * @namespace chrome.app.getDetails
-     *
-     * @namespace safari.self.identifier
-     *
-     * @namespace addon
-     */
+
+var mono = (typeof mono === 'undefined') ? undefined : mono;
+
+(function( global, factory ) {
+    if (mono) {
+        return;
+    }
+    if (global) {
+        return mono = factory();
+    }
+    return exports.init = factory;
+}(typeof window !== "undefined" ? window : undefined, function ( addon, depList ) {
+    var defaultId = 'monoScope';
     var mono = function() {
         // mono like console.log
         var args = Array.prototype.slice.call(arguments);
@@ -21,13 +23,13 @@ var mono = function (env) {
         console.log.apply(console, args);
     };
 
-    var defaultId = 'monoScope';
-    var addon = undefined;
     if (typeof window === 'undefined') {
         mono.isModule = true;
         mono.isFF = true;
-        addon = env;
+        mono.addon = addon;
+        setTimeout = depList.setTimeout;
     } else {
+        window.mono = mono;
         if (typeof GM_getValue !== 'undefined') {
             mono.isGM = true;
             if (window.chrome !== undefined) {
@@ -56,8 +58,8 @@ var mono = function (env) {
             mono.isOpera = true;
             mono.isOperaInject = opera.extension.broadcastMessage === undefined;
         } else {
-            addon = window.addon || window.self;
-            if (addon !== undefined && addon.port !== undefined) {
+            mono.addon = window.addon || window.self;
+            if (mono.addon !== undefined && mono.addon.port !== undefined) {
                 mono.isFF = true;
             } else
             if (navigator.userAgent.indexOf('Firefox') !== -1) {
@@ -66,8 +68,8 @@ var mono = function (env) {
             }
         }
     }
+
     mono.messageStack = 50;
-    mono.addon = addon;
     mono.pageId = defaultId;
     mono.debug = {
         messages: false
@@ -262,10 +264,7 @@ var mono = function (env) {
     localStorageMode.chunkItem = 'monoChunk';
 
     var monoStorage = function() {
-        /**
-         * @namespace require
-         */
-        var ss = require("sdk/simple-storage");
+        var ss = depList.simpleStorage;
         return {
             get: function (src, cb) {
                 var key, obj = {};
@@ -525,7 +524,7 @@ var mono = function (env) {
          * @namespace postMessage
          */
         var onCollector = [];
-        mono.addon = addon = {
+        mono.addon = {
             port: {
                 emit: function(pageId, message) {
                     var msg = '>'+JSON.stringify(message);
@@ -557,7 +556,7 @@ var mono = function (env) {
             mono.sendMessage({action: 'toActiveTab', message: message}, undefined, 'service');
         },
         send: function(message) {
-            addon.port.emit('mono', message);
+            mono.addon.port.emit('mono', message);
         },
         on: function(cb) {
             msgTools.readFilter(this, cb);
@@ -578,7 +577,7 @@ var mono = function (env) {
                     itemCb(message.data, response);
                 }
             };
-            addon.port.on('mono', onMessage);
+            mono.addon.port.on('mono', onMessage);
         }
     };
 
@@ -842,11 +841,4 @@ var mono = function (env) {
     }
 
     return mono;
-};
-
-if (typeof window !== "undefined") {
-    mono = mono(window);
-} else {
-    setTimeout = require("sdk/timers").setTimeout;
-    exports.init = mono;
-}
+}));
