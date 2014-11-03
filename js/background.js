@@ -1,3 +1,6 @@
+/**
+ * @namespace require
+ */
 var lang_arr;
 if (typeof window === 'undefined') {
     self = require("sdk/self");
@@ -7,7 +10,20 @@ if (typeof window === 'undefined') {
             'data/': self.data.url('js/')
         },
         name: self.name,
-        prefixURI: 'resource://'+self.id.slice(1, -1)+'/'
+        prefixURI: 'resource://'+self.id.slice(1, -1)+'/',
+        globals: {
+            console: console,
+            _require: function(path) {
+                switch (path) {
+                    case 'sdk/timers':
+                        return require('sdk/timers');
+                    case 'sdk/simple-storage':
+                        return require('sdk/simple-storage');
+                    default:
+                        console.log('Module not found!', path);
+                }
+            }
+        }
     });
     mono = ffLoader.main(ffDataLoader, "data/mono");
     window = require("sdk/window/utils").getMostRecentBrowserWindow();

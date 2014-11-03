@@ -13,7 +13,7 @@
     ],
     "author": "Anton V.",
     "license": "MPL 2.0",
-    "version": "1.2.65",
+    "version": "1.2.66",
     "permissions": {
         "cross-domain-content": ["http://*", "https://*"],
         "private-browsing": true
