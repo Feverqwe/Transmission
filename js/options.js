@@ -1,5 +1,7 @@
 (function () {
-    mono.pageId = 'opt';
+    mono.sendHook.mgr = function(){};
+    mono.sendHook.bg = function(){};
+
     var actionReader = function(message, cb) {
         if (message.action === 'setDirList') {
             return options.setDirList(message.data);
@@ -8,7 +10,6 @@
             window.location = 'sleep.html';
             return;
         }
-        mono('>', message);
     };
     mono.onMessage(function(message, response) {
         if (Array.isArray(message)) {
@@ -368,7 +369,7 @@ var options = function() {
                 }
                 $('input[name="notify_visbl_interval"]').parent().parent().parent().hide();
             }
-            mono.sendMessage({action: 'resize', height: 600}, undefined, 'service');
+            mono.isFF && mono.sendMessage({action: 'resize', height: 600}, undefined, 'service');
             mono.storage.get('lang', function(data) {
                 currentLanguage = data.lang || currentLanguage;
                 mono.sendMessage(['def_settings'], function(data) {
