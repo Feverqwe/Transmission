@@ -94,17 +94,18 @@ var mono = (typeof mono === 'undefined') ? undefined : mono;
   })();
 
   mono.messageStack = 50;
-  
+
   mono.cloneObj = function(obj) {
     if (typeof jQuery !== 'undefined') {
-      mono.cloneObj = jQuery.extend.bind(this, true, {});
-      return mono.cloneObj(obj);
+      mono.cloneObj = function(message) {
+        return jQuery.extend(true, {}, message);
+      };
     } else {
       mono.cloneObj = function(message) {
         return JSON.parse(JSON.stringify(message));
       };
-      return mono.cloneObj(obj);
     }
+    return mono.cloneObj(obj);
   };
 
   var msgTools = {
