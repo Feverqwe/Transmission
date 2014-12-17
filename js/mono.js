@@ -96,16 +96,7 @@ var mono = (typeof mono === 'undefined') ? undefined : mono;
   mono.messageStack = 50;
 
   mono.cloneObj = function(obj) {
-    if (typeof jQuery !== 'undefined') {
-      mono.cloneObj = function(message) {
-        return jQuery.extend(true, {}, message);
-      };
-    } else {
-      mono.cloneObj = function(message) {
-        return JSON.parse(JSON.stringify(message));
-      };
-    }
-    return mono.cloneObj(obj);
+    return JSON.parse(JSON.stringify(obj));
   };
 
   var msgTools = {
@@ -199,7 +190,7 @@ var mono = (typeof mono === 'undefined') ? undefined : mono;
       }
       if (sender.monoDirect) {
         return function(message) {
-          sender(message, chromeMsg.onMessage);
+          sender(mono.cloneObj(message), chromeMsg.onMessage);
         };
       }
       return function(message) {
@@ -448,7 +439,7 @@ var mono = (typeof mono === 'undefined') ? undefined : mono;
         target: {
           page: {
             dispatchMessage: function(name, message) {
-              mono.safariDirectOnMessage({message: message});
+              mono.safariDirectOnMessage({message: mono.cloneObj(message)});
             }
           }
         }
