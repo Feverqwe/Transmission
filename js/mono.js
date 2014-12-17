@@ -94,6 +94,18 @@ var mono = (typeof mono === 'undefined') ? undefined : mono;
   })();
 
   mono.messageStack = 50;
+  
+  mono.cloneObj = function(obj) {
+    if (typeof jQuery !== 'undefined') {
+      mono.cloneObj = jQuery.extend.bind(this, true, {});
+      return mono.cloneObj(obj);
+    } else {
+      mono.cloneObj = function(message) {
+        return JSON.parse(JSON.stringify(message));
+      };
+      return mono.cloneObj(obj);
+    }
+  };
 
   var msgTools = {
     cbObj: {},
@@ -239,7 +251,7 @@ var mono = (typeof mono === 'undefined') ? undefined : mono;
       if (!mono.isChromeBgPage) {
         chromeMsg.onMessage.monoDirect = true;
         chromeMsg.send = mono.sendMessage.send = function(message) {
-          bgWin.mono.chromeDirectOnMessage(message, chromeMsg.onMessage);
+          bgWin.mono.chromeDirectOnMessage(mono.cloneObj(message), chromeMsg.onMessage);
         }
       } else
       if (mono.chromeDirectOnMessage === undefined ) {
@@ -431,7 +443,7 @@ var mono = (typeof mono === 'undefined') ? undefined : mono;
     },
     send: mono.isSafariPopup ? function(message) {
       safari.extension.globalPage.contentWindow.mono.safariDirectOnMessage({
-        message: message,
+        message: mono.cloneObj(message),
         target: {
           page: {
             dispatchMessage: function(name, message) {
@@ -505,7 +517,8 @@ var mono = (typeof mono === 'undefined') ? undefined : mono;
 
   var gmMsg = {
     cbList: [],
-    onMessage: function(message) {
+    onMessage: function(_message) {
+      var message = mono.cloneObj(_message);
       var response = gmMsg.onMessage;
       for (var i = 0, cb; cb = gmMsg.cbList[i]; i++) {
         if (this.isBg === cb.isBg) {
