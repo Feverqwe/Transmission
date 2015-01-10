@@ -37,13 +37,14 @@
     });
 })();
 var options = function() {
+    var isTransmission = true;
     var var_cache = {};
     var dom_cache = {};
     var currentLanguage = navigator.language.substr(0,2);
     var def_settings = undefined;
     var set_place_holder = function() {
         mono.sendMessage('settings', function(settings) {
-            $.each(def_settings, function(k, v) {
+            $.each(def_settings, function (k, v) {
                 if (v.t === "text" || v.t === "number" || v.t === "password") {
                     var dom_obj = $('input[name="' + k + '"]');
                     dom_obj.removeAttr("value");
@@ -64,39 +65,37 @@ var options = function() {
                             dom_obj.attr("placeholder", v.v);
                         }
                     }
-                } else
-                if (v.t === "checkbox") {
+                } else if (v.t === "checkbox") {
                     $('input[name="' + k + '"]').prop('checked', settings[k]);
-                } else
-                if (v.t === "array") {
+                } else if (v.t === "array") {
                     if (k === "folders_array") {
                         var arr = settings[k];
-                        var $select =  dom_cache.sel_folders;
+                        var $select = dom_cache.sel_folders;
                         $select.empty();
                         for (var n = 0, len = arr.length; n < len; n++) {
-                            $select.append( $('<option>', {text: arr[n][1], value: JSON.stringify(arr[n])}) );
+                            $select.append($('<option>', {text: arr[n][1], value: JSON.stringify(arr[n])}));
                         }
                     }
                 }
             });
             write_sortable_tables();
-            dom_cache.inp_add_folder.prop('disabled', !dom_cache.ctx_labels.prop('checked'));
         }, 'bg');
-
-        dom_cache.sel_folder_arr.empty().off().on('click', function() {
-            if ($(this).children().length !== 0) {
-                return;
-            }
-            mono.sendMessage({action: 'sendAction', data: {action: 'list-dirs'} }, undefined, 'bg');
-            return 1;
-        });
+        if (!isTransmission) {
+            dom_cache.sel_folder_arr.empty().off().on('click', function () {
+                if ($(this).children().length !== 0) {
+                    return;
+                }
+                mono.sendMessage({action: 'sendAction', data: {action: 'list-dirs'} }, undefined, 'bg');
+                return 1;
+            });
+        }
     };
     var saveAll = function(cb) {
         var changes = {};
         changes['lang'] = dom_cache.select_language.val();
         $.each(def_settings, function(key, value) {
             var $el = $('input[name="' + key + '"]');
-            if (value.t === "text" || value.t == "password") {
+            if (value.t === "text" || value.t === "password") {
                 var val = $el.val();
                 if (val.length === 0 && key !== 'login' && key !== 'password') {
                     val = value.v;
@@ -229,26 +228,26 @@ var options = function() {
     };
     var ap = function(t, k, v) {
         return $('<li>', {'class': 'item ui-state-default'}).data('key', k).append( $('<div>', {'class': 'info'}).append(
-                $('<div>', {text: lang_arr[v.lang][1]}),
-                '[',
-                $('<div>', {text: lang_arr.settings[50]+': '}).append(
-                    $('<label>', {text: v.size}),
-                    'px;'
+                    $('<div>', {text: lang_arr[v.lang][1]}),
+                    '[',
+                    $('<div>', {text: lang_arr.settings[50]+': '}).append(
+                        $('<label>', {text: v.size}),
+                        'px;'
+                    ),
+                    ' ',
+                    $('<div>', {text: lang_arr.settings[49]+':'}).append(
+                        $('<input>',{type: 'checkbox', checked: (v.a)?true:false}),
+                        ']'
+                    )
                 ),
-                ' ',
-                $('<div>', {text: lang_arr.settings[49]+':'}).append(
-                    $('<input>',{type: 'checkbox', checked: (v.a)?true:false}),
-                    ']'
-                )
-            ),
-            $('<div>', {'class': 'size'}).css('width', v.size +'px')
-        );
+                $('<div>', {'class': 'size'}).css('width', v.size +'px')
+            );
     };
     var write_sortable_tables = function() {
         var items;
         mono.sendMessage(['getColums', 'getFlColums'], function(data) {
             var tr_colums = data.getColums;
-            var tr_table = dom_cache.ul_tr_colums;
+            var tr_table = $("ul.tr_colums");
             tr_table.empty();
             items = [];
             $.each(tr_colums, function(k, v) {
@@ -283,8 +282,8 @@ var options = function() {
         ul_sortable.sortable({placeholder: "ui-state-highlight"});
         ul_sortable.disableSelection();
         ul_sortable.find("div.size").resizable({handles: "e", resize: function(event, ui) {
-            $(this).parent().children('div').children("div").eq(1).children('label').html(ui.size.width);
-        }});
+                $(this).parent().children('div').children("div").eq(1).children('label').html(ui.size.width);
+            }});
     };
     var setDirList = function (arr) {
         dom_cache.inp_add_folder[0].disabled = false;
@@ -292,7 +291,7 @@ var options = function() {
         f_select.empty();
         $(this).unbind('click');
         $.each(arr, function(key, value) {
-            var name = '[' + bytesToSize(value.available * 1024 * 1024) + ' ' + lang_arr[107][1] + '] ' + value.path;
+            var name = '[' + bytesToSize(value['available'] * 1024 * 1024) + ' ' + lang_arr[107][1] + '] ' + value['path'];
             f_select.append( $('<option>', {value: key, text: name}) );
         });
     };
@@ -417,17 +416,11 @@ var options = function() {
                 }, 'bg');
             });
             dom_cache.inp_add_folder.on('click', function() {
-                var arr = [dom_cache.sel_folder_arr.val(), $(this).parent().children('input[type=text]').val()];
+                var arr = [isTransmission?'':dom_cache.sel_folder_arr.val(), $(this).parent().children('input[type=text]').val()];
                 if (arr[1].length < 1)
                     return;
                 dom_cache.sel_folders.append(new Option(arr[1], JSON.stringify(arr)));
                 $(this).parent().children('input[type=text]').val("");
-            });
-            $('span[data-lang="23"]').next().one('dblclick', function () {
-                if ( dom_cache.sel_folder_arr.children().length !== 0 ) {
-                    return;
-                }
-                setDirList([{path:'Default download dir'}]);
             });
             $('input[name="rm_folder"]').on('click', function() {
                 $('select[name="folders"] :selected').remove();
@@ -450,9 +443,11 @@ var options = function() {
                     }, 'bg');
                 });
             });
-            dom_cache.ctx_labels.on('click', function() {
-                dom_cache.inp_add_folder[0].disabled = !this.checked;
-            });
+            if (!isTransmission) {
+                dom_cache.ctx_labels.on('click', function() {
+                    dom_cache.inp_add_folder[0].disabled = !this.checked;
+                });
+            }
             if (mono.isChrome && chrome.storage) {
                 $('input[name="save_in_cloud"]').on('click', function() {
                     var _this = this;

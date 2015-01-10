@@ -75,12 +75,7 @@ var jQ = {
             if (obj[key] === undefined) {
                 obj[key] = '';
             }
-            if (engine.settings.fix_cirilic_path === 1 &&
-                key === 'path' && obj.hasOwnProperty('download_dir')) {
-                itemsList.push(encodeURIComponent(key) + '=' + engine.in_cp1251(obj[key]));
-            } else {
-                itemsList.push(encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]));
-            }
+            itemsList.push(encodeURIComponent(key)+'='+encodeURIComponent(obj[key]));
         }
         return itemsList.join('&');
     },
@@ -240,6 +235,7 @@ if (window.isModule) {
 }
 
 var engine = function () {
+    var isTransmission = true;
     var complete_icon = 'images/notification_done.png';
     var add_icon = 'images/notification_add.png';
     var error_icon = 'images/notification_error.png';
@@ -248,13 +244,14 @@ var engine = function () {
         client: {},
         traffic: [{name:'download', values: []}, {name:'upload', values: []}],
         //лимит на кол-во получений токена, сбрасывается при первом успешном sendAction
-        get_token_count: 0
+        get_token_count: 0,
+        rmLastScrapeResult: /"lastScrapeResult":"[^"]*","/gm
     };
     var def_settings = {
         ssl: {v: 0, t: "checkbox"},
         ut_ip: {v: "127.0.0.1", t: "text"},
-        ut_port: {v: 8080, t: "number", min: 1},
-        ut_path: {v: "gui/", t: "text"},
+        ut_port: {v: 9091, t: "number", min: 1},
+        ut_path: {v: "transmission/rpc", t: "text"},
         show_active_tr_on_icon: {v: 1, t: "checkbox"},
         notify_on_dl_comp: {v: 1, t: "checkbox"},
         bg_update_interval: {v: 60000 * 2, t: "number", min: 5000},
@@ -270,10 +267,10 @@ var engine = function () {
         context_menu_trigger: {v: 1, t: "checkbox"},
         folders_array: {v: [], t: "array"},
         context_labels: {v: 0, t: "checkbox"},
-        fix_cirilic: {v: 0, t: "checkbox"},
+        free_space: {v: 1, t: "checkbox"},
+        get_full_list: {v: 0, t: "checkbox"},
         tree_view_menu: {v: 0, t: "checkbox"},
-        show_default_dir: {v: 0, t: "checkbox"},
-        fix_cirilic_path: {v: 0, t: "checkbox"}
+        show_default_dir: {v: 0, t: "checkbox"}
     };
     var settings = {};
     var loadSettings = function (cb) {
@@ -283,6 +280,10 @@ var engine = function () {
         }
         mono.storage.get(keys, function(options) {
             jQ.each(def_settings, function (key, item) {
+                if (isTransmission && key === 'context_labels') {
+                    settings[key] = item.v;
+                    return 1;
+                }
                 var value = options[key];
                 if (value === undefined) {
                     settings[key] = item.v;
@@ -321,8 +322,9 @@ var engine = function () {
         otdano: {a: 0, size: 60, pos: 13, lang: 78, order: 1},
         poluchino: {a: 0, size: 60, pos: 14, lang: 79, order: 1},
         koeficient: {a: 0, size: 60, pos: 15, lang: 80, order: 1},
-        dostupno: {a: 0, size: 60, pos: 16, lang: 81, order: 1},
-        metka: {a: 0, size: 100, pos: 17, lang: 82, order: 1},
+        // Transmission
+        // dostupno: {a: 0, size: 60, pos: 16, lang: 81, order: 1},
+        // metka: {a: 0, size: 100, pos: 17, lang: 82, order: 1},
         time_dobavleno: {a: 0, size: 120, pos: 18, lang: 83, order: 1},
         time_zavircheno: {a: 0, size: 120, pos: 19, lang: 84, order: 1},
         controls: {a: 1, size: 57, pos: 20, lang: 21, order: 0}
@@ -343,7 +345,7 @@ var engine = function () {
             }
             clearInterval(timer);
             timer = setInterval(function () {
-                sendAction({list: 1});
+                sendAction({list: 1, cid: 0});
             }, settings.bg_update_interval);
             bgTimer.isStart = true;
         };
@@ -441,21 +443,15 @@ var engine = function () {
         var_cache.get_token_count++;
         setStatus('getToken', [-1, 'Getting token...']);
 
-        var url = var_cache.webui_url + "token.html";
+        var url = var_cache.webui_url + '?' + jQ.param({method:'session-get'});
         var xhr = new XMLHttpRequest();
         xhr.open("GET", url, true);
         xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password));
         var _onready = function() {
             setStatus('getToken', [200]);
-            var token = xhr.responseText.match(/>([^<]+)</);
-            if (token && token.length > 1) {
-                token = token[1];
-            } else {
-                token = '';
-            }
             engine.cache = var_cache.client = {
                 status: var_cache.client.status,
-                token: token
+                token: xhr.getResponseHeader("X-Transmission-Session-Id")
             };
             if (onload !== undefined) {
                 onload();
@@ -463,6 +459,9 @@ var engine = function () {
             bgTimer.start();
         };
         var _onerror = function() {
+            if (xhr.status === 409) {
+                return _onready();
+            }
             setStatus('getToken', [xhr.status, xhr.statusText]);
             if (onerror !== undefined) {
                 onerror();
@@ -481,6 +480,520 @@ var engine = function () {
         xhr.onerror = _onerror;
         xhr.send();
     };
+    var getStatusTransmission2uTorrent = function(code) {
+        var uCode = 0;
+        var Status = "";
+        /*
+         TR_STATUS_STOPPED        = 0, // Torrent is stopped
+         TR_STATUS_CHECK_WAIT     = 1, // Queued to check files
+         TR_STATUS_CHECK          = 2, // Checking files
+         TR_STATUS_DOWNLOAD_WAIT  = 3, // Queued to download
+         TR_STATUS_DOWNLOAD       = 4, // Downloading
+         TR_STATUS_SEED_WAIT      = 5, // Queued to seed
+         TR_STATUS_SEED           = 6  // Seeding
+         */
+        if (code === 0) {
+            uCode = 128;
+            Status = "Stopped";
+        } else
+        if (code === 1) {
+            uCode = 233;
+            Status = "Queued to check files";
+        } else
+        if (code === 2) {
+            uCode = 130;
+            Status = "Checking";
+        } else
+        if (code === 3) {
+            uCode = 200;
+            Status = "Queued to download";
+        } else
+        if (code === 4) {
+            uCode = 201;
+            Status = "Downloading";
+        } else
+        if (code === 5) {
+            uCode = 200;
+            Status = "Queued to seed";
+        } else
+        if (code === 6) {
+            uCode = 201;
+            Status = "Seeding";
+        } else {
+            uCode = 152;
+            Status = "Unknown";
+        }
+        return [uCode, Status];
+    };
+    var Transmission2uTorrentAPI = function(data) {
+        /*
+
+         ,arr[i][0] /* ХЭШ = id
+         ,arr[i][1] /* STATUS CODE
+         ,arr[i][2] /* ИМЯ = name
+         ,arr[i][3] /* РАЗМЕР = totalSize
+         ,arr[i][4] /* ПРОЦЕНТ ВЫПОЛНЕНИЯ = percentDone
+         ,arr[i][5]/*  загружено = sizeWhenDone - leftUntilDone
+         ,arr[i][6]/*  РОЗДАНО = uploadedEver
+         ,arr[i][7]/*  КОЭФФИЦИЕНТ = item[5] / item[6]
+         ,arr[i][8] /* СКОРОСТЬ РАЗДАЧИ = rateUpload
+         ,arr[i][9] /* СКОРОСТЬ ЗАГРУЗКИ = rateDownload
+         ,arr[i][10] /*ETA = eta
+         ,arr[i][11] /*МЕТКА
+         ,arr[i][12] /*ПОДКЛЮЧЕНО ПИРОВ = peersSendingToUs
+         ,arr[i][13] /*ПИРЫ В РОЕ
+         ,arr[i][14] /*ПОДКЛЮЧЕНО СИДОВ = webseedsSendingToUs
+         ,arr[i][15] /*СИДЫ В РОЕ
+         ,arr[i][16]/* ДОСТУПНОСТЬ
+         ,arr[i][17] /*ПОРЯДОК ОЧЕРЕДИ ТОРРЕНТОВ = queuePosition
+         ,arr[i][18]/* отдано
+         ,arr[i][19]/* ?
+         ,arr[i][20]/* ?
+         ,arr[i][21] /*статус тескстом
+         ,arr[i][22]/* sid
+         ,arr[i][23]/* время старта = addedDate
+         ,arr[i][24]/* время завершения = doneDate
+         ,arr[i][26]/* path_to_file = downloadDir
+
+         */
+
+        var ut = {};
+        var ut_settings = [];
+        ut['label'] = [];
+        arguments = data['arguments'] || [];
+        var up_limit = -1;
+        var dl_limit = -1;
+        jQ.each(arguments, function(key, value) {
+            if (key === 'torrents') {
+                var fileMode = 0;
+                if (value.length === 1 && 'fileStats' in value[0]) {
+                    fileMode = 1;
+                }
+                var type = 'torrents';
+                if (fileMode === 1 || var_cache.client.cid !== 0) {
+                    type = 'torrentp';
+                }
+                ut[type] = [];
+                var l = value.length;
+                for (var i = 0; i < l; i++) {
+                    var field = value[i];
+                    if (field === undefined) {
+                        console.log("Field undefined!");
+                        continue;
+                    }
+                    var item = ["", 0, "", 0, 0, 0, 0, 0, 0, 0, 0, "", 0, 0, 0, 0, 0, 0, 0, "", "", "", "", 0, 0, "", "", 0];
+                          //     0, 1,  2, 3, 4, 5, 6, 7, 8, 9,10, 11,12,13,14,15,16,17,18, 19, 20, 21, 22,23,24, 25, 26, 28
+                    var utStatus = [];
+                    if (field.id === undefined) {
+                        console.log("File ID is undefined!");
+                        continue;
+                    }
+                    if (field.error > 0) {
+                        utStatus[0] = 144;
+                        utStatus[1] = field.errorString || "Unknown error!";
+                    } else {
+                        utStatus = getStatusTransmission2uTorrent(field.status);
+                    }
+                    item[0] = 'trID_'+field.id;
+                    item[1] = utStatus[0];
+                    item[2] = field.name || "Unknown name";
+                    item[3] = field.totalSize || 0;
+                    if (field.recheckProgress === undefined) {
+                        field.recheckProgress = 0;
+                    }
+                    if (field.percentDone === undefined) {
+                        field.percentDone = 0;
+                    }
+                    if (field.recheckProgress !== 0) {
+                        item[4] = parseInt(field.recheckProgress * 1000);
+                    } else {
+                        item[4] = parseInt(field.percentDone * 1000);
+                    }
+                    item[5] = field.downloadedEver || 0;
+                    item[6] = field.uploadedEver || 0;
+                    if (field.downloadedEver > 0) {
+                        item[7] = Math.round(field.uploadedEver / field.downloadedEver * 1000);
+                    } else {
+                        item[7] = 0;
+                    }
+                    if (isNaN(item[7])) {
+                        item[7] = 0;
+                    }
+                    item[8] = field.rateUpload || 0;
+                    item[9] = field.rateDownload || 0;
+                    item[10] = field.eta || 0;
+                    if (item[10] < 0) {
+                        item[10] = 0;
+                    }
+                    item[12] = field.peersGettingFromUs || 0;
+                    var l_c = 0;
+                    var s_c = 0;
+                    if (field.trackerStats === undefined) {
+                        field.trackerStats = [];
+                    }
+                    field.trackerStats.forEach(function(itm) {
+                        if (itm.leecherCount > 0) {
+                            l_c += itm.leecherCount;
+                        }
+                        if (itm.seederCount > 0) {
+                            s_c += itm.seederCount;
+                        }
+                    });
+                    item[13] = l_c;
+                    item[14] = field.peersSendingToUs || 0;
+                    item[15] = s_c;
+                    item[17] = field.queuePosition || 0;
+
+                    item[21] = utStatus[1];
+
+                    item[23] = field.addedDate || 0;
+                    item[24] = field.doneDate || 0;
+                    item[26] = field.downloadDir || "Unknown path";
+                    if (fileMode) {
+                        ut['files'] = [];
+                        ut['files'][0] = item[0];
+                        ut['files'][1] = [];
+                        if (field.files === undefined) {
+                            field.files = [];
+                        }
+                        if (field.fileStats === undefined) {
+                            field.fileStats = [];
+                        }
+                        var fn = field.files.length;
+                        if (fn > field.fileStats.length) {
+                            fn = 0;
+                            console.log("Files more fileStats!");
+                        }
+                        var file_name_first_slash_position = -1;
+                        var file_folder = undefined;
+                        var count_files_in_first_folder = 0;
+                        for (var n = 0; n < fn; n++) {
+                            var f_item = field.files[n];
+                            var s_item = field.fileStats[n] || {priority: 0};
+                            var file = ["", 0, 0, 0, 0, 0, false, -1, -1, -1, -1, -1, 0];
+                            /*
+                             * name = 0
+                             * size = 1
+                             * dwnload = 2
+                             * dune = 2
+                             * prio = 3
+                             */
+                            if (s_item.wanted === false) {
+                                s_item.priority = 0;
+                            } else {
+                                s_item.priority += 2;
+                            }
+                            if (n === 0 && file_folder === undefined) {
+                                file_name_first_slash_position = f_item.name.indexOf('/');
+                                if (file_name_first_slash_position !== -1) {
+                                    file_folder = f_item.name.substr(0, file_name_first_slash_position);
+                                }
+                            }
+                            if (file_folder !== undefined && f_item.name.substr(0, file_name_first_slash_position) === file_folder) {
+                                count_files_in_first_folder++;
+                            }
+                            file[0] = f_item.name;
+                            file[15] = f_item.name;
+                            file[1] = f_item.length;
+                            file[2] = f_item.bytesCompleted;
+                            file[3] = s_item.priority;
+                            ut['files'][1].push(file);
+                        }
+                        if (file_folder !== undefined && count_files_in_first_folder === fn) {
+                            if (item[26].substr(-1) === '/') {
+                                item[26] += file_folder;
+                            } else {
+                                item[26] += '/' + file_folder;
+                            }
+                            ut['files'][1].forEach(function(file) {
+                                file[0] = file[0].substr(file_name_first_slash_position + 1);
+                            });
+                        }
+                    }
+                    ut[type].push(item);
+                }
+                ut['torrentc'] = 1;
+            } else
+            if (key === 'removed') {
+                var val_len = value.length;
+                if (val_len > 0) {
+                    for (var i = 0; i < val_len; i++) {
+                        value[i] = 'trID_'+value[i];
+                    }
+                    ut['torrentm'] = value;
+                }
+            } else
+            if (key === 'speed-limit-down') {
+                if (dl_limit === -1) {
+                    dl_limit = value;
+                }
+            } else
+            if (key === 'speed-limit-down-enabled' && value === false) {
+                dl_limit = 0;
+            } else
+            if (key === 'speed-limit-up') {
+                if (up_limit === -1) {
+                    up_limit = value;
+                }
+            } else
+            if (key === 'speed-limit-up-enabled' && value === false) {
+                up_limit = 0;
+            } else
+            if (key === 'alt-speed-enabled') {
+                var_cache.client.alt_speed = value;
+                mono.sendMessage({action: 'setAltSpeedState', data: value === true}, undefined, 'mgr');
+            } else
+            if (key === 'download-dir') {
+                ut_settings.push(['download-dir', '', value]);
+            } else
+            if (key === 'download-dir-free-space') {
+                ut_settings.push(['download-dir-free-space', '', value]);
+            } else
+            if (key === 'size-bytes') {
+                ut.free_space = value;
+            }
+        });
+        if (up_limit !== -1 && dl_limit !== -1) {
+            ut_settings.push(['max_dl_rate', '', dl_limit], ['max_ul_rate', '', up_limit]);
+        }
+        if (ut_settings.length > 0) {
+            ut['settings'] = ut_settings;
+        }
+        return ut;
+    };
+    var uTorrent2Transmission = function(url) {
+        if (typeof url === 'string') {
+            url = url.split('&');
+            var params = {};
+            for (var i = 0, item; item = url[i]; i++) {
+                if (item.length === 0) {
+                    continue;
+                }
+                var splitBy = item.indexOf('=');
+                var key = item.substr(0, splitBy);
+                var val = item.substr(splitBy+1);
+                if (key === 'f') {
+                    val = parseInt(val);
+                }
+                if (params[key] !== undefined) {
+                    if (typeof (params[key]) !== "object") {
+                        params[key] = [params[key]];
+                    }
+                    params[key].push(val);
+                } else {
+                    params[key] = val;
+                }
+            }
+        } else {
+            params = jQ.extend(true, {}, url);
+        }
+        if (params.hash !== undefined) {
+            if (typeof params.hash !== 'object') {
+                params.hash = parseInt(params.hash.substr(5));
+            } else {
+                for (var i = 0, item; item = params.hash[i]; i++) {
+                    params.hash[i] = parseInt(item.substr(5));
+                }
+            }
+        }
+        if (params.p !== undefined) {
+            params.p = parseInt(params.p);
+        }
+        if (params.f !== undefined && typeof params.f !== 'object' ) {
+            params.f = [params.f];
+        }
+        var data = {};
+        var dont_get_list = 0;
+        var onload = undefined;
+        if (params.action !== undefined) {
+            if (params.action === 'getfiles') {
+                dont_get_list = 1;
+                data = {
+                    method: "torrent-get",
+                    arguments: {
+                        fields: ["id", "name", "totalSize", "percentDone", 'downloadedEver', 'uploadedEver', 'rateUpload', 'rateDownload', 'eta', 'peersSendingToUs', 'peersGettingFromUs', 'queuePosition', 'addedDate', 'doneDate', 'downloadDir', 'recheckProgress', 'status', 'error', 'errorString', 'trackerStats', 'files', 'fileStats'],
+                        ids: params.hash
+                    }
+                };
+            } else
+            if (params.action === 'start' || params.action === 'unpause') {
+                data = {
+                    method: "torrent-start"
+                };
+                if (params.hash !== undefined) {
+                    data['arguments'] = {ids: params.hash};
+                }
+            } else
+            if (params.action === 'stop' || params.action === 'pause') {
+                data = {
+                    method: "torrent-stop",
+                    arguments: {
+                        ids: params.hash
+                    }
+                };
+            } else
+            if (params.action === 'recheck') {
+                data = {
+                    method: "torrent-verify",
+                    arguments: {
+                        ids: params.hash
+                    }
+                };
+            } else
+            if (params.action === 'remove' || params.action === 'removetorrent') {
+                data = {
+                    method: "torrent-remove",
+                    arguments: {
+                        ids: params.hash
+                    }
+                };
+            } else
+            if (params.action === 'removedata' || params.action === 'removedatatorrent') {
+                data = {
+                    method: "torrent-remove",
+                    arguments: {
+                        'delete-local-data': true,
+                        ids: params.hash
+                    }
+                };
+            } else
+            if (params.action === 'getsettings') {
+                data = {method: "session-get"};
+            } else
+            if (params.action === 'setprio') {
+                var files = params.f;
+                onload = function() {
+                    sendAction({action: 'getfiles', hash: 'trID_'+params.hash});
+                };
+                if (params.p === 2) {
+                    data = {
+                        method: "torrent-set",
+                        arguments: {
+                            'priority-normal': files,
+                            'files-wanted': files,
+                            ids: params.hash
+                        }
+                    };
+                } else
+                if (params.p === 1) {
+                    data = {
+                        method: "torrent-set",
+                        arguments: {
+                            'priority-low': files,
+                            'files-wanted': files,
+                            ids: params.hash
+                        }
+                    };
+                } else
+                if (params.p === 3) {
+                    data = {
+                        method: "torrent-set",
+                        arguments: {
+                            'priority-high': files,
+                            'files-wanted': files,
+                            ids: params.hash
+                        }
+                    };
+                } else
+                if (params.p === 0) {
+                    data = {
+                        method: "torrent-set",
+                        arguments: {
+                            'files-unwanted': files,
+                            ids: params.hash
+                        }
+                    };
+                }
+            } else
+            if (params.action === 'setsetting') {
+                var speed = params.v;
+                dont_get_list = 1;
+                data = {
+                    method: "session-set",
+                    arguments: {}
+                };
+                if (params.s === "max_dl_rate") {
+                    if (speed === 0) {
+                        data.arguments['speed-limit-down-enabled'] = false;
+                    } else {
+                        data.arguments['speed-limit-down-enabled'] = true;
+                        data.arguments['speed-limit-down'] = speed;
+                    }
+                }
+                if (params.s === "max_ul_rate") {
+                    if (speed === 0) {
+                        data.arguments['speed-limit-up-enabled'] = false;
+                    } else {
+                        data.arguments['speed-limit-up-enabled'] = true;
+                        data.arguments['speed-limit-up'] = speed;
+                    }
+                }
+                if (params.s === "alt-speed-enabled") {
+                    data.arguments['alt-speed-enabled'] = (speed !== 0);
+                }
+            } else
+            if (params.action === 'add-url') {
+                data = {
+                    method: 'torrent-add',
+                    arguments: {
+                        filename: params.s
+                    }
+                };
+                if (params.download_dir !== undefined) {
+                    data.arguments['download-dir'] = params.path;
+                }
+            } else
+            if (params.action === 'rename') {
+                data = {
+                    method: "torrent-rename-path",
+                    arguments: {
+                        ids: params.hash,
+                        path: params.path,
+                        name: params.name
+                    }
+                };
+            } else
+            if (params.action === 'move') {
+                data = {
+                    method: "torrent-set-location",
+                    arguments: {
+                        ids: params.hash,
+                        location: params.location,
+                        move: params.move === true
+                    }
+                };
+            } else
+            if (params.action === 'free-space') {
+                data = {
+                    method: "free-space",
+                    arguments: {
+                        path: params.path
+                    }
+                };
+            }
+        } else
+        if (params.list !== undefined) {
+            dont_get_list = 1;
+
+            data = {
+                method: "torrent-get",
+                arguments: {
+                    fields: ["id", "name", "totalSize", "percentDone", 'downloadedEver', 'uploadedEver', 'rateUpload', 'rateDownload', 'eta', 'peersSendingToUs', 'peersGettingFromUs', 'queuePosition', 'addedDate', 'doneDate', 'downloadDir', 'recheckProgress', 'status', 'error', 'errorString', 'trackerStats']
+                }
+            };
+            if (params.cid !== 0) {
+              data.arguments['ids'] = "recently-active";
+            } else {
+              var_cache.client.cid = 0;
+            }
+        }
+        if (dont_get_list === 0 && onload === undefined && params.list !== undefined) {
+            onload = function() {
+                sendAction({list: 1});
+            };
+        }
+        return {data: JSON.stringify(data), onload: onload};
+    };
     var sendAction = function (data, onload) {
         if (var_cache.client.token === undefined) {
             getToken(function () {
@@ -490,79 +1003,91 @@ var engine = function () {
         }
         var _data;
         if (typeof data === 'string') {
-            _data = 'token=' + var_cache.client.token + '&cid=' + var_cache.client.cid + '&' + data;
+            _data = data + '&cid=' + var_cache.client.cid;
         } else {
-            _data = jQ.extend({token: var_cache.client.token, cid: var_cache.client.cid}, data);
+            _data = jQ.extend({cid: var_cache.client.cid}, data);
         }
         var onerror, onready;
-        if (_data.torrent_file !== undefined) {
-            var form_data = new window.FormData();
-            var file = _data.torrent_file;
-            form_data.append("torrent_file", file);
-            var xhr = new XMLHttpRequest();
-            delete _data.torrent_file;
-            xhr.open("POST", var_cache.webui_url + '?' + jQ.param(_data), true);
-            xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password));
-            onready = function () {
-                var_cache.get_token_count = 0;
-                var data;
-                try {
-                    var responseText = xhr.responseText;
-                    if (settings.fix_cirilic === 1) {
-                        responseText = fixCirilic(responseText);
+        if (data.torrent_file !== undefined) {
+            var reader = new window.FileReader();
+            reader.readAsDataURL(data.torrent_file);
+            reader.onloadend = function() {
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", var_cache.webui_url, true);
+                xhr.setRequestHeader("X-Transmission-Session-Id", var_cache.client.token || '');
+                if (settings.login.length > 0 || settings.password.length > 0) {
+                    xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password));
+                }
+                onready = function () {
+                    var_cache.get_token_count = 0;
+                    var data;
+                    try {
+                        data = JSON.parse(xhr.responseText);
+                    } catch (err) {
+                        showNotifi(error_icon, lang_arr[103], '', 'addFile');
+                        return;
                     }
-                    data = JSON.parse(responseText);
-                } catch (err) {
-                    showNotifi(error_icon, lang_arr[103], '', 'addFile');
-                    return;
+                    if (onload !== undefined) {
+                        onload(data);
+                    }
+                    readResponse(data);
+                };
+                onerror = function () {
+                    showNotifi(error_icon, xhr.status, xhr.statusText, 'addFile');
+                    setStatus('sendFile', [xhr.status, xhr.statusText, _data]);
+                    //400 - invalid request, когда token протухает
+                    if (var_cache.client.sendAction_error > 3 || xhr.status === 409) {
+                        var_cache.client.token = undefined;
+                        sendAction(data, onload);
+                        return;
+                    }
+                    var_cache.client.sendAction_error = (var_cache.client.sendAction_error === undefined) ? 1 : var_cache.client.sendAction_error + 1;
+                };
+                var file_data_pos = reader.result.indexOf(',');
+                var params = {
+                    method: "torrent-add",
+                    arguments: {
+                        metainfo: reader.result.substr(file_data_pos + 1)
+                    }
+                };
+                if (data.download_dir !== undefined) {
+                    params.arguments['download-dir'] = data.path;
                 }
-                if (onload !== undefined) {
-                    onload(data);
-                }
-                readResponse(data);
+                xhr.onload = function() {
+                    if (xhr.status !== 200 && xhr.status !== 204) {
+                        return onerror();
+                    }
+                    onready();
+                };
+                xhr.onerror = onerror;
+                xhr.send(JSON.stringify(params));
             };
-            onerror = function () {
-                showNotifi(error_icon, xhr.status, xhr.statusText, 'addFile');
-                setStatus('sendFile', [xhr.status, xhr.statusText, _data]);
-                //400 - invalid request, когда token протухает
-                if (var_cache.client.sendAction_error > 3 || xhr.status === 400) {
-                    var_cache.client.token = undefined;
-                    sendAction(data, onload);
-                    return;
-                }
-                var_cache.client.sendAction_error = (var_cache.client.sendAction_error === undefined) ? 1 : var_cache.client.sendAction_error + 1;
-            };
-            xhr.onload = function() {
-                if (xhr.status !== 200 && xhr.status !== 204) {
-                    return onerror();
-                }
-                onready();
-            };
-            xhr.onerror = onerror;
-            xhr.send(form_data);
             return;
+        }
+        var tr_data = uTorrent2Transmission(_data);
+        if (tr_data.onload !== undefined) {
+            onload = tr_data.onload;
         }
 
         var xhr = new XMLHttpRequest();
-        xhr.open('GET', var_cache.webui_url + '?' + jQ.param(_data), true);
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password));
-        onready = function() {
+        xhr.open('POST', var_cache.webui_url, true);
+        xhr.responseType = 'text';
+        xhr.setRequestHeader("X-Transmission-Session-Id", var_cache.client.token || '');
+        if (settings.login.length > 0 || settings.password.length > 0) {
+            xhr.setRequestHeader("Authorization", "Basic " + window.btoa(settings.login + ":" + settings.password));
+        }
+        onready = function(e) {
             var data = xhr.responseText;
-            if (data.length === 0) {
-                return;
-            }
+
+            data = data.replace(var_cache.rmLastScrapeResult, '"lastScrapeResult":"","');
             try {
-                if (settings.fix_cirilic === 1) {
-                    data = fixCirilic(data);
-                }
                 data = JSON.parse(data);
-            } catch (err) {
-                console.log('Data parse error!', data);
-                return;
+            } catch (e) {
+                data = null;
             }
+
             var_cache.get_token_count = 0;
-            setStatus('sendAction', [200]);
+            var data = Transmission2uTorrentAPI(data);
             if (onload !== undefined) {
                 onload(data);
             }
@@ -570,7 +1095,7 @@ var engine = function () {
         };
         onerror = function() {
             setStatus('sendAction', [xhr.status, xhr.statusText, _data]);
-            if (var_cache.client.sendAction_error > 3 || xhr.status === 400) {
+            if (var_cache.client.sendAction_error > 3 || xhr.status === 409) {
                 var_cache.client.token = undefined;
                 sendAction(data, onload);
                 return;
@@ -584,7 +1109,7 @@ var engine = function () {
             onready();
         };
         xhr.onerror = onerror;
-        xhr.send();
+        xhr.send(jQ.param(tr_data.data));
     };
     var readResponse = function (data) {
         /**
@@ -676,7 +1201,8 @@ var engine = function () {
         }
         if (data.settings !== undefined) {
             var_cache.client.settings = data.settings;
-            mono.sendMessage({action: 'setSpeedLimit', data: var_cache.client.settings}, undefined, 'mgr');
+            mono.sendMessage([{action: 'setSpeedLimit', data: var_cache.client.settings},
+                {action: 'setSpace', data: var_cache.client.settings}], undefined, 'mgr');
         }
         if (data.files !== undefined) {
             mono.sendMessage({action: 'setFileList', data: data.files}, undefined, 'mgr');
@@ -730,7 +1256,7 @@ var engine = function () {
         var xhr = new XMLHttpRequest();
         var url = self.data.url('./icons/icon-'+size+'.png');
         if (count === 0) {
-            return cb(url);
+            return cb(url, count);
         }
         xhr.open('GET', url);
         xhr.responseType = 'blob';
@@ -794,7 +1320,7 @@ var engine = function () {
         }
         var active = 0;
         for (var i = 0, item; item = arr[i]; i++) {
-            if (item[4] !== 1000 && ( item[24] === undefined || item[24] === 0) ) {
+            if (item[4] !== 1000 && ( item[24] === undefined || item[24] === 0)) {
                 active++;
             }
         }
@@ -884,8 +1410,8 @@ var engine = function () {
                 sendAction({list: 1}, function () {
                     sendAction(jQ.extend({action: 'add-url', s: url}, dir), function (data) {
                         setOnFileAddListener(label);
-                        if (data.error !== undefined) {
-                            showNotifi(error_icon, lang_arr[23], data.error, 'addFile');
+                        if (data.result && data.result !== 'success') {
+                            showNotifi(error_icon, lang_arr[23], data.result, 'addFile');
                             var_cache.newFileListener = undefined;
                         }
                         sendAction({list: 1});
@@ -903,8 +1429,8 @@ var engine = function () {
             sendAction({list: 1}, function () {
                 sendAction(jQ.extend({action: 'add-file', torrent_file: url}, dir), function (data) {
                     setOnFileAddListener(label);
-                    if (data.error !== undefined) {
-                        showNotifi(error_icon, lang_arr[23], data.error, 'addFile');
+                    if (data.result && data.result !== 'success') {
+                        showNotifi(error_icon, lang_arr[23], data.result, 'addFile');
                         var_cache.newFileListener = undefined;
                     }
                     sendAction({list: 1});
@@ -937,7 +1463,7 @@ var engine = function () {
         }
         var dir, label;
         var item = var_cache.folders_array[id];
-        if (settings.context_labels) {
+        if (!isTransmission && settings.context_labels) {
             label = item[1];
         } else {
             dir = {download_dir: item[0], path: item[1]};
@@ -1310,86 +1836,6 @@ var engine = function () {
     var clone_obj = function (obj) {
         return jQ.extend(true, {}, obj);
     };
-    var fixCirilic = function () {
-        var cirilic = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя";
-        var chars = ("\\u037777777720\\u037777777620 \\u037777777720\\u037777777621 " +
-            "\\u037777777720\\u037777777622 \\u037777777720\\u037777777623 " +
-            "\\u037777777720\\u037777777624 \\u037777777720\\u037777777625 " +
-            "\\u037777777720\\u037777777601 \\u037777777720\\u037777777626 " +
-            "\\u037777777720\\u037777777627 \\u037777777720\\u037777777630 " +
-            "\\u037777777720\\u037777777631 \\u037777777720\\u037777777632 " +
-            "\\u037777777720\\u037777777633 \\u037777777720\\u037777777634 " +
-            "\\u037777777720\\u037777777635 \\u037777777720\\u037777777636 " +
-            "\\u037777777720\\u037777777637 \\u037777777720\\u037777777640 " +
-            "\\u037777777720\\u037777777641 \\u037777777720\\u037777777642 " +
-            "\\u037777777720\\u037777777643 \\u037777777720\\u037777777644 " +
-            "\\u037777777720\\u037777777645 \\u037777777720\\u037777777646 " +
-            "\\u037777777720\\u037777777647 \\u037777777720\\u037777777650 " +
-            "\\u037777777720\\u037777777651 \\u037777777720\\u037777777652 " +
-            "\\u037777777720\\u037777777653 \\u037777777720\\u037777777654 " +
-            "\\u037777777720\\u037777777655 \\u037777777720\\u037777777656 " +
-            "\\u037777777720\\u037777777657 \\u037777777720\\u037777777660 " +
-            "\\u037777777720\\u037777777661 \\u037777777720\\u037777777662 " +
-            "\\u037777777720\\u037777777663 \\u037777777720\\u037777777664 " +
-            "\\u037777777720\\u037777777665 \\u037777777721\\u037777777621 " +
-            "\\u037777777720\\u037777777666 \\u037777777720\\u037777777667 " +
-            "\\u037777777720\\u037777777670 \\u037777777720\\u037777777671 " +
-            "\\u037777777720\\u037777777672 \\u037777777720\\u037777777673 " +
-            "\\u037777777720\\u037777777674 \\u037777777720\\u037777777675 " +
-            "\\u037777777720\\u037777777676 \\u037777777720\\u037777777677 " +
-            "\\u037777777721\\u037777777600 \\u037777777721\\u037777777601 " +
-            "\\u037777777721\\u037777777602 \\u037777777721\\u037777777603 " +
-            "\\u037777777721\\u037777777604 \\u037777777721\\u037777777605 " +
-            "\\u037777777721\\u037777777606 \\u037777777721\\u037777777607 " +
-            "\\u037777777721\\u037777777610 \\u037777777721\\u037777777611 " +
-            "\\u037777777721\\u037777777612 \\u037777777721\\u037777777613 " +
-            "\\u037777777721\\u037777777614 \\u037777777721\\u037777777615 " +
-            "\\u037777777721\\u037777777616 \\u037777777721\\u037777777617").split(' ');
-        return function (data) {
-            if (data.indexOf("\\u03777777772") === -1) {
-                return data;
-            }
-            for (var i = 0, char_item; char_item = chars[i]; i++) {
-                while (data.indexOf(char_item) !== -1) {
-                    data = data.replace(char_item, cirilic[i]);
-                }
-            }
-            return data;
-        };
-    }();
-    var in_cp1251 = function(sValue) {
-        var text = "", Ucode, ExitValue, s;
-        for (var i = 0, sValue_len = sValue.length; i < sValue_len; i++) {
-            s = sValue.charAt(i);
-            Ucode = s.charCodeAt(0);
-            var Acode = Ucode;
-            if (Ucode > 1039 && Ucode < 1104) {
-                Acode -= 848;
-                ExitValue = "%" + Acode.toString(16);
-            }
-            else if (Ucode === 1025) {
-                Acode = 168;
-                ExitValue = "%" + Acode.toString(16);
-            }
-            else if (Ucode === 1105) {
-                Acode = 184;
-                ExitValue = "%" + Acode.toString(16);
-            }
-            else if (Ucode === 32) {
-                Acode = 32;
-                ExitValue = "%" + Acode.toString(16);
-            }
-            else if (Ucode === 10) {
-                Acode = 10;
-                ExitValue = "%0A";
-            }
-            else {
-                ExitValue = s;
-            }
-            text = text + ExitValue;
-        }
-        return text;
-    };
     var fastMigration = function(lStorage) {
         var settings = {};
         for (var key in def_settings) {
@@ -1527,7 +1973,6 @@ var engine = function () {
             });
         },
         sendFile: sendFile,
-        createCtxMenu: createCtxMenu,
-        in_cp1251: in_cp1251
+        createCtxMenu: createCtxMenu
     };
 }();
