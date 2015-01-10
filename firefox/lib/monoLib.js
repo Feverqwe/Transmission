@@ -16,7 +16,7 @@
    */
 
   /**
-   * type {function}
+   * Response id for page
    * @returns {number}
    */
   var getPageId = function() {
@@ -26,6 +26,11 @@
     return ++getPageId.value;
   };
 
+  /**
+   * Get mono page from map
+   * @param page
+   * @returns {object}
+   */
   var getMonoPage = function(page) {
     for (var index in map) {
       if (map[index].page === page) {
@@ -36,11 +41,20 @@
   };
 
   var virtualPageList = [];
+  /**
+   * Virtual port for background page
+   * @returns {{port: {emit: Function, on: Function}, lib: {emit: Function, on: Function}, isVirtual: boolean}}
+   */
   exports.virtualAddon = function() {
     var subscribClientList = {};
     var subscribServerList = {};
     var obj = {
       port: {
+        /**
+         * Send message from bg page
+         * @param {number} to
+         * @param message
+         */
         emit: function(to, message) {
           var list = subscribServerList[to];
           if (list === undefined) {
@@ -50,6 +64,11 @@
             item(message);
           }
         },
+        /**
+         * Listener for background page
+         * @param {number} to
+         * @param {function} cb - Callback function
+         */
         on: function(to, cb) {
           if (subscribClientList[to] === undefined) {
             subscribClientList[to] = [];
@@ -58,6 +77,11 @@
         }
       },
       lib: {
+        /**
+         * Send message to bg page
+         * @param {number} to
+         * @param message
+         */
         emit: function(to, message) {
           var list = subscribClientList[to];
           if (list === undefined) {
@@ -67,6 +91,11 @@
             item(message);
           }
         },
+        /**
+         * Listener for monoLib
+         * @param {number} to
+         * @param {function} cb - Callback function
+         */
         on: function(to, cb) {
           if (subscribServerList[to] === undefined) {
             subscribServerList[to] = [];
@@ -80,6 +109,9 @@
     return obj;
   };
 
+  /**
+   * Virtual port function for pages without addon, but with mono.js work like bridge
+   */
   exports.virtualPort = function() {
     window.addEventListener('message', function(e) {
       if (e.data[0] !== '>') {
@@ -176,17 +208,18 @@
       var type = (mPage.page.isVirtual !== undefined) ? 'lib' : 'port';
       return mPage.page[type].emit('mono', message);
     }
+
+    var fmPage = map[message.from];
     for (var i = 0, item; item = virtualPageList[i]; i++) {
+      if (fmPage.page === item) continue;
       item.lib.emit('mono', message);
     }
-    if (flags.enableLocalScope && message.from !== undefined) {
-      var fmPage = map[message.from];
-      if (fmPage !== undefined && (fmPage.isLocal || fmPage.page.isVirtual)) {
-        for (var index in map) {
-          var mPage = map[index];
-          if (fmPage === mPage || mPage.isLocal === false || mPage.active === false) continue;
-          mPage.page.port.emit('mono', message);
-        }
+
+    if (flags.enableLocalScope && fmPage !== undefined && fmPage.page.isVirtual && message.from !== undefined) {
+      for (var index in map) {
+        var mPage = map[index];
+        if (fmPage === mPage || mPage.isLocal === false || mPage.active === false) continue;
+        mPage.page.port.emit('mono', message);
       }
     }
   };
@@ -234,10 +267,16 @@ var ffSimpleStorage = (function() {
       if (Array.isArray(src) === true) {
         for (var i = 0, len = src.length; i < len; i++) {
           key = src[i];
+          if (!ss.storage.hasOwnProperty(key)) {
+            continue;
+          }
           obj[key] = ss.storage[key];
         }
       } else {
         for (key in src) {
+          if (!ss.storage.hasOwnProperty(key)) {
+            continue;
+          }
           obj[key] = ss.storage[key];
         }
       }
@@ -296,7 +335,7 @@ sendHook.monoStorage = function(message) {
  * @namespace monoOnMessage {function}
  * @namespace map {array}
  */
-var serviceList = {
+var serviceList = exports.serviceList = {
   resize: function(message) {
     var mPage = map[message.from];
     if (!mPage || mPage.active === false) {
@@ -319,91 +358,7 @@ var serviceList = {
   }
 };
 
-var sanitizerHTML = function (html) {
-  var chrome = require('chrome');
-  var Cc = chrome.Cc;
-  var Ci = chrome.Ci;
-
-  var flags = 2;
-
-  if (sanitizerHTML.regexpList === undefined) {
-    var self = require("sdk/self");
-    var id = self.id.replace(/[^\w\d]/g, '_');
-    sanitizerHTML.regexpList = [];
-    sanitizerHTML.regexpList[1] = new RegExp('http:\\/\\/'+id+'#', 'gm');
-    sanitizerHTML.regexpList[0] = /href=(['"]{1})([^'"]*)(?:['"]{1})/img;
-    sanitizerHTML.regexpList[2] = /javascript/i;
-    sanitizerHTML.regexpList[3] = id;
-  }
-
-  var sanitizeRegExp = sanitizerHTML.regexpList;
-
-  html = html.replace(sanitizeRegExp[0], function(str, arg1, arg2) {
-    "use strict";
-    var data = arg2;
-    if (arg2.search(sanitizeRegExp[2]) === 0) {
-      data = '';
-    } else
-    if (arg2[0] === '/' || arg2.substr(0, 4) !== 'http') {
-      data = 'http://'+sanitizeRegExp[3]+'#' + arg2
-    }
-    return 'href='+arg1+data+arg1;
-  });
-
-  var parser = Cc["@mozilla.org/parserutils;1"].getService(Ci.nsIParserUtils);
-  var sanitizedHTML = parser.sanitize(html, flags);
-
-  sanitizedHTML = sanitizedHTML.replace(sanitizeRegExp[1], '');
-
-  return sanitizedHTML;
-};
-
-serviceList.xhr = function(message, response) {
-  var msg = message.data || {};
-  if (!serviceList.xhr.xhrList) {
-    serviceList.xhr.xhrList = {};
-  }
-  var xhrList = serviceList.xhr.xhrList;
-
-  var XMLHttpRequest = require('sdk/net/xhr').XMLHttpRequest;
-  var obj = msg.data;
-  var xhr = new XMLHttpRequest();
-  xhr.open(obj.open[0], obj.open[1], obj.open[2], obj.open[3], obj.open[4]);
-  xhr.responseType = obj.responseType;
-  if (obj.mimeType) {
-    xhr.overrideMimeType(obj.mimeType);
-  }
-  if (obj.headers) {
-    for (var key in obj.headers) {
-      xhr.setRequestHeader(key, obj.headers[key]);
-    }
-  }
-  if (obj.responseType) {
-    xhr.responseType = obj.responseType;
-  }
-  xhr.onload = xhr.onerror = function() {
-    delete xhrList[obj.id];
-    return response({
-      status: xhr.status,
-      statusText: xhr.statusText,
-      response: (obj.responseType)?xhr.response:(obj.safe)?sanitizerHTML(xhr.responseText):xhr.responseText
-    });
-  };
-  xhr.send(obj.data);
-  if (obj.id) {
-    xhrList[obj.id] = xhr;
-  }
-};
-serviceList.xhrAbort = function(message) {
-  var msg = message.data || {};
-  var xhrList = serviceList.xhr.xhrList || {};
-
-  var xhr = xhrList[msg.data];
-  if (xhr) {
-    xhr.abort();
-    delete xhrList[msg.data];
-  }
-};
+//@ffLibOtherUtils
 
 sendHook.service = function(message) {
   var msg = message.data || {};

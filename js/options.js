@@ -1,492 +1,671 @@
-(function () {
-    mono.sendHook.mgr = function(){};
-    mono.sendHook.bg = function(){};
-
-    var actionReader = function(message, cb) {
-        if (message.action === 'setDirList') {
-            return options.setDirList(message.data);
+mono.create = function(tagName, obj) {
+    var el;
+    if ( typeof tagName === 'string') {
+        el = document.createElement(tagName);
+    } else {
+        el = tagName;
+    }
+    if (obj !== undefined) {
+        for (var attr in obj) {
+            var value = obj[attr];
+            if (mono.create.hookList[attr]) {
+                mono.create.hookList[attr](el, value);
+                continue;
+            }
+            if (value === undefined || value === null) {
+                continue;
+            }
+            el[attr] = value;
         }
-        if (message === 'sleep') {
-            window.location = 'sleep.html';
+    }
+    return el;
+};
+mono.create.hookList = {
+    text: function(el, value) {
+        el.textContent = value;
+    },
+    data: function(el, value) {
+        if (!value) return;
+
+        for (var item in value) {
+            var val = value[item];
+            if (val !== null && val !== undefined) {
+                el.dataset[item] = val;
+            }
+        }
+    },
+    class: function(el, value) {
+        if (typeof value !== 'string') {
+            for (var i = 0, len = value.length; i < len; i++) {
+                var className = value[i];
+                if (!className) {
+                    continue;
+                }
+                el.classList.add(className);
+            }
             return;
         }
-    };
-    mono.onMessage(function(message, response) {
-        if (Array.isArray(message)) {
-            var c_wait = message.length;
-            var c_ready = 0;
-            var resultList = {};
-            var ready = function(key, data) {
-                c_ready+= 1;
-                resultList[key] = data;
-                if (c_wait === c_ready) {
-                    response(resultList);
+        el.setAttribute('class', value);
+    },
+    style: function(el, value) {
+        if (typeof value !== 'string') {
+            for (var item in value) {
+                el.style[item] = value[item];
+            }
+            return;
+        }
+        el.setAttribute('style', value);
+    },
+    append: function(el, value) {
+        if (Array.isArray(value)) {
+            for (var i = 0, len = value.length; i < len; i++) {
+                var subEl = value[i];
+                if (!subEl) {
+                    continue;
                 }
-            };
-            message.forEach(function(action) {
-                actionReader(action, function (data) {
-                    ready(action, data);
+                if (typeof (subEl) === 'string') {
+                    subEl = document.createTextNode(subEl);
+                }
+                el.appendChild(subEl);
+            }
+            return;
+        }
+        el.appendChild(value);
+    },
+    on: function(el, args) {
+        if (typeof args[0] !== 'string') {
+            for (var i = 0, len = args.length; i < len; i++) {
+                var subArgs = args[i];
+                el.addEventListener(subArgs[0], subArgs[1], subArgs[2]);
+            }
+            return;
+        }
+        //type, onEvent, useCapture
+        el.addEventListener(args[0], args[1], args[2]);
+    },
+    onCreate: function(el, value) {
+        value(el);
+    }
+};
+mono.debounce = function(fn, delay) {
+    var timer = null;
+    return function () {
+        var context = this, args = arguments;
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+            fn.apply(context, args);
+        }, delay);
+    };
+};
+
+var options = function() {
+    "use strict";
+    var activePage = null;
+    var activeItem = undefined;
+    var domCache = {};
+    var varCache = {};
+
+    var set_place_holder = function() {
+        for (var key in options.defaultSettings) {
+            var defaultValue = options.defaultSettings[key];
+            var el = document.querySelector('input[data-option="' + key + '"]');
+            if (el === null) {
+                return console.log('El not found!', key);
+            }
+            if (['text', 'number', 'password'].indexOf(el.type) !== -1) {
+                if (options.settings[key] !== defaultValue) {
+                    el.value = options.settings[key];
+                } else {
+                    el.value = '';
+                }
+                if (defaultValue || defaultValue === '' || defaultValue === 0) {
+                    el.placeholder = defaultValue;
+                }
+            } else if (el.type === "checkbox") {
+                el.checked = !!options.settings[key];
+            } else if (el.type === "radio") {
+                var _el = document.querySelector('input[data-option="' + key + '"][value="'+options.settings[key]+'"]');
+                if (_el !== null) {
+                    el = _el;
+                }
+                el.checked = true;
+            }
+        }
+    };
+
+    var onHashChange = function() {
+        var hash = location.hash.substr(1) || 'client';
+        var activeItem = document.querySelector('a[data-page="'+hash+'"]');
+        if (activeItem === null) {
+            activeItem = document.querySelector('a[data-page="client"]');
+        }
+        activeItem.dispatchEvent(new CustomEvent('click', {bubbles: true}));
+    };
+
+    var saveChange = function(e) {
+        var el = e.target;
+        if (el.tagName !== 'INPUT') {
+            return;
+        }
+        var key = el.dataset.option;
+        if (!key) {
+            return;
+        }
+        var value;
+        if (el.type === 'checkbox') {
+            value = el.checked ? 1 : 0;
+        } else
+        if (el.type === 'radio') {
+            value = parseInt(el.value);
+        } else
+        if (el.type === 'number') {
+            var number = parseInt(el.value);
+            if (isNaN(number)) {
+                number = parseInt(el.placeholder);
+            }
+            var min = parseInt(el.min);
+            if (!isNaN(min) && number < min) {
+                number = min;
+                el.value = number;
+            }
+            if (isNaN(number)) {
+                return;
+            }
+            value = number;
+        } else
+        if (['text', 'password'].indexOf(el.type) !== -1) {
+            value = el.value;
+            var placehoder = el.placeholder;
+            if (!value && placehoder) {
+                value = placehoder;
+            }
+        }
+
+        var obj = {};
+        obj[key] = value;
+
+        var cb = this.cb;
+        mono.storage.set(obj, function() {
+            mono.sendMessage({action: 'reloadSettings'}, cb);
+        });
+    };
+
+    var getBackupJson = function(cb) {
+        mono.storage.get(null, function(storage) {
+            cb && cb(JSON.stringify(storage));
+        });
+    };
+
+    var restoreSettings = function(storage) {
+        mono.storage.clear();
+        var data = {};
+        for (var item in storage) {
+            var value = storage[item];
+            if (storage.hasOwnProperty(item) === false || value === null) {
+                continue;
+            }
+            data[item] = value;
+        }
+        mono.storage.set(data, function() {
+            mono.sendMessage({action: 'reloadSettings'}, function() {
+                window.location.reload();
+            });
+        });
+    };
+
+    var makeBackupForm = function() {
+        domCache.backupUpdateBtn.on('click', function() {
+            getBackupJson(function(json) {
+                domCache.backupInp.val( json );
+            });
+        });
+        domCache.restoreBtn.on('click', function() {
+            try {
+                var data = JSON.parse(domCache.restoreInp.val());
+            } catch (error) {
+                return alert(options.language.OV_FL_ERROR + "\n" + error);
+            }
+            restoreSettings(data);
+        });
+        domCache.clearCloudStorageBtn.on('click', function() {
+            mono.storage.sync.clear();
+            domCache.getFromCloudBtn.prop('disabled', true);
+        });
+        domCache.saveInCloudBtn.on('click', function() {
+            var _this = this;
+            _this.disabled = true;
+            setTimeout(function() {
+                _this.disabled = false;
+            }, 750);
+            getBackupJson(function(json) {
+                mono.storage.sync.set({backup: json}, function() {
+                    domCache.getFromCloudBtn.prop('disabled', false);
                 });
             });
-            return;
-        }
-        actionReader(message, response);
-    });
-    $(function () {
-        options.boot();
-    });
-})();
-var options = function() {
-    var isTransmission = true;
-    var var_cache = {};
-    var dom_cache = {};
-    var currentLanguage = navigator.language.substr(0,2);
-    var def_settings = undefined;
-    var set_place_holder = function() {
-        mono.sendMessage('settings', function(settings) {
-            $.each(def_settings, function (k, v) {
-                if (v.t === "text" || v.t === "number" || v.t === "password") {
-                    var dom_obj = $('input[name="' + k + '"]');
-                    dom_obj.removeAttr("value");
-                    if (settings[k] === undefined) {
-                        settings[k] = v.v;
-                    }
-                    if (settings[k] !== v.v) {
-                        if (k === "bg_update_interval" || k === "notify_visbl_interval" || k === "mgr_update_interval") {
-                            dom_obj.attr("value", settings[k] / 1000);
-                        } else {
-                            dom_obj.attr("value", settings[k]);
-                        }
-                    }
-                    if (v.v !== undefined) {
-                        if (k === "bg_update_interval" || k === "notify_visbl_interval" || k === "mgr_update_interval") {
-                            dom_obj.attr("placeholder", v.v / 1000);
-                        } else {
-                            dom_obj.attr("placeholder", v.v);
-                        }
-                    }
-                } else if (v.t === "checkbox") {
-                    $('input[name="' + k + '"]').prop('checked', settings[k]);
-                } else if (v.t === "array") {
-                    if (k === "folders_array") {
-                        var arr = settings[k];
-                        var $select = dom_cache.sel_folders;
-                        $select.empty();
-                        for (var n = 0, len = arr.length; n < len; n++) {
-                            $select.append($('<option>', {text: arr[n][1], value: JSON.stringify(arr[n])}));
-                        }
-                    }
-                }
-            });
-            write_sortable_tables();
-        }, 'bg');
-        if (!isTransmission) {
-            dom_cache.sel_folder_arr.empty().off().on('click', function () {
-                if ($(this).children().length !== 0) {
-                    return;
-                }
-                mono.sendMessage({action: 'sendAction', data: {action: 'list-dirs'} }, undefined, 'bg');
-                return 1;
-            });
-        }
-    };
-    var saveAll = function(cb) {
-        var changes = {};
-        changes['lang'] = dom_cache.select_language.val();
-        $.each(def_settings, function(key, value) {
-            var $el = $('input[name="' + key + '"]');
-            if (value.t === "text" || value.t === "password") {
-                var val = $el.val();
-                if (val.length === 0 && key !== 'login' && key !== 'password') {
-                    val = value.v;
-                }
-                changes[key] = val;
-            } else
-            if (value.t === "checkbox") {
-                var val = ($el.prop('checked'))?1:0;
-                changes[key] = val;
-            } else
-            if (value.t === "number") {
-                var val = $el.val();
-                if (val.length <= 0) {
-                    //берется из placeholder потому, что bg_update_interval итп именют кратные значения
-                    val = $el.attr('placeholder');
-                }
-                if (key === "bg_update_interval" || key === "notify_visbl_interval" || key === "mgr_update_interval") {
-                    val = val * 1000;
-                }
-                if (value.min !== undefined && val < value.min) {
-                    val = value.min;
-                }
-                changes[key] = val;
-            }
         });
-        var $f_select = dom_cache.sel_folders.children('option');
-        var f_select_len = $f_select.length;
-        var folders_arr = new Array(f_select_len);
-        for (var n = 0; n < f_select_len; n++) {
-            folders_arr[n] = JSON.parse($f_select.eq(n).val());
-        }
-        changes['folders_array'] = JSON.stringify(folders_arr);
+        domCache.getFromCloudBtn.on('click', function() {
+            mono.storage.sync.get('backup', function(storage) {
+                domCache.restoreInp.val( storage.backup );
+            });
+        });
+    };
 
-        mono.storage.set(changes, function() {
-            cb && cb();
-        });
-
-        mono.sendMessage(['getColums', 'getFlColums'], function(data) {
-            var tr_colums = data.getColums;
-            var table = $('ul.tr_colums');
-            var new_obj = {};
-            var items = table.children('li');
-            var c = items.length;
-            for (var n = 0; n < c; n++) {
-                var item = items.eq(n);
-                var key = item.data('key');
-                var active = (item.children('div.info').children('div').eq(2).children('input').eq(0)[0].checked) ? 1 : 0;
-                var size = parseInt(item.children('div.info').children('div').eq(1).children('label').text());
-                new_obj[key] = tr_colums[key];
-                new_obj[key].size = size;
-                new_obj[key].a = active;
+    var writeLanguage = function(body) {
+        var elList = (body || document).querySelectorAll('[data-lang]');
+        for (var i = 0, el; el = elList[i]; i++) {
+            var langList = el.dataset.lang.split('|');
+            for (var m = 0, lang; lang = langList[m]; m++) {
+                var args = lang.split(',');
+                var locale = options.language[args.shift()];
+                if (locale === undefined) {
+                    console.log('Language string is not found!', el.dataset.lang);
+                    continue;
+                }
+                if (args.length !== 0) {
+                    args.forEach(function (item) {
+                        if (item === 'text') {
+                            el.textContent = locale;
+                            return 1;
+                        }
+                        el.setAttribute(item, locale);
+                    });
+                } else if (el.tagName === 'DIV') {
+                    el.title = locale;
+                } else if (['A', 'LEGEND', 'SPAN', 'LI', 'TH', 'P', 'OPTION', 'BUTTON', 'H2', 'H3'].indexOf(el.tagName) !== -1) {
+                    el.textContent = locale;
+                } else if (el.tagName === 'INPUT') {
+                    el.value = locale;
+                } else {
+                    console.log('Tag name not found!', el.tagName);
+                }
             }
-            mono.storage.set({colums: JSON.stringify(new_obj)});
+        }
+    };
 
-            var fl_colums = data.getFlColums;
-            var table = $('ul.fl_colums');
-            var new_obj = {};
-            var items = table.children('li');
-            var c = items.length;
-            for (var n = 0; n < c; n++) {
-                var item = items.eq(n);
-                var key = item.data('key');
-                var active = (item.children('div.info').children('div').eq(2).children('input').eq(0)[0].checked) ? 1 : 0;
-                var size = parseInt(item.children('div.info').children('div').eq(1).children('label').text());
-                new_obj[key] = fl_colums[key];
-                new_obj[key].size = size;
-                new_obj[key].a = active;
-            }
-            mono.storage.set({fl_colums: JSON.stringify(new_obj)});
-        }, 'bg');
-    };
-    var getBackup = function() {
-        mono.storage.get(undefined, function(data) {
-            $('textarea[name="backup"]').val(JSON.stringify(data));
-        });
-    };
-    var stngsRestore = function(text) {
-        var rst;
-        try {
-            rst = JSON.parse(text);
-        } catch (err) {
-            alert(lang_arr.settings[51] + "\n" + err);
-        }
-        if (rst === undefined) {
-            return;
-        }
-        mono.storage.clear();
-        var changes = {};
-        for (var key in rst)
-        {
-            var value = rst[key];
-            if (value === undefined || key === 'length')
-                continue;
-            changes[key] = value;
-        }
-        mono.storage.set(changes, function() {
-            write_language(rst.lang || currentLanguage);
-            mono.sendMessage({action: 'updateSettings', data: lang_arr.t}, function() {
-                set_place_holder();
-                $('a[data-page="setup"]').trigger('click');
-                chk_settings();
-            }, 'bg');
-        });
-    };
-    var make_bakup_form = function() {
-        $('div.backup_form div').children('a.backup_tab').on('click', function(e) {
-            e.preventDefault();
-            $(this).parents().eq(1).children('div.restore').slideUp('fast');
-            $(this).parent().children('a.restore_tab').removeClass('active');
-            $(this).parents().eq(1).children('div.backup').slideDown('fast');
-            $(this).parent().children('a.backup_tab').addClass('active');
-            getBackup();
-        });
-        $('div.backup_form div').children('a.restore_tab').on('click', function(e) {
-            e.preventDefault();
-            $(this).parents().eq(1).children('div.backup').slideUp('fast');
-            $(this).parent().children('a.backup_tab').removeClass('active');
-            $(this).parents().eq(1).children('div.restore').slideDown('fast');
-            $(this).parent().children('a.restore_tab').addClass('active');
-        });
-        $('div.backup').find('input[name=backup]').on('click', function(e) {
-            e.preventDefault();
-            getBackup();
-        });
-        $('div.restore').find('input[name=restore]').on('click', function(e) {
-            e.preventDefault();
-            stngsRestore($(this).parent().children('textarea').val());
-            $('textarea[name="backup"]').empty();
-        });
-    };
-    var ap = function(t, k, v) {
-        return $('<li>', {'class': 'item ui-state-default'}).data('key', k).append( $('<div>', {'class': 'info'}).append(
-                    $('<div>', {text: lang_arr[v.lang][1]}),
-                    '[',
-                    $('<div>', {text: lang_arr.settings[50]+': '}).append(
-                        $('<label>', {text: v.size}),
-                        'px;'
-                    ),
-                    ' ',
-                    $('<div>', {text: lang_arr.settings[49]+':'}).append(
-                        $('<input>',{type: 'checkbox', checked: (v.a)?true:false}),
-                        ']'
-                    )
-                ),
-                $('<div>', {'class': 'size'}).css('width', v.size +'px')
-            );
-    };
-    var write_sortable_tables = function() {
-        var items;
-        mono.sendMessage(['getColums', 'getFlColums'], function(data) {
-            var tr_colums = data.getColums;
-            var tr_table = $("ul.tr_colums");
-            tr_table.empty();
-            items = [];
-            $.each(tr_colums, function(k, v) {
-                items.push(ap(tr_table, k, v));
-            });
-            tr_table.append(items);
-            var fl_colums = data.getFlColums;
-            var fl_table = $("ul.fl_colums");
-            fl_table.empty();
-            items = [];
-            $.each(fl_colums, function(k, v) {
-                items.push(ap(fl_table, k, v));
-            });
-            fl_table.append(items);
-            var ul_sortable = $("ul.sortable");
-            ul_sortable.sortable({placeholder: "ui-state-highlight"});
-            ul_sortable.disableSelection();
-            ul_sortable.find("div.size").resizable({handles: "e", resize: function(event, ui) {
-                $(this).parent().children('div').children("div").eq(1).children('label').html(ui.size.width);
-            }});
-        }, 'bg');
-    };
-    var reset_table = function(table, arr) {
-        var items;
-        table.empty();
-        items = [];
-        $.each(arr, function(k, v) {
-            items.push(ap(table, k, v));
-        });
-        table.append(items);
-        var ul_sortable = $("ul.sortable");
-        ul_sortable.sortable({placeholder: "ui-state-highlight"});
-        ul_sortable.disableSelection();
-        ul_sortable.find("div.size").resizable({handles: "e", resize: function(event, ui) {
-                $(this).parent().children('div').children("div").eq(1).children('label').html(ui.size.width);
-            }});
-    };
-    var setDirList = function (arr) {
-        dom_cache.inp_add_folder[0].disabled = false;
-        var f_select = dom_cache.sel_folder_arr;
-        f_select.empty();
-        $(this).unbind('click');
-        $.each(arr, function(key, value) {
-            var name = '[' + bytesToSize(value['available'] * 1024 * 1024) + ' ' + lang_arr[107][1] + '] ' + value['path'];
-            f_select.append( $('<option>', {value: key, text: name}) );
-        });
-    };
-    var bytesToSize = function(bytes, nan) {
+    var bytesToText = function(bytes, nan, ps) {
         //переводит байты в строчки
-        var sizes = lang_arr[59];
-        if (nan === undefined)
+        var sizes = (ps === undefined) ? options.language.sizeList : options.language.sizePsList;
+        sizes = JSON.parse(sizes);
+        if (nan === undefined) {
             nan = 'n/a';
-        if (bytes == 0)
+        }
+        if (bytes === 0) {
             return nan;
+        }
         var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
         if (i === 0) {
             return (bytes / Math.pow(1024, i)) + ' ' + sizes[i];
         }
         return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
     };
-    var write_language = function(language) {
-        window.lang_arr = get_lang(language);
-        currentLanguage = window.lang_arr.t;
-        var lang = lang_arr.settings;
-        dom_cache.select_language.val(language);
-        $.each(lang, function(k, v) {
-            var el = $('[data-lang=' + k + ']');
-            if (el.length === 0) {
-                return true;
-            }
-            var t = el.prop("tagName");
-            if (t === "A" || t === "LEGEND" || t === "SPAN" || t === "LI") {
-                el.text(v);
-            } else
-            if (t === "INPUT") {
-                el.val(v);
-            } else {
-                console.log(t);
-            }
-        });
-        write_sortable_tables();
-    };
-    var popup = function() {
-        var isPopup = false;
-        if (mono.isFF) {
-            if (mono.noAddon) {
-                return false;
-            }
-            return true;
-        }
-        var windows = chrome.extension.getViews({type: 'popup'});
-        for (var n = 0; n < windows.length; n++) {
-            if ("options" in windows[n])
-                isPopup = true;
-        }
-        return isPopup;
-    };
-    var chk_settings = function() {
-        mono.sendMessage('getToken', function(getToken) {
-            if (getToken === 1) {
-                $('div.page.save > div.status').css({'background': 'none', 'color': '#009900'}).text(lang_arr.settings[52]).animate({opacity: 0}, 3000, function() {
-                    $(this).empty().css("opacity", "1");
-                });
-                if (popup()) {
-                    window.location = "manager.html";
-                }
-            } else {
-                mono.sendMessage('cache', function(cache) {
-                    $('div.page.save > div.status').css({'background': 'none', 'color': '#c40005'}).text(lang_arr.settings[53] + ' ' + cache.status);
-                }, 'bg');
-            }
-        }, 'bg');
-    };
-    return {
-        boot: function() {
-            if (mono.isFF) {
-                if (!mono.noAddon) {
-                    addon.postMessage('isShow');
-                }
-                $('input[name="notify_visbl_interval"]').parent().parent().parent().hide();
-            }
-            mono.isFF && mono.sendMessage({action: 'resize', height: 600}, undefined, 'service');
-            mono.storage.get('lang', function(data) {
-                currentLanguage = data.lang || currentLanguage;
-                mono.sendMessage(['def_settings'], function(data) {
-                    def_settings = data.def_settings;
-                    $(function() {
-                        options.begin();
-                    });
-                }, 'bg');
-            });
-        },
-        begin: function() {
-            dom_cache.select_language = $('select[name="language"]');
-            dom_cache.body = $('body');
-            dom_cache.ul_menu = $('ul.menu');
-            dom_cache.ul_tr_colums = $("ul.tr_colums");
-            dom_cache.inp_add_folder = $('input[name="add_folder"]');
-            dom_cache.sel_folder_arr = $('select[name="folder_arr"]');
-            dom_cache.sel_folders = $('select[name="folders"]');
-            dom_cache.ctx_labels = $('input[name="context_labels"]');
 
-            write_language(currentLanguage);
-            dom_cache.select_language.on('change', function() {
-                write_language(this.value);
-            });
-            $('a.help').on('click', function(e) {
-                e.preventDefault();
-                $(this).parent().parent().children('div').toggle('fast');
-            });
-            dom_cache.ul_menu.on('click', 'a', function(e) {
-                e.preventDefault();
-                dom_cache.ul_menu.find('a.active').removeClass('active');
-                $(this).addClass('active');
-                dom_cache.body.find('div.page.active').removeClass('active');
-                dom_cache.body.find('div.' + $(this).data('page')).addClass('active');
-            });
-            $('input[name="tr_reset"]').on("click", function() {
-                mono.sendMessage('getDefColums', function(data) {
-                    reset_table(dom_cache.ul_tr_colums, data);
-                }, 'bg');
-            });
-            $('input[name="fl_reset"]').on("click", function() {
-                mono.sendMessage('getDefFlColums', function(data) {
-                    reset_table($("ul.fl_colums"), data);
-                }, 'bg');
-            });
-            dom_cache.inp_add_folder.on('click', function() {
-                var arr = [isTransmission?'':dom_cache.sel_folder_arr.val(), $(this).parent().children('input[type=text]').val()];
-                if (arr[1].length < 1)
-                    return;
-                dom_cache.sel_folders.append(new Option(arr[1], JSON.stringify(arr)));
-                $(this).parent().children('input[type=text]').val("");
-            });
-            $('input[name="rm_folder"]').on('click', function() {
-                $('select[name="folders"] :selected').remove();
-            });
-            $('input[name="option_down"]').on('click', function() {
-                var $this = $('select[name="folders"] :selected').eq(0);
-                var $next = $this.next();
-                $next.after($this);
-            });
-            $('input[name="option_up"]').on('click', function() {
-                var $this = $('select[name="folders"] :selected').eq(0);
-                var $next = $this.prev();
-                $next.before($this);
-            });
-            $('input[name="save"]').on('click', function() {
-                $('div.page.save > div.status').css('background', 'url(images/loading.gif) center center no-repeat').text('');
-                saveAll(function() {
-                    mono.sendMessage({action: 'updateSettings', data: lang_arr.t}, function() {
-                        chk_settings();
-                    }, 'bg');
-                });
-            });
-            if (!isTransmission) {
-                dom_cache.ctx_labels.on('click', function() {
-                    dom_cache.inp_add_folder[0].disabled = !this.checked;
-                });
+    var updateDirList = function() {
+        mono.sendMessage({action: 'getDirList'}, function(data) {
+            var select = domCache.dirList;
+            select.textContent = '';
+            var dirList = data['download-dirs'];
+            if (!dirList) {
+                select.selectedIndex = -1;
+                select.dispatchEvent(new CustomEvent('change'));
+                return;
             }
-            if (mono.isChrome && chrome.storage) {
-                $('input[name="save_in_cloud"]').on('click', function() {
-                    var _this = this;
-                    mono.storage.get(undefined, function(data) {
-                        var obj = {
-                            backup: JSON.stringify(data)
-                        };
-                        mono.storage.sync.set(obj, function() {
-                            $(_this).val(lang_arr.settings[52]);
-                            window.setTimeout(function() {
-                                $('input[name="save_in_cloud"]').val(lang_arr.settings[59]);
-                            }, 3000);
-                            $('input[name="get_from_cloud"]')[0].disabled = false;
+            for (var i = 0, item; item = dirList[i]; i++) {
+                select.appendChild(mono.create('option', {
+                    value: i,
+                    text: item.path,
+                    data: {
+                        available: item.available
+                    }
+                }));
+            }
+            select.selectedIndex = 0;
+            select.dispatchEvent(new CustomEvent('change'));
+        });
+    };
+
+    var folderLoadList = function(folderList) {
+        for (var i = 0, item; item = folderList[i]; i++) {
+            domCache.folderList.appendChild(mono.create('option', {
+                text: item[1],
+                data: {
+                    dir: item[0],
+                    subPath: item[1]
+                }
+            }));
+        }
+    };
+
+    var folderSaveList = window.folderSaveList = function() {
+        var optionList = [];
+        var optionNodeList = domCache.folderList.childNodes;
+        for (var i = 0, item; item = optionNodeList[i]; i++) {
+            optionList.push([item.dataset.dir, item.dataset.subPath]);
+        }
+        mono.storage.set({folderList: optionList}, function() {
+            mono.sendMessage({action: 'reloadSettings'});
+        });
+    };
+
+    var labelLoadList = function(labelList) {
+        for (var i = 0, item; item = labelList[i]; i++) {
+            domCache.labelList.appendChild(mono.create('option', {
+                text: item,
+                data: {
+                    label: item
+                }
+            }));
+        }
+    };
+
+    var labelSaveList = window.labelSaveList = function() {
+        var optionList = [];
+        var optionNodeList = domCache.labelList.childNodes;
+        for (var i = 0, item; item = optionNodeList[i]; i++) {
+            optionList.push(item.dataset.label);
+        }
+        mono.storage.set({labelList: optionList}, function() {
+            mono.sendMessage({action: 'reloadSettings'});
+        });
+    };
+
+    var removeOption = function(type) {
+        var container = domCache[type+'List'];
+        var rmList = [];
+        var optionNodeList = container.childNodes;
+        for (var i = 0, item; item = optionNodeList[i]; i++) {
+            if (!item.selected) continue;
+            rmList.push(item);
+        }
+        for (var i = 0, item; item = rmList[i]; i++) {
+            item.parentNode.removeChild(item);
+        }
+
+        window[type+'SaveList']();
+    };
+
+    var optionUp = function(type) {
+        var container = domCache[type+'List'];
+        var optionIndex = container.selectedIndex;
+        if (optionIndex === -1) {
+            return;
+        }
+        var option = container.childNodes[optionIndex];
+        if (!option.previousElementSibling) return;
+        container.insertBefore(option, option.previousElementSibling);
+
+        window[type+'SaveList']();
+    };
+
+    var optionDown = function(type) {
+        var container = domCache[type+'List'];
+        var optionIndex = container.selectedIndex;
+        if (optionIndex === -1) {
+            return;
+        }
+        var option = container.childNodes[optionIndex];
+        var next = option.nextElementSibling;
+        if (!next) return;
+        if (!next.nextElementSibling) {
+            container.appendChild(option);
+        } else {
+            container.insertBefore(option, next.nextElementSibling);
+        }
+
+        window[type+'SaveList']();
+    };
+
+    return {
+        start: function() {
+            mono.onMessage(function(message) {
+                if (message === 'sleep') {
+                    window.location = 'sleep.html';
+                }
+            });
+
+            mono.storage.get([
+                'folderList',
+                'labelList'
+            ], function(storage) {
+                mono.sendMessage([
+                    {action: 'getLanguage'},
+                    {action: 'getSettings'},
+                    {action: 'getTrColumnArray'},
+                    {action: 'getFlColumnArray'},
+                    {action: 'getDefaultSettings'}
+                ], function (data) {
+                    options.settings = data.getSettings;
+                    options.defaultSettings = data.getDefaultSettings;
+                    options.language = data.getLanguage;
+
+                    !(mono.isFF && mono.noAddon) && mono.sendMessage({action: 'resize', height: 480, width: 800}, undefined, "service");
+
+                    var langSelect = document.getElementById("language");
+                    var langPos = ['ru', 'en', 'fr'].indexOf(options.language.lang);
+                    if (langPos === -1) {
+                        langPos = 1;
+                    }
+                    langSelect.selectedIndex = langPos;
+                    langSelect.addEventListener('change', function() {
+                        var index = langSelect.selectedIndex;
+                        var option = langSelect.childNodes[index];
+                        var lang = option.value;
+                        mono.storage.set({language: lang}, function() {
+                            mono.sendMessage({action: 'reloadSettings'}, function() {
+                                location.reload();
+                            });
                         });
                     });
-                });
-                $('input[name="get_from_cloud"]').on('click', function() {
-                    chrome.storage.sync.get("backup", function(val) {
-                        if ("backup" in val === false)
-                            return;
-                        this.disabled = true;
-                        $('textarea[name="restore"]').val(val.backup);
+
+                    if (options.language.lang !== "ru") {
+                        document.querySelector('.cirilicFixs').style.display = 'none';
                     }
-                    );
-                });
-                chrome.storage.sync.get("backup",
-                        function(val) {
-                            if ("backup" in val === false) {
-                                $('input[name="get_from_cloud"]').eq(0)[0].disabled = true;
-                            }
+
+                    writeLanguage();
+
+                    domCache.folderList = document.getElementById('folderList');
+                    folderLoadList(storage.folderList || []);
+                    domCache.subPath = document.getElementById('subPath');
+                    domCache.addSubPath = document.getElementById('addSubPath');
+                    domCache.addSubPath.addEventListener('click', function() {
+                        var dirIndex = domCache.dirList.selectedIndex;
+                        if (dirIndex === -1) {
+                            return;
                         }
-                );
-            } else {
-                $('input[name="get_from_cloud"]').css('display', 'none');
-                $('input[name="save_in_cloud"]').css('display', 'none');
-            }
-            set_place_holder();
-            make_bakup_form();
-        },
-        setDirList: setDirList
-    };
+                        var dir = parseInt(domCache.dirList.childNodes[dirIndex].value);
+                        var subPath = domCache.subPath.value;
+                        if (!subPath) {
+                            return;
+                        }
+                        domCache.folderList.appendChild(mono.create('option', {
+                            text: subPath,
+                            data: {
+                                dir: dir,
+                                subPath: subPath
+                            }
+                        }));
+
+                        domCache.subPath.value = '';
+                        folderSaveList();
+                    });
+                    domCache.subPath.addEventListener('keydown', function(e) {
+                        if (e.keyCode === 13) {
+                            domCache.addSubPath.dispatchEvent(new CustomEvent('click'));
+                        }
+                    });
+
+                    domCache.label = document.getElementById('label');
+                    domCache.labelList = document.getElementById('labelList');
+                    labelLoadList(storage.labelList || []);
+                    domCache.addLabel = document.getElementById('addLabel');
+                    domCache.addLabel.addEventListener('click', function() {
+                        var label = domCache.label.value;
+                        if (!label) {
+                            return;
+                        }
+                        domCache.labelList.appendChild(mono.create('option', {
+                            text: label,
+                            data: {
+                                label: label
+                            }
+                        }));
+
+                        domCache.label.value = '';
+                        labelSaveList();
+                    });
+                    domCache.label.addEventListener('keydown', function(e) {
+                        if (e.keyCode === 13) {
+                            domCache.addLabel.dispatchEvent(new CustomEvent('click'));
+                        }
+                    });
+
+                    domCache.folderDeleteSelected = document.getElementById('folderDeleteSelected');
+                    domCache.folderDeleteSelected.addEventListener('click', removeOption.bind(null, 'folder'));
+                    domCache.folderUp = document.getElementById('folderUp');
+                    domCache.folderUp.addEventListener('click', optionUp.bind(null, 'folder'));
+                    domCache.folderDown = document.getElementById('folderDown');
+                    domCache.folderDown.addEventListener('click', optionDown.bind(null, 'folder'));
+
+                    domCache.labelDeleteSelected = document.getElementById('labelDeleteSelected');
+                    domCache.labelDeleteSelected.addEventListener('click', removeOption.bind(null, 'label'));
+                    domCache.labelUp = document.getElementById('labelUp');
+                    domCache.labelUp.addEventListener('click', optionUp.bind(null, 'label'));
+                    domCache.labelDown = document.getElementById('labelDown');
+                    domCache.labelDown.addEventListener('click', optionDown.bind(null, 'label'));
+
+                    domCache.backupUpdateBtn = $('#backupUpdate');
+                    domCache.restoreBtn = $('#restoreBtn');
+                    domCache.saveInCloudBtn = $('#saveInCloud');
+                    domCache.getFromCloudBtn = $('#getFromCloudBtn');
+                    domCache.clearCloudStorageBtn = $('#clearCloudStorage');
+                    domCache.backupInp = $('#backupInp');
+                    domCache.restoreInp = $('#restoreInp');
+
+                    set_place_holder();
+
+                    if (!mono.isChrome) {
+                        domCache.saveInCloudBtn.hide();
+                        domCache.getFromCloudBtn.hide();
+                        domCache.clearCloudStorageBtn.hide();
+                    }
+
+                    makeBackupForm();
+
+                    domCache.menu = document.querySelector('.menu');
+                    domCache.menu.addEventListener('click', function(e) {
+                        var el = e.target;
+                        if (el.tagName !== 'A') return;
+
+                        if (el.classList.contains('active')) {
+                            return;
+                        }
+                        activeItem && activeItem.classList.remove('active');
+                        activeItem = el;
+                        activeItem.classList.add('active');
+                        activePage && activePage.classList.remove('active');
+                        var page = el.dataset.page;
+                        activePage = document.querySelector('.page.' + page);
+                        activePage.classList.add('active');
+                        if (page === 'backup') {
+                            domCache.backupUpdateBtn.trigger('click');
+                        }
+                        if (page === 'restore') {
+                            mono.storage.sync.get('backup', function(storage) {
+                                if (storage.backup !== undefined) {
+                                    return;
+                                }
+                                domCache.getFromCloudBtn.prop('disabled', true);
+                            });
+                        }
+                        if (page === 'ctx') {
+                            updateDirList();
+                        }
+                    });
+                    window.addEventListener("hashchange", onHashChange);
+                    onHashChange();
+
+                    domCache.clientCheckBtn = document.getElementById('clientCheckBtn');
+                    domCache.clientCheckBtn.addEventListener('click', function(e) {
+                        var statusEl = document.getElementById('clientStatus');
+                        statusEl.textContent = '';
+                        statusEl.appendChild(mono.create('img', {
+                            src: 'images/loading.gif'
+                        }));
+                        mono.sendMessage({action: 'checkSettings'}, function(response) {
+                            statusEl.textContent = '';
+                            var span;
+                            if (response.error) {
+                                span = mono.create('span', {
+                                    text: response.error.statusText+' (code: '+response.error.status+')',
+                                    style: {
+                                        color: 'red'
+                                    }
+                                });
+                            } else {
+                                span = mono.create('span', {
+                                    text: options.language.DLG_BTN_OK,
+                                    style: {
+                                        color: 'green'
+                                    }
+                                });
+                                var windowMode;
+                                if (mono.isChrome) {
+                                    windowMode = window !== chrome.extension.getViews({type: 'popup'})[0];
+                                } else {
+                                    windowMode = mono.isFF && mono.noAddon;
+                                }
+                                if (!windowMode) {
+                                    return window.location = "manager.html";
+                                }
+                            }
+                            statusEl.appendChild(span);
+
+                            clearTimeout(varCache.statusTimer);
+                            varCache.statusTimer = setTimeout(function() {
+                                statusEl.textContent = '';
+                            }, 2500);
+                        });
+                    });
+
+                    domCache.dirList = document.getElementById("dirList");
+                    domCache.dirList.addEventListener('change', function() {
+                        var selectedOption = this.childNodes[this.selectedIndex];
+                        var value = -1;
+                        if (selectedOption) {
+                            value = bytesToText(selectedOption.dataset.available * 1024 * 1024);
+                            domCache.addSubPath.disabled = false;
+                        } else {
+                            domCache.addSubPath.disabled = true;
+                        }
+                        document.getElementById("availableCount").textContent = value;
+                    });
+
+                    domCache.updateDirList = document.getElementById("updateDirList");
+                    domCache.updateDirList.addEventListener('click', function() {
+                        updateDirList();
+                    });
+
+                    var checkInputList = document.querySelectorAll('input[data-option="login"], input[data-option="password"], input[data-option="ip"], input[data-option="port"]');
+                    for (var i = 0, el; el = checkInputList[i]; i++) {
+                        el.addEventListener('keydown', function(e) {
+                            if (e.keyCode === 13) {
+                                saveChange.call({cb: function() {
+                                    domCache.clientCheckBtn.dispatchEvent(new CustomEvent('click'));
+                                }}, {target: this});
+                            }
+                        });
+                    }
+
+                    var inputList = document.querySelectorAll('input[type=text], input[type=password], input[type=number]');
+
+                    for (var i = 0, el; el = inputList[i]; i++) {
+                        el.addEventListener('keyup', mono.debounce(saveChange, 500));
+                    }
+
+                    document.body.addEventListener('click', saveChange);
+                });
+            });
+        }
+    }
 }();
+
+options.start();

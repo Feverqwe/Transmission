@@ -5,26 +5,21 @@
         <meta charset="utf-8" />
         <link rel="stylesheet" type="text/css" href="css/stylesheet.css"> 
         <link rel="stylesheet" type="text/css" href="css/jquery.contextMenu.css">
-        <link rel="stylesheet" type="text/css" href="css/jquery.selectBox.css">
+        <link rel="stylesheet" type="text/css" href="css/selectBox.css">
         <script src="js/mono.js"></script>
-        <script src="js/jquery-2.1.1.min.js"></script>
-        <script src="js/notifer.js"></script>
-        <script src="js/jquery.selectBox.js"></script>
-        <script src="js/jquery.contextMenu.js"></script>
-        <script src="js/manager.js"></script>
     </head>
     <body>
         <ul class="menu">
-            <li><a class="btn refresh" target="_blank" href="#refresh"></a></li>
-            <li><a class="btn wui" target="_blank" href="#wui"></a></li>
+            <li><a class="btn refresh" target="_blank" href="#refresh" data-lang="refresh,title"></a></li>
+            <li><a class="btn wui" target="_blank" href="#wui" data-lang="ST_CAPT_WEBUI,title"></a></li>
             <li class="separate"></li>
-            <li><a class="btn add_file" href="#add_file"></a></li>
-            <li><a class="btn add_magnet" href="#add_magnet"></a></li>
+            <li><a class="btn add_file" href="#add_file" data-lang="Open_file,title"></a></li>
+            <li><a class="btn add_magnet" href="#add_magnet" data-lang="MM_FILE_ADD_URL,title"></a></li>
             <li class="separate"></li>
             <li><a class="btn alt_speed" href="#alt_speed"></a></li>
             <li class="separate"></li>
-            <li><a class="btn start_all" href="#start_all"></a></li>
-            <li><a class="btn pause_all" href="#pause_all"></a></li>
+            <li><a class="btn start_all" href="#start_all" data-lang="STM_TORRENTS_RESUMEALL,title"></a></li>
+            <li><a class="btn pause_all" href="#pause_all" data-lang="STM_TORRENTS_PAUSEALL,title"></a></li>
             <li class="graph"></li>
             <li class="select"><select></select></li>
         </ul>
@@ -56,9 +51,11 @@
             </div>
             <ul class="bottom-menu">
                 <li class="path"><input type="text" readonly="readonly"/></li>
-                <li class="btn"><a class="close"></a></li>
-                <li class="btn"><a class="update"></a></li>
+                <li class="btn"><a class="close" data-lang="DLG_BTN_CLOSE,title"></a></li>
+                <li class="btn"><a class="update" data-lang="refresh,title"></a></li>
             </ul>
         </div>
+        <script src="js/selectBox.js"></script>
+        <script src="js/manager.js"></script>
     </body>
 </html>

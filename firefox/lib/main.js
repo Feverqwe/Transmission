@@ -1,14 +1,12 @@
-(function(){
-    var ToggleButton = require('sdk/ui/button/toggle').ToggleButton;
-    var panels = require("sdk/panel");
+(function() {
     var self = require("sdk/self");
     var monoLib = require("./monoLib.js");
     var pageMod = require("sdk/page-mod");
 
     monoLib.flags.enableLocalScope = true;
 
-    var button = ToggleButton({
-        id: "tTinyOpenBtn",
+    var button = require('sdk/ui/button/toggle').ToggleButton({
+        id: "uTinyOpenBtn",
         label: "Transmission easy client",
         icon: {
             "16": "./icons/icon-16.png",
@@ -26,7 +24,7 @@
     });
 
     pageMod.PageMod({
-        include: self.data.url('options.html') +'*',
+        include: self.data.url('options.html')+'*',
         contentScript: '('+monoLib.virtualPort.toString()+')()',
         contentScriptWhen: 'start',
         onAttach: function(tab) {
@@ -49,23 +47,23 @@
         tabs.open( self.data.url('options.html') );
     });
 
-    var displayState = false;
-    var popup = panels.Panel({
+    var isSleep = false;
+    var popup = require("sdk/panel").Panel({
         width: 800,
         height: 350,
-        contentURL: self.data.url("./manager.html"),
+        contentURL: self.data.url("./sleep.html"),
         onHide: function () {
             button.state('window', {checked: false});
-            displayState = false;
+            isSleep = true;
             popup.port.emit('mono', {data: 'sleep'});
         },
         onShow: function() {
-            displayState = true;
+            isSleep = false;
             popup.port.emit('mono', {data: 'wake'});
         },
         onMessage: function(msg) {
             if (msg === 'isShow') {
-                if (!displayState) {
+                if (isSleep) {
                     popup.port.emit('mono', {data: 'sleep'});
                 }
             }
