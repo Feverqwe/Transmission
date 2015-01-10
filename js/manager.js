@@ -1498,6 +1498,7 @@ var manager = {
     updateTrackerList: function(onReady) {
         manager.timer.wait = true;
 
+        /*
         var data = {list: 1};
         if (manager.varCache.flListLayer.param !== undefined) {
             manager.extend(data, manager.varCache.flListLayer.param);
@@ -1507,6 +1508,13 @@ var manager = {
             manager.timer.wait = false;
             onReady && onReady();
             manager.writeTrList(data);
+        });
+        */
+        mono.sendMessage({action: 'getTorrentList'}, function(data) {
+            manager.timer.wait = false;
+            onReady && onReady();
+            console.log(data);
+            manager.writeTrList(data.ut);
         });
     },
     timer: {

@@ -34,8 +34,8 @@ var engine = {
     defaultSettings: {
         useSSL: 0,
         ip: "127.0.0.1",
-        port: 8080,
-        path: "gui/",
+        port: 9091,
+        path: "transmission/rpc",
         displayActiveTorrentCountIcon: 1,
         showNotificationOnDownloadCompleate: 1,
         notificationTimeout: 5000,
@@ -53,10 +53,7 @@ var engine = {
 
         ctxMenuType: 1,
         treeViewContextMenu: 0,
-        showDefaultFolderContextMenuItem: 0,
-
-        fixCirilicTitle: 0,
-        fixCirilicTorrentPath: 0
+        showDefaultFolderContextMenuItem: 0
     },
     torrentListColumnList: {},
     defaultTorrentListColumnList: [
@@ -100,8 +97,7 @@ var engine = {
     },
     varCache: {
         webUiUrl: undefined,
-        token: undefined,
-        cid: undefined,
+        token: null,
         torrents: [],
         labels: [],
         settings: [],
@@ -112,23 +108,28 @@ var engine = {
         notifyList: {},
 
         folderList: [],
-        labelList: []
+        labelList: [],
+
+        rmLastScrapeResult: /"lastScrapeResult":"[^"]*","/gm
+    },
+    api: {
+        getTorrentListRequest: {
+            method: "torrent-get",
+            arguments: {
+                fields: ["id", "name", "totalSize", "percentDone", 'downloadedEver', 'uploadedEver',
+                    'rateUpload', 'rateDownload', 'eta', 'peersSendingToUs', 'peersGettingFromUs',
+                    'queuePosition', 'addedDate', 'doneDate', 'downloadDir', 'recheckProgress',
+                    'status', 'error', 'errorString', 'trackerStats']
+            }
+        }
     },
     param: function(params) {
         if (typeof params === 'string') return params;
 
         var args = [];
-        if (params.token) {
-            args.push(encodeURIComponent('token') + '=' + encodeURIComponent(params.token));
-            delete params.token;
-        }
         for (var key in params) {
             var value = params[key];
             if (value === null || value === undefined) {
-                continue;
-            }
-            if (engine.settings.fixCirilicTorrentPath && key === 'path'&& params.download_dir !== undefined) {
-                args.push(encodeURIComponent(key) + '=' + engine.inCp1251(value));
                 continue;
             }
             args.push(encodeURIComponent(key) + '=' + encodeURIComponent(value));
@@ -243,106 +244,206 @@ var engine = {
             this.state = 0;
         }
     },
-    getToken: function(onReady, onError, force) {
-        if (engine.settings.login === null || engine.settings.password === null) {
-            var errorText = 'Login or password is not found!';
-            onError && onError({status: 0, statusText: errorText});
-            return engine.publicStatus(errorText);
+    tr2utStatus: function(code) {
+        var uCode = 0;
+        var Status = "";
+        /*
+         TR_STATUS_STOPPED        = 0, // Torrent is stopped
+         TR_STATUS_CHECK_WAIT     = 1, // Queued to check files
+         TR_STATUS_CHECK          = 2, // Checking files
+         TR_STATUS_DOWNLOAD_WAIT  = 3, // Queued to download
+         TR_STATUS_DOWNLOAD       = 4, // Downloading
+         TR_STATUS_SEED_WAIT      = 5, // Queued to seed
+         TR_STATUS_SEED           = 6  // Seeding
+         */
+        // todo: translate!
+        if (code === 0) {
+            uCode = 128;
+            Status = "Stopped";
+        } else
+        if (code === 1) {
+            uCode = 233;
+            Status = "Queued to check files";
+        } else
+        if (code === 2) {
+            uCode = 130;
+            Status = "Checking";
+        } else
+        if (code === 3) {
+            uCode = 200;
+            Status = "Queued to download";
+        } else
+        if (code === 4) {
+            uCode = 201;
+            Status = "Downloading";
+        } else
+        if (code === 5) {
+            uCode = 200;
+            Status = "Queued to seed";
+        } else
+        if (code === 6) {
+            uCode = 201;
+            Status = "Seeding";
+        } else {
+            uCode = 152;
+            Status = "Unknown";
         }
-
-        engine.publicStatus('Try get token!' + (force ? ' Retry: ' + force : ''));
-
-        engine.ajax({
-            url: engine.varCache.webUiUrl + 'token.html',
-            headers: {
-                Authorization: 'Basic ' + window.btoa(engine.settings.login + ":" + engine.settings.password)
-            },
-            success: function(data) {
-                var token = data.match(/>([^<]+)</);
-                if (token !== null) {
-                    token = token[1];
-                    engine.publicStatus('Token is found!');
+        return [uCode, Status];
+    },
+    tr2utTorrentList: function(response) {
+        var data = {
+            ut: {}
+        };
+        var args = response.arguments;
+        for (var key in response) {
+            data[key] = response[key];
+        }
+        if (args.hasOwnProperty('torrents')) {
+            data.ut.torrentp = [];
+            for (var field, i = 0; field = args.torrents[i]; i++) {
+                // status>
+                var utStatus = [];
+                if (field.error > 0) {
+                    utStatus[0] = 144;
+                    utStatus[1] = field.errorString || "Unknown error!";
                 } else {
-                    engine.publicStatus('Token not found!');
+                    utStatus = engine.tr2utStatus(field.status);
                 }
-                engine.varCache.token = token;
-                engine.publicStatus('');
-                onReady && onReady();
-            },
-            error: function(xhr) {
-                engine.publicStatus('Get token error! Code: '+xhr.status);
-                if (force === undefined) {
-                    force = 0;
+                // <status
+
+                // seeds/peers in poe>
+                var peers = 0;
+                var seeds = 0;
+                if (field.trackerStats === undefined) {
+                    field.trackerStats = [];
                 }
-                force++;
-                if (force <= 5) {
-                    return engine.getToken.call(engine, onReady, onError, force);
+                field.trackerStats.forEach(function(item) {
+                    if (item.leecherCount > 0) {
+                        peers += item.leecherCount;
+                    }
+                    if (item.seederCount > 0) {
+                        seeds += item.seederCount;
+                    }
+                });
+                // <seeds/peers in poe
+                var item = {
+                    id: 'trID_'+field.id,
+                    status: utStatus[0],
+                    name: field.name,
+                    totalSize: field.totalSize,
+                    progress: parseInt((field.recheckProgress || field.percentDone) * 1000),
+                    downloadedEver: field.downloadedEver,
+                    uploadedEver: field.uploadedEver,
+                    shred: field.downloadedEver > 0 ? Math.round(field.uploadedEver / field.downloadedEver * 1000) : 0,
+                    rateUpload: field.rateUpload,
+                    rateDownload: field.rateDownload,
+                    eta: field.eta < 0 ? 0 : field.eta,
+                    label: '',
+                    peersGettingFromUs: field.peersGettingFromUs,
+                    peers: peers,
+                    peersSendingToUs: field.peersSendingToUs,
+                    seeds: seeds,
+                    unk: 0,
+                    queuePosition: field.queuePosition,
+                    uploaded: 0,
+                    unk1: '',
+                    unk2: '',
+                    statusText: utStatus[1],
+                    sid: 0,
+                    addedDate: field.addedDate,
+                    doneDate: field.doneDate,
+                    unk3: '',
+                    downloadDir: field.downloadDir,
+                    unk4: '',
+                    unk5: 0
+                };
+                var arrayItem = [];
+                for (var key in item) {
+                    arrayItem.push(item[key]);
                 }
-                onError && onError({status: xhr.status, statusText: xhr.statusText});
+                data.ut.torrentp.push(arrayItem);
             }
-        });
+        }
+        var torrentm = [];
+        for (var i = 0, item_s; item_s = engine.varCache.torrents[i]; i++) {
+            var found = false;
+            for (var n = 0, item_m; item_m = data.ut.torrentp[n]; n++) {
+                if (item_m[0] === item_s[0]) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                torrentm.push(item_s[0]);
+            }
+        }
+        if (torrentm.length > 0) {
+            data.ut.torrentm = torrentm;
+        }
+        /*var settings = [];
+        if (args.hasOwnProperty('speed-limit-down')) {
+
+        }
+        if (args.hasOwnProperty('speed-limit-down-enabled')) {
+
+        }
+        if (args.hasOwnProperty('speed-limit-up-enabled')) {
+
+        }
+        if (args.hasOwnProperty('alt-speed-enabled')) {
+
+        }
+        if (args.hasOwnProperty('download-dir')) {
+
+        }
+        if (args.hasOwnProperty('download-dir-free-space')) {
+
+        }
+        if (args.hasOwnProperty('size-bytes')) {
+
+        }*/
+        return data;
     },
     sendAction: function(origData, onLoad, onError, force) {
-        if (engine.varCache.token === undefined) {
-            return engine.getToken(function onGetToken() {
-                engine.sendAction.call(engine, origData, onLoad, onError, force || 1);
-            });
-        }
-
         var data = origData;
-        if (typeof data === "string") {
-            data = 'token='+engine.varCache.token+'&'+data;
-        } else {
-            data.token = engine.varCache.token;
+
+        var headers = {};
+
+        if (engine.settings.login && engine.settings.password) {
+            headers.Authorization = 'Basic ' + window.btoa(engine.settings.login + ":" + engine.settings.password);
         }
-
-        var url = engine.varCache.webUiUrl;
-        var type;
-        if (data.hasOwnProperty('torrent_file')) {
-            type = 'POST';
-            var formData = new window.FormData();
-            var file = data.torrent_file;
-            formData.append("torrent_file", file);
-
-            data = {};
-            for (var key in origData) {
-                data[key] = origData[key];
-            }
-            delete data.torrent_file;
-            url += '?' + engine.param(data);
-            data = formData;
-        } else {
-            type = 'GET';
+        if (engine.varCache.token !== null) {
+            headers['X-Transmission-Session-Id'] = engine.varCache.token;
         }
 
         engine.ajax({
-            type: type,
-            url: url,
-            headers: {
-                Authorization: 'Basic ' + window.btoa(engine.settings.login + ":" + engine.settings.password)
-            },
-            data: data,
+            type: 'POST',
+            url: engine.varCache.webUiUrl,
+            headers: headers,
+            data: JSON.stringify(data),
             success: function(data, xhr) {
                 var data = xhr.responseText;
                 try {
-                    if (engine.settings.fixCirilicTitle) {
-                        data = engine.fixCirilicTitle(data);
-                    }
+                    data = data.replace(engine.varCache.rmLastScrapeResult, '"lastScrapeResult":"","');
                     data = JSON.parse(data);
                 } catch (err) {
                     return engine.publicStatus('Data parse error!');
                 }
+                if (data.result !== 'success') {
+                    return onError && onError();
+                }
                 engine.publicStatus('');
+                data = engine.tr2utTorrentList(data);
                 onLoad && onLoad(data);
-                engine.readResponse(data, origData.cid);
+                engine.readResponse(data.ut);
             },
             error: function(xhr) {
-                if (xhr.status === 400) {
+                if (xhr.status === 409) {
                     if (force === undefined) {
                         force = 0;
                     }
                     force++;
-                    engine.varCache.token = undefined;
+                    engine.varCache.token = xhr.getResponseHeader("X-Transmission-Session-Id");
                     if (force < 2) {
                         return engine.sendAction.call(engine, origData, onLoad, onError, force);
                     }
@@ -352,7 +453,7 @@ var engine = {
             }
         });
     },
-    readResponse: function(data, cid) {
+    readResponse: function(data) {
         if (data.torrentm !== undefined) {
             // Removed torrents
             var list = engine.varCache.torrents;
@@ -366,15 +467,11 @@ var engine = {
             }
         }
 
-        var newTorrentList = data.torrents || data.torrentp;
+        var newTorrentList = data.torrentp;
         if (newTorrentList !== undefined) {
             engine.utils(engine.varCache.torrents, newTorrentList);
         }
 
-        if (data.torrents !== undefined) {
-            //Full torrent list
-            engine.varCache.torrents = data.torrents;
-        } else
         if (data.torrentp !== undefined) {
             // Updated torrent list with CID
             var list = engine.varCache.torrents;
@@ -394,27 +491,22 @@ var engine = {
                     list.push(item_p);
                 }
             }
-            engine.varCache.newFileListener && engine.varCache.newFileListener(newItem, cid);
+            // todo: fix me
+            // engine.varCache.newFileListener && engine.varCache.newFileListener(newItem);
         }
 
-        if (data.label !== undefined) {
-            // Labels
-            engine.varCache.labels = data.label;
-        }
-
-        if (data.settings !== undefined) {
+        /*if (data.settings !== undefined) {
             // Settings
             engine.varCache.settings = data.settings;
-        }
+        }*/
 
         engine.settings.displayActiveTorrentCountIcon && engine.displayActiveItemsCountIcon(engine.varCache.torrents);
     },
     updateTrackerList: function() {
-        engine.sendAction({list: 1, cid: engine.varCache.cid}, function(data) {
-            if (data.torrentc !== undefined) {
-                engine.varCache.cid = data.torrentc;
-            }
+        engine.sendAction(engine.api.getTorrentListRequest, function(data) {
+            // on ready
         }, function() {
+            // on error
             engine.timer.stop();
         });
     },
@@ -699,9 +791,8 @@ var engine = {
         };
         xhr.send();
     },
-    setOnFileAddListener: function(label, requestCid) {
-        engine.varCache.newFileListener = function(newFile, cid) {
-            if (cid !== requestCid) return;
+    setOnFileAddListener: function() {
+        engine.varCache.newFileListener = function(newFile) {
             delete engine.varCache.newFileListener;
             if (newFile.length === 0) {
                 engine.showNotification(engine.icons.error, engine.language.torrentFileExists, '');
@@ -711,9 +802,6 @@ var engine = {
                 return;
             }
             var item = newFile[0];
-            if (label && !item[11]) {
-                engine.sendAction({action: 'setprops', s: 'label', hash: item[0], v: label});
-            }
             if (engine.settings.selectDownloadCategoryOnAddItemFromContextMenu) {
                 mono.storage.set({selectedLabel: {label: 'DL', custom: 1}});
             }
@@ -752,90 +840,10 @@ var engine = {
                     engine.showNotification(engine.icons.error, engine.language.OV_FL_ERROR, data.error);
                     return;
                 }
-                engine.setOnFileAddListener(label, cid);
+                engine.setOnFileAddListener();
                 engine.sendAction({list: 1, cid: cid});
             });
         });
-    },
-    fixCirilicTitle: function () {
-        var cirilic = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя";
-        var chars = ("\\u037777777720\\u037777777620 \\u037777777720\\u037777777621 " +
-        "\\u037777777720\\u037777777622 \\u037777777720\\u037777777623 " +
-        "\\u037777777720\\u037777777624 \\u037777777720\\u037777777625 " +
-        "\\u037777777720\\u037777777601 \\u037777777720\\u037777777626 " +
-        "\\u037777777720\\u037777777627 \\u037777777720\\u037777777630 " +
-        "\\u037777777720\\u037777777631 \\u037777777720\\u037777777632 " +
-        "\\u037777777720\\u037777777633 \\u037777777720\\u037777777634 " +
-        "\\u037777777720\\u037777777635 \\u037777777720\\u037777777636 " +
-        "\\u037777777720\\u037777777637 \\u037777777720\\u037777777640 " +
-        "\\u037777777720\\u037777777641 \\u037777777720\\u037777777642 " +
-        "\\u037777777720\\u037777777643 \\u037777777720\\u037777777644 " +
-        "\\u037777777720\\u037777777645 \\u037777777720\\u037777777646 " +
-        "\\u037777777720\\u037777777647 \\u037777777720\\u037777777650 " +
-        "\\u037777777720\\u037777777651 \\u037777777720\\u037777777652 " +
-        "\\u037777777720\\u037777777653 \\u037777777720\\u037777777654 " +
-        "\\u037777777720\\u037777777655 \\u037777777720\\u037777777656 " +
-        "\\u037777777720\\u037777777657 \\u037777777720\\u037777777660 " +
-        "\\u037777777720\\u037777777661 \\u037777777720\\u037777777662 " +
-        "\\u037777777720\\u037777777663 \\u037777777720\\u037777777664 " +
-        "\\u037777777720\\u037777777665 \\u037777777721\\u037777777621 " +
-        "\\u037777777720\\u037777777666 \\u037777777720\\u037777777667 " +
-        "\\u037777777720\\u037777777670 \\u037777777720\\u037777777671 " +
-        "\\u037777777720\\u037777777672 \\u037777777720\\u037777777673 " +
-        "\\u037777777720\\u037777777674 \\u037777777720\\u037777777675 " +
-        "\\u037777777720\\u037777777676 \\u037777777720\\u037777777677 " +
-        "\\u037777777721\\u037777777600 \\u037777777721\\u037777777601 " +
-        "\\u037777777721\\u037777777602 \\u037777777721\\u037777777603 " +
-        "\\u037777777721\\u037777777604 \\u037777777721\\u037777777605 " +
-        "\\u037777777721\\u037777777606 \\u037777777721\\u037777777607 " +
-        "\\u037777777721\\u037777777610 \\u037777777721\\u037777777611 " +
-        "\\u037777777721\\u037777777612 \\u037777777721\\u037777777613 " +
-        "\\u037777777721\\u037777777614 \\u037777777721\\u037777777615 " +
-        "\\u037777777721\\u037777777616 \\u037777777721\\u037777777617").split(' ');
-        return function (data) {
-            if (data.indexOf("\\u03777777772") === -1) {
-                return data;
-            }
-            for (var i = 0, char_item; char_item = chars[i]; i++) {
-                while (data.indexOf(char_item) !== -1) {
-                    data = data.replace(char_item, cirilic[i]);
-                }
-            }
-            return data;
-        };
-    }(),
-    inCp1251: function(sValue) {
-        var text = "", Ucode, ExitValue, s;
-        for (var i = 0, sValue_len = sValue.length; i < sValue_len; i++) {
-            s = sValue.charAt(i);
-            Ucode = s.charCodeAt(0);
-            var Acode = Ucode;
-            if (Ucode > 1039 && Ucode < 1104) {
-                Acode -= 848;
-                ExitValue = "%" + Acode.toString(16);
-            }
-            else if (Ucode === 1025) {
-                Acode = 168;
-                ExitValue = "%" + Acode.toString(16);
-            }
-            else if (Ucode === 1105) {
-                Acode = 184;
-                ExitValue = "%" + Acode.toString(16);
-            }
-            else if (Ucode === 32) {
-                Acode = 32;
-                ExitValue = "%" + Acode.toString(16);
-            }
-            else if (Ucode === 10) {
-                Acode = 10;
-                ExitValue = "%0A";
-            }
-            else {
-                ExitValue = s;
-            }
-            text = text + ExitValue;
-        }
-        return text;
     },
     onCtxMenuCall: function (e) {
         /**
@@ -1410,7 +1418,7 @@ var engine = {
         checkSettings: function(message, response) {
             engine.loadSettings(function() {
                 engine.getLanguage(function () {
-                    engine.getToken(function() {
+                    engine.sendAction(engine.api.getTorrentListRequest, function() {
                         response({});
                     }, function(statusObj) {
                         response({error: statusObj});
@@ -1437,6 +1445,11 @@ var engine = {
                 engine.timer.start();
             }
             response();
+        },
+        getTorrentList: function(message, response) {
+            engine.sendAction(engine.api.getTorrentListRequest, function(data) {
+                response(data);
+            });
         }
     }
 };
