@@ -120,8 +120,22 @@ var engine = {
                     'rateUpload', 'rateDownload', 'eta', 'peersSendingToUs', 'peersGettingFromUs',
                     'queuePosition', 'addedDate', 'doneDate', 'downloadDir', 'recheckProgress',
                     'status', 'error', 'errorString', 'trackerStats']
+            },
+            ids: undefined
+        },
+        getFileListRequest: {
+            method: "torrent-get",
+            arguments: {
+                fields: ["id", 'files', 'fileStats'],
+                ids: undefined
             }
-        }
+        },
+        trUtColumnList: ['id', 'statusCode', 'name', 'totalSize', 'progress', 'downloadedEver', 'uploadedEver'
+            , 'shared', 'rateUpload', 'rateDownload', 'eta', '_label', 'peersGettingFromUs'
+            , 'peers', 'peersSendingToUs', 'seeds', 'n_unk', 'queuePosition', 'n_uploaded'
+            , 't_unk1', 't_unk2', 'statusText', 'n_sid', 'addedDate', 'doneDate', 't_unk3'
+            , 'downloadDir', 't_unk4', 'n_unk5'],
+        flUtColumnList: ['name', 'length', 'bytesCompleted', 'priority', 'origName', 'folderName']
     },
     param: function(params) {
         if (typeof params === 'string') return params;
@@ -290,7 +304,8 @@ var engine = {
         }
         return [uCode, Status];
     },
-    tr2utTorrentList: function(response) {
+    tr2utTrList: function(response, request) {
+        var type = request.arguments.ids === 'recently-active' ? 'torrentp' : 'torrents';
         var data = {
             ut: {}
         };
@@ -298,88 +313,117 @@ var engine = {
         for (var key in response) {
             data[key] = response[key];
         }
-        if (args.hasOwnProperty('torrents')) {
-            data.ut.torrentp = [];
+        if (args.torrents !== undefined) {
+            var firstField = args.torrents[0];
+            if (firstField && firstField.files !== undefined) {
+                var files = data.ut.files = [];
+                files[0] = 'trId'+firstField.id;
+                var fileList = files[1] = [];
+                var firstSlashPosition;
+                for (var n = 0, file; file = firstField.files[n]; n++) {
+                    if (firstSlashPosition === undefined) {
+                        firstSlashPosition = file.name.indexOf('/');
+                        if (firstSlashPosition === -1) {
+                            firstSlashPosition = null;
+                            break;
+                        }
+                    }
+                    if (file.name.indexOf('/') !== firstSlashPosition) {
+                        firstSlashPosition = null;
+                        break;
+                    }
+                }
+                for (var n = 0, file; file = firstField.files[n]; n++) {
+                    file.priority = (!firstField.fileStats[n].wanted) ? 0 : firstField.fileStats[n].priority + 2;
+                    file.origName = file.name;
+                    file.folderName = '';
+                    if (firstSlashPosition !== null) {
+                        file.folderName = file.name.substr(0, firstSlashPosition + 1);
+                        file.name = file.name.substr(firstSlashPosition + 1);
+                    }
+                    var fileItem = [];
+                    for (var i = 0, column; column = engine.api.flUtColumnList[i]; i++) {
+                        fileItem.push(file[column]);
+                    }
+                    fileList.push(fileItem);
+                }
+                return data;
+            }
+
+            data.ut[type] = [];
             for (var field, i = 0; field = args.torrents[i]; i++) {
+                field.id = 'trId'+field.id;
                 // status>
                 var utStatus = [];
                 if (field.error > 0) {
                     utStatus[0] = 144;
-                    utStatus[1] = field.errorString || "Unknown error!";
+                    utStatus[1] = field.errorString || "Unknown error";
                 } else {
                     utStatus = engine.tr2utStatus(field.status);
                 }
+                field.statusCode = utStatus[0];
+                field.statusText = utStatus[1];
                 // <status
-
+                field.progress = parseInt((field.recheckProgress || field.percentDone) * 1000);
+                field.shared = field.downloadedEver > 0 ? Math.round(field.uploadedEver / field.downloadedEver * 1000) : 0;
+                if (field.eta < 0) {
+                    field.eta = 0;
+                }
                 // seeds/peers in poe>
                 var peers = 0;
                 var seeds = 0;
-                if (field.trackerStats === undefined) {
-                    field.trackerStats = [];
-                }
-                field.trackerStats.forEach(function(item) {
-                    if (item.leecherCount > 0) {
+                if (field.trackerStats !== undefined) {
+                    for (var n = 0, item; item = field.trackerStats[n]; n++) {
                         peers += item.leecherCount;
-                    }
-                    if (item.seederCount > 0) {
                         seeds += item.seederCount;
                     }
-                });
+                }
+                field.peers = peers;
+                field.seeds = seeds;
                 // <seeds/peers in poe
-                var item = {
-                    id: 'trID_'+field.id,
-                    status: utStatus[0],
-                    name: field.name,
-                    totalSize: field.totalSize,
-                    progress: parseInt((field.recheckProgress || field.percentDone) * 1000),
-                    downloadedEver: field.downloadedEver,
-                    uploadedEver: field.uploadedEver,
-                    shred: field.downloadedEver > 0 ? Math.round(field.uploadedEver / field.downloadedEver * 1000) : 0,
-                    rateUpload: field.rateUpload,
-                    rateDownload: field.rateDownload,
-                    eta: field.eta < 0 ? 0 : field.eta,
-                    label: '',
-                    peersGettingFromUs: field.peersGettingFromUs,
-                    peers: peers,
-                    peersSendingToUs: field.peersSendingToUs,
-                    seeds: seeds,
-                    unk: 0,
-                    queuePosition: field.queuePosition,
-                    uploaded: 0,
-                    unk1: '',
-                    unk2: '',
-                    statusText: utStatus[1],
-                    sid: 0,
-                    addedDate: field.addedDate,
-                    doneDate: field.doneDate,
-                    unk3: '',
-                    downloadDir: field.downloadDir,
-                    unk4: '',
-                    unk5: 0
-                };
+
                 var arrayItem = [];
-                for (var key in item) {
-                    arrayItem.push(item[key]);
+                for (var n = 0, column; column = engine.api.trUtColumnList[n]; n++) {
+                    if (field[column] !== undefined) {
+                        arrayItem.push(field[column]);
+                        continue;
+                    }
+                    var dataType = column[0];
+                    if (dataType === 'n') {
+                        arrayItem.push(0);
+                        continue;
+                    }
+                    arrayItem.push('');
                 }
-                data.ut.torrentp.push(arrayItem);
+                data.ut[type].push(arrayItem);
             }
         }
-        var torrentm = [];
-        for (var i = 0, item_s; item_s = engine.varCache.torrents[i]; i++) {
-            var found = false;
-            for (var n = 0, item_m; item_m = data.ut.torrentp[n]; n++) {
-                if (item_m[0] === item_s[0]) {
-                    found = true;
-                    break;
+        if (type === 'torrents') {
+            var torrentm = [];
+            for (var i = 0, item_s; item_s = engine.varCache.torrents[i]; i++) {
+                var found = false;
+                for (var n = 0, item_m; item_m = data.ut.torrents[n]; n++) {
+                    if (item_m[0] === item_s[0]) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    torrentm.push(item_s[0]);
                 }
             }
-            if (!found) {
-                torrentm.push(item_s[0]);
+            if (torrentm.length > 0) {
+                data.ut.torrentm = torrentm;
+            }
+        } else {
+            if (args.removed !== undefined) {
+                data.ut.torrentm = [];
+                for (var i = 0, len = args.removed.length; i < len; i++) {
+                    data.ut.torrentm.push('trId'+args.removed[i]);
+                }
             }
         }
-        if (torrentm.length > 0) {
-            data.ut.torrentm = torrentm;
-        }
+        data.ut.torrentc = Date.now();
         /*var settings = [];
         if (args.hasOwnProperty('speed-limit-down')) {
 
@@ -433,7 +477,7 @@ var engine = {
                     return onError && onError();
                 }
                 engine.publicStatus('');
-                data = engine.tr2utTorrentList(data);
+                data = engine.tr2utTrList(data, origData);
                 onLoad && onLoad(data);
                 engine.readResponse(data.ut);
             },
@@ -1365,6 +1409,18 @@ var engine = {
         fn && fn(msgList, response);
     },
     storageCache: {},
+    hookList: {
+        getTorrentList: function(data, response) {
+            if (data.cid) {
+                engine.api.getTorrentListRequest.arguments.ids = 'recently-active';
+            } else {
+                delete engine.api.getTorrentListRequest.arguments.ids;
+            }
+            engine.sendAction(engine.api.getTorrentListRequest, function(data) {
+                response(data.ut);
+            });
+        }
+    },
     actionList: {
         getLanguage: function(message, response) {
             response(engine.language);
@@ -1394,6 +1450,10 @@ var engine = {
             responose(engine.varCache.lastPublicStatus);
         },
         api: function(message, response) {
+            var hook = engine.hookList[message.data.action];
+            if (hook !== undefined) {
+                return hook(message.data, response);
+            }
             engine.sendAction(message.data, response);
         },
         setTrColumnArray: function(message, response) {
@@ -1446,9 +1506,10 @@ var engine = {
             }
             response();
         },
-        getTorrentList: function(message, response) {
-            engine.sendAction(engine.api.getTorrentListRequest, function(data) {
-                response(data);
+        getFileList: function(message, response) {
+            engine.api.getFileListRequest.arguments.ids = [parseInt(message.hash.substr(4))];
+            engine.sendAction(engine.api.getFileListRequest, function(data) {
+                response(data.ut);
             });
         }
     }

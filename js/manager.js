@@ -1498,23 +1498,19 @@ var manager = {
     updateTrackerList: function(onReady) {
         manager.timer.wait = true;
 
-        /*
-        var data = {list: 1};
-        if (manager.varCache.flListLayer.param !== undefined) {
-            manager.extend(data, manager.varCache.flListLayer.param);
-        }
-
-        manager.api(data, function(data) {
+        var onResponse = function(data) {
             manager.timer.wait = false;
             onReady && onReady();
             manager.writeTrList(data);
-        });
-        */
-        mono.sendMessage({action: 'getTorrentList'}, function(data) {
-            manager.timer.wait = false;
-            onReady && onReady();
-            console.log(data);
-            manager.writeTrList(data.ut);
+        };
+       manager.api({action: 'getTorrentList'}, function(data) {
+            if (manager.varCache.flListLayer.param !== undefined) {
+                return mono.sendMessage({action: 'getFileList', hash: manager.varCache.flListLayer.hash}, function(flData) {
+                    data.files = flData.files;
+                    onResponse(data);
+                });
+            }
+            onResponse(data);
         });
     },
     timer: {
@@ -1896,7 +1892,6 @@ var manager = {
     flListShow: function(hash) {
         var flListLayer = manager.varCache.flListLayer = {};
         flListLayer.hash = hash;
-        var requestData = {action: 'getfiles', hash: hash};
 
         var trItem = manager.varCache.trListItems[hash];
         var trNode = trItem.node;
@@ -1925,9 +1920,9 @@ var manager = {
             value: folder
         });
 
-        mono.sendMessage({action: 'api', data: requestData}, function(data) {
+        mono.sendMessage({action: 'getFileList', hash: hash}, function(data) {
             manager.writeFlList(data);
-            flListLayer.param = requestData;
+            flListLayer.param = 1;
         });
 
         manager.domCache.fl.style.display = 'block';
@@ -3134,6 +3129,9 @@ var manager = {
             }
         }
     },
+    tr2utSettings: function(data) {
+
+    },
     run: function() {
         console.time('manager');
         console.time('remote data');
@@ -3284,7 +3282,7 @@ var manager = {
                 });
 
                 manager.readSettings({settings: data.getRemoteSettings});
-                mono.sendMessage({action: 'api', data: {action: 'getsettings'}}, function(data) {
+                mono.sendMessage({action: 'api', data: {method: 'session-get'}}, function(data) {
                     manager.readSettings(data);
                 });
 
@@ -3496,7 +3494,7 @@ var manager = {
                     if (el.tagName !== 'A') return;
                     if (el.classList.contains('update')) {
                         e.preventDefault();
-                        mono.sendMessage({action: 'api', data: {action: 'getfiles', hash: manager.varCache.flListLayer.hash}}, function(data) {
+                        mono.sendMessage({action: 'getFileList', hash: manager.varCache.flListLayer.hash}, function(data) {
                             manager.writeFlList(data);
                         });
                         return;
