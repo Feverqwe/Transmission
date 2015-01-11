@@ -299,30 +299,6 @@ var options = function() {
         return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
     };
 
-    var updateDirList = function() {
-        mono.sendMessage({action: 'getDirList'}, function(data) {
-            var select = domCache.dirList;
-            select.textContent = '';
-            var dirList = data['download-dirs'];
-            if (!dirList) {
-                select.selectedIndex = -1;
-                select.dispatchEvent(new CustomEvent('change'));
-                return;
-            }
-            for (var i = 0, item; item = dirList[i]; i++) {
-                select.appendChild(mono.create('option', {
-                    value: i,
-                    text: item.path,
-                    data: {
-                        available: item.available
-                    }
-                }));
-            }
-            select.selectedIndex = 0;
-            select.dispatchEvent(new CustomEvent('change'));
-        });
-    };
-
     var folderLoadList = function(folderList) {
         for (var i = 0, item; item = folderList[i]; i++) {
             domCache.folderList.appendChild(mono.create('option', {
@@ -342,28 +318,6 @@ var options = function() {
             optionList.push([item.dataset.dir, item.dataset.subPath]);
         }
         mono.storage.set({folderList: optionList}, function() {
-            mono.sendMessage({action: 'reloadSettings'});
-        });
-    };
-
-    var labelLoadList = function(labelList) {
-        for (var i = 0, item; item = labelList[i]; i++) {
-            domCache.labelList.appendChild(mono.create('option', {
-                text: item,
-                data: {
-                    label: item
-                }
-            }));
-        }
-    };
-
-    var labelSaveList = window.labelSaveList = function() {
-        var optionList = [];
-        var optionNodeList = domCache.labelList.childNodes;
-        for (var i = 0, item; item = optionNodeList[i]; i++) {
-            optionList.push(item.dataset.label);
-        }
-        mono.storage.set({labelList: optionList}, function() {
             mono.sendMessage({action: 'reloadSettings'});
         });
     };
@@ -423,8 +377,8 @@ var options = function() {
             });
 
             mono.storage.get([
-                'folderList',
-                'labelList'
+                'folderList'/*,
+                'labelList'*/
             ], function(storage) {
                 mono.sendMessage([
                     {action: 'getLanguage'},
@@ -467,11 +421,7 @@ var options = function() {
                     domCache.subPath = document.getElementById('subPath');
                     domCache.addSubPath = document.getElementById('addSubPath');
                     domCache.addSubPath.addEventListener('click', function() {
-                        var dirIndex = domCache.dirList.selectedIndex;
-                        if (dirIndex === -1) {
-                            return;
-                        }
-                        var dir = parseInt(domCache.dirList.childNodes[dirIndex].value);
+                        var dir = '0';
                         var subPath = domCache.subPath.value;
                         if (!subPath) {
                             return;
@@ -493,44 +443,12 @@ var options = function() {
                         }
                     });
 
-                    domCache.label = document.getElementById('label');
-                    domCache.labelList = document.getElementById('labelList');
-                    labelLoadList(storage.labelList || []);
-                    domCache.addLabel = document.getElementById('addLabel');
-                    domCache.addLabel.addEventListener('click', function() {
-                        var label = domCache.label.value;
-                        if (!label) {
-                            return;
-                        }
-                        domCache.labelList.appendChild(mono.create('option', {
-                            text: label,
-                            data: {
-                                label: label
-                            }
-                        }));
-
-                        domCache.label.value = '';
-                        labelSaveList();
-                    });
-                    domCache.label.addEventListener('keydown', function(e) {
-                        if (e.keyCode === 13) {
-                            domCache.addLabel.dispatchEvent(new CustomEvent('click'));
-                        }
-                    });
-
                     domCache.folderDeleteSelected = document.getElementById('folderDeleteSelected');
                     domCache.folderDeleteSelected.addEventListener('click', removeOption.bind(null, 'folder'));
                     domCache.folderUp = document.getElementById('folderUp');
                     domCache.folderUp.addEventListener('click', optionUp.bind(null, 'folder'));
                     domCache.folderDown = document.getElementById('folderDown');
                     domCache.folderDown.addEventListener('click', optionDown.bind(null, 'folder'));
-
-                    domCache.labelDeleteSelected = document.getElementById('labelDeleteSelected');
-                    domCache.labelDeleteSelected.addEventListener('click', removeOption.bind(null, 'label'));
-                    domCache.labelUp = document.getElementById('labelUp');
-                    domCache.labelUp.addEventListener('click', optionUp.bind(null, 'label'));
-                    domCache.labelDown = document.getElementById('labelDown');
-                    domCache.labelDown.addEventListener('click', optionDown.bind(null, 'label'));
 
                     domCache.backupUpdateBtn = $('#backupUpdate');
                     domCache.restoreBtn = $('#restoreBtn');
@@ -575,9 +493,6 @@ var options = function() {
                                 }
                                 domCache.getFromCloudBtn.prop('disabled', true);
                             });
-                        }
-                        if (page === 'ctx') {
-                            updateDirList();
                         }
                     });
                     window.addEventListener("hashchange", onHashChange);
@@ -624,24 +539,6 @@ var options = function() {
                                 statusEl.textContent = '';
                             }, 2500);
                         });
-                    });
-
-                    domCache.dirList = document.getElementById("dirList");
-                    domCache.dirList.addEventListener('change', function() {
-                        var selectedOption = this.childNodes[this.selectedIndex];
-                        var value = -1;
-                        if (selectedOption) {
-                            value = bytesToText(selectedOption.dataset.available * 1024 * 1024);
-                            domCache.addSubPath.disabled = false;
-                        } else {
-                            domCache.addSubPath.disabled = true;
-                        }
-                        document.getElementById("availableCount").textContent = value;
-                    });
-
-                    domCache.updateDirList = document.getElementById("updateDirList");
-                    domCache.updateDirList.addEventListener('click', function() {
-                        updateDirList();
                     });
 
                     var checkInputList = document.querySelectorAll('input[data-option="login"], input[data-option="password"], input[data-option="ip"], input[data-option="port"]');

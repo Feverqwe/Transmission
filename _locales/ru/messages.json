@@ -464,5 +464,17 @@
     },
     "startNow": {
         "message": "Запустить сейчас"
+    },
+    "rename": {
+        "message": "Переименовать"
+    },
+    "renameText": {
+        "message": "Введине новое имя файла"
+    },
+    "move": {
+        "message": "Переместить"
+    },
+    "moveNewPath": {
+        "message": "Введите новый путь"
     }
 }

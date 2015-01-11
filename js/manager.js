@@ -152,7 +152,6 @@ var manager = {
         remoteLabels: [],
         speedLimit: {},
         folderList: [],
-        labelList: [],
         webUiUrl: undefined,
         hasGraph: false,
         movebleStyleList: {},
@@ -478,7 +477,7 @@ var manager = {
             }
         })
     },
-    setLabels: function(items) {
+    setLabels: function() {
         var selectedIndex = 0;
         var labels = manager.varCache.labels = [];
         var optionList = document.createDocumentFragment();
@@ -487,15 +486,6 @@ var manager = {
             labels.push({label: item, custom: 1});
             optionList.appendChild(manager.getLabelOptionNode(item, true));
             if (manager.varCache.currentFilter.custom && manager.varCache.currentFilter.label === item) {
-                selectedIndex = cIndex;
-            }
-            cIndex++;
-        }
-        for (var i = 0, item; item = items[i]; i++) {
-            item = item[0];
-            labels.push({label: item});
-            optionList.appendChild(manager.getLabelOptionNode(item, false));
-            if (!manager.varCache.currentFilter.custom && manager.varCache.currentFilter.label === item) {
                 selectedIndex = cIndex;
             }
             cIndex++;
@@ -1489,13 +1479,6 @@ var manager = {
             manager.writeFlList(data);
         }
 
-        if (data.label) {
-            if (!manager.labelsEqual(data.label, manager.varCache.remoteLabels)) {
-                manager.varCache.remoteLabels = data.label;
-                manager.setLabels(data.label);
-            }
-        }
-
         if (list !== undefined && manager.settings.showSpeedGraph && manager.varCache.hasGraph) {
             graph.move(dlSpeed, upSpeed);
         }
@@ -2098,150 +2081,7 @@ var manager = {
         }
 
         return actionList;
-    }/* Transmission,
-    updateLabesCtx: function (trigger, hash) {
-        var ul = trigger.items.labels.$node.children('ul');
-        var current_label = manager.varCache.trListItems[hash].api[11];
-        var items = trigger.items.labels.items;
-        if (current_label) {
-            if (items.delLabel === undefined) {
-                items.delLabel = {
-                    name: manager.language.OV_REMOVE_LABEL,
-                    $node: $('<li>', {'class': 'context-menu-item'}).data({
-                        contextMenuKey: 'delLabel',
-                        contextMenu: trigger.items.labels,
-                        contextMenuRoot: trigger
-                    }).append(
-                        $('<span>', {text: manager.language.OV_REMOVE_LABEL})
-                    )
-                };
-                items.delLabel.$node.prependTo(trigger.items.labels.$node.children('ul'));
-                trigger.callbacks.delLabel = function () {
-                    var hash = this[0].id;
-                    manager.api({list: 1, action: 'setprops', s: 'label', hash: hash, v: ''});
-                };
-            }
-            if (items.addLabel !== undefined) {
-                items.addLabel.$node.remove();
-                delete items.addLabel;
-            }
-        } else {
-            if (items.addLabel === undefined) {
-                items.addLabel = {
-                    name: manager.language.OV_NEW_LABEL,
-                    $node: $('<li>', {'class': 'context-menu-item'}).data({
-                        contextMenuKey: 'addLabel',
-                        contextMenu: trigger.items.labels,
-                        contextMenuRoot: trigger
-                    }).append(
-                        $('<span>', {text: manager.language.OV_NEW_LABEL})
-                    )
-                };
-                items.addLabel.$node.prependTo(trigger.items.labels.$node.children('ul'));
-                trigger.callbacks.addLabel = function () {
-                    var hash = this[0].id;
-                    showNotification([
-                        [{label: {text: manager.language.OV_NEWLABEL_CAPTION}},
-                        {input: {type: 'text', name: 'label', focus: true, on: [
-                            ['keydown', function(e) {
-                                if (e.keyCode === 13) {
-                                    this.nodeCache.yesBtn.trigger('click');
-                                }
-                            }]
-                        ]}}],
-                        [
-                            {input: {type: "button", value: manager.language.DLG_BTN_APPLY, name: 'yesBtn', on: ['click', function() {
-                                var formData = this.getFormData();
-                                this.close();
-                                var label = formData.label;
-                                if (!label) return;
-                                manager.api({list: 1, action: 'setprops', s: 'label', hash: hash, v: label});
-                            }]}},
-                            {input: {type: "button", value: manager.language.DLG_BTN_CANCEL, name: 'noBtn', on: ['click', function() {
-                                this.close();
-                            }]}}
-                        ]
-                    ]);
-                };
-            }
-            if (items.delLabel !== undefined) {
-                items.delLabel.$node.remove();
-                delete items.delLabel;
-            }
-        }
-        var userLabelLength = 0;
-        var fullLabelList = manager.varCache.labelList.slice(0);
-        for (var i = 0, item; item = manager.varCache.labels[i]; i++) {
-            if (item.custom) continue;
-            if (fullLabelList.indexOf(item.label) !== -1) continue;
-            fullLabelList.push(item.label);
-        }
-        for (var i = 0, label; label = fullLabelList[i]; i++) {
-            userLabelLength++;
-            if (items['_' + label] === undefined) {
-                items['_' + label] = {
-                    name: label,
-                    $node: $('<li>', {'class': 'context-menu-item'}).data({
-                        label: label,
-                        contextMenuKey: '_' + label,
-                        contextMenu: trigger.items.labels,
-                        contextMenuRoot: trigger
-                    }).append($('<span>', {text: label}))
-                };
-                items['_' + label].$node.appendTo(trigger.items.labels.$node.children('ul'));
-                trigger.callbacks['_' + label] = function (key, trigger) {
-                    var hash = this[0].id;
-                    var label = trigger.items.labels.items[key].name;
-                    manager.api({list: 1, action: 'setprops', s: 'label', hash: hash, v: label});
-                };
-            }
-        }
-        if (userLabelLength > 0) {
-            if (items.s === undefined) {
-                items.s = {
-                    name: '-',
-                    $node: $('<li>', {'class': 'context-menu-item  context-menu-separator not-selectable'}).data({
-                        contextMenuKey: 's',
-                        contextMenu: trigger.items.labels,
-                        contextMenuRoot: trigger
-                    })
-                };
-            }
-            if (items.delLabel !== undefined) {
-                items.delLabel.$node.after(items.s.$node);
-            } else {
-                items.addLabel.$node.after(items.s.$node);
-            }
-        } else if (items.s !== undefined) {
-            items.s.$node.remove();
-            delete items.s;
-        }
-        for (var key in items) {
-            if (key[0] !== '_') {
-                continue;
-            }
-            var item = items[key];
-            var found = false;
-            for (var i = 0, label; label = fullLabelList[i]; i++) {
-                if (label === item.name) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                item.$node.remove();
-                delete items[key];
-                continue;
-            }
-            if (item.name !== current_label) {
-                item.labelNode && item.labelNode.remove();
-                delete item.labelNode;
-            } else
-            if (item.labelNode === undefined) {
-                item.$node.prepend(item.labelNode = $('<label>', {text: '●'}));
-            }
-        }
-    }*/,
+    },
     getSpeedArray: function (currentSpeed, count) {
         if (currentSpeed === 0) {
             currentSpeed = 512;
@@ -2703,21 +2543,7 @@ var manager = {
                             }
                         });
                     }
-                }/* Transmission,
-                pause: {
-                    name: manager.language.OV_FL_PAUSED,
-                    callback: function () {
-                        var hash = this[0].id;
-                        manager.api({list: 1, action: 'pause', hash: hash});
-                    }
                 },
-                unpause: {
-                    name: manager.language.resume,
-                    callback: function () {
-                        var hash = this[0].id;
-                        manager.api({list: 1, action: 'unpause', hash: hash});
-                    }
-                }*/,
                 stop: {
                     name: manager.language.ML_STOP,
                     callback: function () {
@@ -2785,14 +2611,7 @@ var manager = {
                                     }
                                 });
                             }
-                        }/* Transmission,
-                        remove_files: {
-                            name: manager.language.ML_DELETE_DATA,
-                            callback: function () {
-                                var hash = this[0].id;
-                                manager.api({list: 1, action: 'removedata', hash: hash});
-                            }
-                        }*/,
+                        },
                         remove_torrent_files: {
                             name: manager.language.ML_DELETE_DATATORRENT,
                             callback: function () {
@@ -2809,18 +2628,61 @@ var manager = {
                     }
                 },
                 's2': '-',
+                move: {
+                    name: manager.language.move,
+                    callback: function (key, trigger) {
+                        var hash = this[0].id;
+                        var currentLocation = manager.varCache.trListItems[hash].api[26];
+                        var folderTemplate = showNotification.selectFolderTemplate(1);
+                        if (folderTemplate[1].select.append.length === 0) {
+                            folderTemplate = undefined;
+                        }
+                        showNotification([
+                            [
+                                {label: {text: manager.language.moveNewPath}},
+                                {input: {type: 'text', name: 'newLocation', value: currentLocation, focus: true, on: [
+                                    ['keydown', function(e) {
+                                        if (e.keyCode === 13) {
+                                            this.nodeCache.okBtn.trigger('click');
+                                        }
+                                    }]
+                                ]}}
+                            ],
+                            folderTemplate,
+                            [
+                                {input: {type: "button", name: 'okBtn', value: manager.language.DLG_BTN_APPLY, on: [
+                                    ['click', function() {
+                                        var formData = this.getFormData();
+                                        var location = formData.newLocation;
+                                        if (formData.folder > -1) {
+                                            location = manager.varCache.folderList[formData.folder][1];
+                                        }
+                                        this.close();
+                                        mono.sendMessage({action: 'api', data: {
+                                            method: "torrent-set-location",
+                                            arguments: {
+                                                ids: [parseInt(hash.substr(4))],
+                                                location: location,
+                                                move: true
+                                            }
+                                        }});
+                                    }]
+                                ]}},
+                                {input: {type: "button", value: manager.language.DLG_BTN_CANCEL, on: [
+                                    ['click', function() {
+                                        this.close();
+                                    }]
+                                ]}}
+                            ]
+                        ]);
+                    }
+                },
                 torrent_files: {
                     name: manager.language.showFileList,
                     callback: function () {
                         manager.flListShow(this[0].id);
                     }
-                }/* Transmission,
-                labels: {
-                    name: manager.language.OV_COL_LABEL,
-                    className: "labels",
-                    label: '',
-                    items: {}
-                }*/
+                }
             }
         });
 
@@ -2907,31 +2769,55 @@ var manager = {
                         var fileIndexList = manager.varCache.flListLayer.ctxSelectArray.slice(0);
                         manager.setPriority(hash, fileIndexList, 0);
                     }
-                }/*,
-                s1: '-',
-                download: {
-                    name: manager.language.DLG_RSSDOWNLOADER_24,
+                },
+                rename: {
+                    name: manager.language.rename,
                     callback: function (key, trigger) {
                         var hash = manager.varCache.flListLayer.hash;
-                        var ctxSelectArray = manager.varCache.flListLayer.ctxSelectArray;
-                        for (var n = 0, len = ctxSelectArray.length; n < len; n++) {
-                            var item = ctxSelectArray[n];
-                            var sid = manager.varCache.trListItems[hash].api[22];
-                            if (sid === undefined) {
-                                continue;
-                            }
-                            var fileUrl = manager.varCache.webUiUrl + 'proxy?sid=' + sid + '&file=' + item + '&disposition=ATTACHMENT&service=DOWNLOAD&qos=0';
-                            if (mono.isChrome) {
-                                chrome.tabs.create({
-                                    url: fileUrl
-                                });
-                            } else {
-                                mono.sendMessage({action: 'openTab', url: fileUrl}, undefined, 'service');
-                            }
+                        var index = this[0].dataset.index;
+                        var currentFileName = manager.varCache.flListItems[index].api[0];
+                        var slashPos = currentFileName.lastIndexOf('/');
+                        if (slashPos !== -1) {
+                            currentFileName = currentFileName.substr(slashPos + 1);
                         }
-                        manager.flUnCheckAll(1);
+                        var path = manager.varCache.flListItems[index].api[4];
+                        showNotification([
+                            [
+                                {label: {text: manager.language.renameText}},
+                                {input: {type: 'text', name: 'newName', value: currentFileName, focus: true, on: [
+                                    ['keydown', function(e) {
+                                        if (e.keyCode === 13) {
+                                            this.nodeCache.okBtn.trigger('click');
+                                        }
+                                    }]
+                                ]}}
+                            ],
+                            [
+                                {input: {type: "button", name: 'okBtn', value: manager.language.DLG_BTN_APPLY, on: [
+                                    ['click', function() {
+                                        var formData = this.getFormData();
+                                        var name = formData.newName;
+                                        this.close();
+                                        if (!name) return;
+                                        mono.sendMessage({action: 'api', data: {
+                                            method: "torrent-rename-path",
+                                            arguments: {
+                                                ids: [parseInt(hash.substr(4))],
+                                                path: path,
+                                                name: name
+                                            }
+                                        }});
+                                    }]
+                                ]}},
+                                {input: {type: "button", value: manager.language.DLG_BTN_CANCEL, on: [
+                                    ['click', function() {
+                                        this.close();
+                                    }]
+                                ]}}
+                            ]
+                        ]);
                     }
-                }*/
+                }
             }
         });
 
@@ -3065,24 +2951,15 @@ var manager = {
                 mono.sendMessage({
                     action: 'onSendFile',
                     url: URL.createObjectURL(file),
-                    folder: folderRequest/*,
-                    label: dataForm.label*/
+                    folder: folderRequest
                 });
             }
         };
-        /*var labelTemplate = showNotification.selectLabelTemplate();*/
         var folderTemplate = showNotification.selectFolderTemplate();
-        if (folderTemplate[1].select.append.length === 0/* && labelTemplate[1].select.append.length === 0*/) {
+        if (folderTemplate[1].select.append.length === 0) {
             return onClickYes();
         }
-        /*if (labelTemplate[1].select.append.length === 0) {
-            labelTemplate = undefined;
-        }*/
-        if (folderTemplate[1].select.append.length === 0) {
-            folderTemplate = undefined;
-        }
         showNotification([
-            /*labelTemplate,*/
             folderTemplate,
             [
                 {input: {type: "button", value: manager.language.DLG_BTN_OK, focus: true, on: [
@@ -3104,37 +2981,12 @@ var manager = {
         });
     },
     onLoadQuickNotification: function() {
-        showNotification.selectLabelTemplate = function () {
-            return [
-                {label: {text: manager.language.OV_COL_LABEL}},
-                {select: {append: (function(){
-                    var options = [
-                        $('<option>', {text: '', value: ''})
-                    ];
-                    var labels = [];
-                    for (var i = 0, item; item = manager.varCache.labels[i]; i++) {
-                        if (item.custom) continue;
-                        labels.push(item.label);
-                        options.push($('<option>', {text: item.label, value: item.label}));
-                    }
-                    for (var i = 0, item; item = manager.varCache.labelList[i]; i++) {
-                        if (labels.indexOf(item) !== -1) continue;
-                        options.push($('<option>', {text: item, value: item}));
-                    }
-                    if (options.length === 1) {
-                        return [];
-                    }
-                    return options;
-                })(), name: 'label'}}
-            ];
-        };
-
-        showNotification.selectFolderTemplate = function() {
+        showNotification.selectFolderTemplate = function(noDefailtFolder) {
             return [
                 {label: {text: manager.language.ST_CAPT_FOLDER}},
                 {select: {append: (function(){
                     var folderList = [
-                        $('<option>', {text: manager.language.defaultPath, value: -1})
+                        $('<option>', {text: noDefailtFolder ? '' : manager.language.defaultPath, value: -1})
                     ];
                     for (var i = 0, item; item = manager.varCache.folderList[i]; i++) {
                         folderList.push($('<option>', {text: item[1], value: i}));
@@ -3272,7 +3124,6 @@ var manager = {
             'flSortOptions',
             'selectedLabel',
             'folderList',
-            'labelList'
         ], function(storage) {
             mono.sendMessage([
                 {action: 'getLanguage'},
@@ -3280,7 +3131,6 @@ var manager = {
                 {action: 'getTrColumnArray'},
                 {action: 'getFlColumnArray'},
                 {action: 'getRemoteTorrentList'},
-                {action: 'getRemoteLabels'},
                 {action: 'getRemoteSettings'},
                 {action: 'getPublicStatus'},
                 {action: 'managerIsOpen'}
@@ -3340,7 +3190,6 @@ var manager = {
                 }
 
                 manager.varCache.folderList = storage.folderList || manager.varCache.folderList;
-                manager.varCache.labelList = storage.labelList || manager.varCache.labelList;
 
                 if (storage.trSortOptions) {
                     manager.varCache.trSortColumn = storage.trSortOptions.column;
@@ -3484,11 +3333,7 @@ var manager = {
                     }
                     if (el.classList.contains('add_magnet')) {
                         e.preventDefault();
-                        var labelTemplate = showNotification.selectLabelTemplate();
                         var folderTemplate = showNotification.selectFolderTemplate();
-                        if (labelTemplate[1].select.append.length === 0) {
-                            labelTemplate = undefined;
-                        }
                         if (folderTemplate[1].select.append.length === 0) {
                             folderTemplate = undefined;
                         }
@@ -3503,7 +3348,6 @@ var manager = {
                                     }]
                                 ]}}
                             ],
-                            /*labelTemplate,*/
                             folderTemplate,
                             [
                                 {input: {type: "button", value: manager.language.DLG_BTN_OK, name: 'okBtn', on: [
@@ -3620,13 +3464,6 @@ var manager = {
                         });
                         return;
                     }
-                    /* Transmission
-                    if (el.classList.contains('pause')) {
-                        e.preventDefault();
-                        var hash = el.parentNode.parentNode.parentNode.id;
-                        manager.api({list: 1, action: 'pause', hash: hash});
-                        return;
-                    }*/
                     if (el.classList.contains('stop')) {
                         e.preventDefault();
                         var hash = el.parentNode.parentNode.parentNode.id;
