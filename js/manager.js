@@ -214,7 +214,7 @@ var manager = {
             manager.updateHead(type);
             manager.flClearList();
             mono.sendMessage([
-                {action: 'api', data: flListLayer.param},
+                {action: 'getFileList', hash: manager.varCache.flListLayer.hash},
                 {action: 'setFlColumnArray', data: manager.varCache.flColumnArray}
             ], function(data) {
                 manager.writeFlList(data.api);
@@ -2344,7 +2344,7 @@ var manager = {
         manager.updateHead('fl');
         manager.flClearList();
         mono.sendMessage([
-            {action: 'api', data: flListLayer.param},
+            {action: 'getFileList', hash: manager.varCache.flListLayer.hash},
             {action: 'setFlColumnArray', data: manager.varCache.flColumnArray}
         ], function(data) {
             manager.writeFlList(data.api);
@@ -2430,7 +2430,7 @@ var manager = {
         }
     },
     setPriority: function(hash, fileIndexList, level) {
-        var step = 500;
+        var step = 250;
         var waitCount = 0;
         var doneCount = 0;
         var from = 0;
@@ -2449,7 +2449,21 @@ var manager = {
             waitCount++;
             var list = fileIndexList.slice(from, from+step);
             from+=step;
-            mono.sendMessage({action: 'api', data: $.param({action: 'setprio', p: level}) + '&' + $.param({hash: hash, f: list}, true)}, onReady);
+
+            var request = {
+                method: "torrent-set",
+                arguments: {
+                    ids: [parseInt(hash.substr(4))]
+                }
+            };
+            if (level === 0) {
+                request.arguments['files-unwanted'] = list;
+            } else {
+                var priority = [,'low','normal','high'][level];
+                request.arguments['files-wanted'] = list;
+                request.arguments['priority-'+priority] = list;
+            }
+            mono.sendMessage({action: 'api', data: request}, onReady);
         }
     },
     onLoadContextMenu: function() {
@@ -2764,7 +2778,7 @@ var manager = {
                     manager.varCache.flListLayer.ctxSelectArray = [];
                     var itemList = manager.flGetCheckBoxList(1, 1);
                     for (var i = 0, item; item = itemList[i]; i++) {
-                        manager.varCache.flListLayer.ctxSelectArray.push(item.parentNode.parentNode.dataset.index);
+                        manager.varCache.flListLayer.ctxSelectArray.push(parseInt(item.parentNode.parentNode.dataset.index));
                     }
                 },
                 hide: function () {
