@@ -99,6 +99,10 @@ ul.menu a.btn:hover {
     border: 1px solid #a9acb1;
 }
 
+table.status-panel td.space.disk {
+    background-image: url(../images/free_space.png);
+}
+
 @media
 only screen and (-webkit-min-device-pixel-ratio: 2),
 only screen and (   min--moz-device-pixel-ratio: 2),
@@ -124,6 +128,10 @@ only screen and (                min-resolution: 2dppx) {
     ul.menu a.add_magnet{
         background-image: url("../images/magnet@2x.png");
         background-size: 28px;
+    }
+    table.status-panel td.space.disk {
+        background-image: url(../images/free_space@2x.png);
+        background-size: 16px;
     }
 }
 
@@ -342,9 +350,6 @@ table.status-panel td.speed {
     padding-left: 14px;
     background-repeat: no-repeat;
     background-position-y: 3px;
-}
-table.status-panel td.space.disk {
-    background-image: url(../images/free_space.png);
 }
 table.status-panel td.space div {
     cursor: pointer;
