@@ -346,6 +346,9 @@ table.status-panel td.speed {
 table.status-panel td.space.disk {
     background-image: url(../images/free_space.png);
 }
+table.status-panel td.space div {
+    cursor: pointer;
+}
 table.status-panel td.download {
     background-image: url(../images/arrowDown.svg);
     background-position: left center;
