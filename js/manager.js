@@ -156,7 +156,8 @@ var manager = {
         webUiUrl: undefined,
         hasGraph: false,
         movebleStyleList: {},
-        cid: undefined
+        cid: undefined,
+        settings: {}
     },
     options: {
         scrollWidth: 17,
@@ -513,10 +514,10 @@ var manager = {
         },
         INACTIVE: function(item) {
             return item.api[9] === 0 && item.api[8] === 0;
-        },
+        }/*,
         NOLABEL: function(item) {
             return item.api[11].length === 0;
-        }
+        }*/
     },
     trItemIsInFilter: function(item) {
         //проверяет запись на фильтр
@@ -2088,7 +2089,7 @@ var manager = {
         }
 
         return actionList;
-    },
+    }/* Transmission,
     updateLabesCtx: function (trigger, hash) {
         var ul = trigger.items.labels.$node.children('ul');
         var current_label = manager.varCache.trListItems[hash].api[11];
@@ -2231,7 +2232,7 @@ var manager = {
                 item.$node.prepend(item.labelNode = $('<label>', {text: '●'}));
             }
         }
-    },
+    }*/,
     getSpeedArray: function (currentSpeed, count) {
         if (currentSpeed === 0) {
             currentSpeed = 512;
@@ -2296,24 +2297,26 @@ var manager = {
         }
     },
     readSettings: function(data) {
-        for (var i = 0, item; item = data.settings[i]; i++) {
-            var key = item[0];
-            var value = item[2];
-            if (key === 'max_dl_rate') {
-                value = parseInt(value);
-                if (manager.varCache.speedLimit.dlSpeed !== value) {
-                    manager.varCache.speedLimit.dlSpeed = value;
-                    manager.setSpeedDom('dl', value);
-                }
-            }
-            if (key === 'max_ul_rate') {
-                value = parseInt(value);
-                if (manager.varCache.speedLimit.upSpeed !== value) {
-                    manager.varCache.speedLimit.upSpeed = value;
-                    manager.setSpeedDom('up', value);
-                }
-            }
+        var dlSpeed = !data.arguments['speed-limit-down-enabled'] ? 0 : parseInt(data.arguments['speed-limit-down']);
+        if (manager.varCache.speedLimit.dlSpeed !== dlSpeed) {
+            manager.varCache.speedLimit.dlSpeed = dlSpeed;
+            manager.setSpeedDom('dl', dlSpeed);
         }
+        var upSpeed = !data.arguments['speed-limit-up-enabled'] ? 0 : parseInt(data.arguments['speed-limit-up']);
+        if (manager.varCache.speedLimit.upSpeed !== upSpeed) {
+            manager.varCache.speedLimit.upSpeed = upSpeed;
+            manager.setSpeedDom('up', upSpeed);
+        }
+        if (data.arguments['alt-speed-enabled']) {
+            manager.domCache.menu.querySelector('.alt_speed').classList.add('active');
+        } else {
+            manager.domCache.menu.querySelector('.alt_speed').classList.remove('active');
+        }
+        manager.varCache.settings = data;
+        // todo: alt-speed-enabled
+        // todo: download-dir
+        // todo: download-dir-free-space
+        // todo: size-bytes
         manager.updateSpeedCtxMenu();
     },
     trToggleColum: function(column) {
@@ -2349,8 +2352,25 @@ var manager = {
         });
     },
     setSpeedLimit: function(type, speed) {
-        var action = type === 'dl' ? 'dl' : 'ul';
-        mono.sendMessage({action: 'api', data: {action: 'setsetting', s: 'max_'+action+'_rate', v: speed}});
+        var request = type === 'dl' ? 'down' : 'up';
+        var data = {
+            method: "session-set",
+            arguments: {}
+        };
+        if (speed <= 0) {
+            data.arguments['speed-limit-'+request+'-enabled'] = false;
+        } else {
+            data.arguments['speed-limit-'+request+'-enabled'] = true;
+            data.arguments['speed-limit-'+request+''] = speed;
+        }
+        var oldSpeed = manager.varCache.speedLimit[type + 'Speed'];
+        mono.sendMessage({action: 'sessionSet', data: data}, function(data) {
+            if (data.result === 'success') {
+                oldSpeed = speed;
+            }
+            manager.varCache.speedLimit[type + 'Speed'] = oldSpeed;
+            manager.setSpeedDom(type, oldSpeed);
+        });
         manager.varCache.speedLimit[type+'Speed'] = speed;
         manager.setSpeedDom(type, speed);
     },
@@ -2585,7 +2605,9 @@ var manager = {
                             }
                         }
                     }
+                    /* Transmission
                     manager.updateLabesCtx(trigger, hash);
+                    */
                 },
                 hide: function() {
                     var hash = this[0].id;
@@ -2601,14 +2623,14 @@ var manager = {
                         var hash = this[0].id;
                         manager.api({list: 1, action: 'start', hash: hash});
                     }
-                },
+                }/* Transmission,
                 forcestart: {
                     name: manager.language.ML_FORCE_START,
                     callback: function () {
                         var hash = this[0].id;
                         manager.api({list: 1, action: 'forcestart', hash: hash});
                     }
-                },
+                }*/,
                 pause: {
                     name: manager.language.OV_FL_PAUSED,
                     callback: function () {
@@ -2675,14 +2697,14 @@ var manager = {
                                 }
                                 manager.api(params);
                             }
-                        },
+                        }/* Transmission,
                         remove_files: {
                             name: manager.language.ML_DELETE_DATA,
                             callback: function () {
                                 var hash = this[0].id;
                                 manager.api({list: 1, action: 'removedata', hash: hash});
                             }
-                        },
+                        }*/,
                         remove_torrent_files: {
                             name: manager.language.ML_DELETE_DATATORRENT,
                             callback: function () {
@@ -2703,13 +2725,13 @@ var manager = {
                     callback: function () {
                         manager.flListShow(this[0].id);
                     }
-                },
+                }/* Transmission,
                 labels: {
                     name: manager.language.OV_COL_LABEL,
                     className: "labels",
                     label: '',
                     items: {}
-                }
+                }*/
             }
         });
 
@@ -2796,7 +2818,7 @@ var manager = {
                         var fileIndexList = manager.varCache.flListLayer.ctxSelectArray.slice(0);
                         manager.setPriority(hash, fileIndexList, 0);
                     }
-                },
+                }/*,
                 s1: '-',
                 download: {
                     name: manager.language.DLG_RSSDOWNLOADER_24,
@@ -2820,7 +2842,7 @@ var manager = {
                         }
                         manager.flUnCheckAll(1);
                     }
-                }
+                }*/
             }
         });
 
@@ -3129,9 +3151,6 @@ var manager = {
             }
         }
     },
-    tr2utSettings: function(data) {
-
-    },
     run: function() {
         console.time('manager');
         console.time('remote data');
@@ -3281,7 +3300,7 @@ var manager = {
                     manager.timer.start();
                 });
 
-                manager.readSettings({settings: data.getRemoteSettings});
+                manager.readSettings({arguments: data.getRemoteSettings});
                 mono.sendMessage({action: 'api', data: {method: 'session-get'}}, function(data) {
                     manager.readSettings(data);
                 });
@@ -3409,6 +3428,32 @@ var manager = {
                                 ]}}
                             ]
                         ]);
+                        return;
+                    }
+                    if (el.classList.contains('alt_speed')) {
+                        e.preventDefault();
+                        var trigger = el.classList.contains('active');
+                        if (trigger) {
+                            el.classList.remove('active');
+                        } else {
+                            el.classList.add('active');
+                        }
+                        mono.sendMessage({action: 'sessionSet', data: {
+                            method: "session-set",
+                            arguments: {
+                                'alt-speed-enabled': !trigger
+                            }
+                        }}, function(data) {
+                            if (data.result !== 'success') {
+                                trigger = !trigger;
+                            }
+                            manager.varCache.settings['alt-speed-enabled'] = trigger;
+                            if (trigger) {
+                                el.classList.remove('active');
+                            } else {
+                                el.classList.add('active');
+                            }
+                        });
                         return;
                     }
                 });

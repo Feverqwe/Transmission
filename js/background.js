@@ -72,8 +72,9 @@ var engine = {
          {column: 'upped',       display: 0, order: 1, width: 60,  lang: 'OV_COL_UPPED'},
          {column: 'downloaded',  display: 0, order: 1, width: 60,  lang: 'OV_COL_DOWNLOADED'},
          {column: 'shared',      display: 0, order: 1, width: 60,  lang: 'OV_COL_SHARED'},
+         /* Transmission
          {column: 'avail',       display: 0, order: 1, width: 60,  lang: 'OV_COL_AVAIL'},
-         {column: 'label',       display: 0, order: 1, width: 100, lang: 'OV_COL_LABEL'},
+         {column: 'label',       display: 0, order: 1, width: 100, lang: 'OV_COL_LABEL'},*/
          {column: 'added',       display: 0, order: 1, width: 120, lang: 'OV_COL_DATE_ADDED'},
          {column: 'completed',   display: 0, order: 1, width: 120, lang: 'OV_COL_DATE_COMPLETED'},
          {column: 'actions',     display: 1, order: 0, width: 57,  lang: 'Actions'}
@@ -100,7 +101,7 @@ var engine = {
         token: null,
         torrents: [],
         labels: [],
-        settings: [],
+        settings: {},
         lastPublicStatus: '-_-',
         trafficList: [{name:'download', values: []}, {name:'upload', values: []}],
         startTime: parseInt(Date.now() / 1000),
@@ -305,14 +306,13 @@ var engine = {
         return [uCode, Status];
     },
     tr2utTrList: function(response, request) {
-        var type = request.arguments.ids === 'recently-active' ? 'torrentp' : 'torrents';
-        var data = {
-            ut: {}
-        };
-        var args = response.arguments;
-        for (var key in response) {
-            data[key] = response[key];
+        var data = response;
+        data.ut = {};
+        if (!request.arguments) {
+            return data;
         }
+        var type = request.arguments.ids === 'recently-active' ? 'torrentp' : 'torrents';
+        var args = response.arguments;
         if (args.torrents !== undefined) {
             var firstField = args.torrents[0];
             if (firstField && firstField.files !== undefined) {
@@ -477,9 +477,9 @@ var engine = {
                     return onError && onError();
                 }
                 engine.publicStatus('');
-                data = engine.tr2utTrList(data, origData);
+                engine.tr2utTrList(data, origData);
                 onLoad && onLoad(data);
-                engine.readResponse(data.ut);
+                engine.readResponse(data, origData);
             },
             error: function(xhr) {
                 if (xhr.status === 409) {
@@ -497,7 +497,8 @@ var engine = {
             }
         });
     },
-    readResponse: function(data) {
+    readResponse: function(response, request) {
+        var data = response.ut;
         if (data.torrentm !== undefined) {
             // Removed torrents
             var list = engine.varCache.torrents;
@@ -539,10 +540,9 @@ var engine = {
             // engine.varCache.newFileListener && engine.varCache.newFileListener(newItem);
         }
 
-        /*if (data.settings !== undefined) {
-            // Settings
-            engine.varCache.settings = data.settings;
-        }*/
+        if (request.method === 'session-get') {
+            engine.varCache.settings = response.arguments;
+        }
 
         engine.settings.displayActiveTorrentCountIcon && engine.displayActiveItemsCountIcon(engine.varCache.torrents);
     },
@@ -1455,6 +1455,16 @@ var engine = {
                 return hook(message.data, response);
             }
             engine.sendAction(message.data, response);
+        },
+        sessionSet: function(message, response) {
+            engine.sendAction(message.data, function(data) {
+                if (data.result === 'success') {
+                    for (var key in message.data.arguments) {
+                        engine.varCache.settings[key] = message.data.arguments[key];
+                    }
+                }
+                response(data);
+            });
         },
         setTrColumnArray: function(message, response) {
             engine.torrentListColumnList = message.data;

@@ -317,7 +317,7 @@ table.status-panel td {
     padding-top: 2px;
 }
 table.status-panel td.status {
-    width: 50%;
+    width: 35%;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
