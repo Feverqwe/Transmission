@@ -54,7 +54,9 @@ var engine = {
         treeViewContextMenu: 0,
         showDefaultFolderContextMenuItem: 0,
 
-        showFreeSpace: 1
+        showFreeSpace: 1,
+
+        guiPath: ''
     },
     torrentListColumnList: {},
     defaultTorrentListColumnList: [

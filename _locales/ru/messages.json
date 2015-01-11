@@ -333,7 +333,7 @@
         "message": "Файл больше 10 мб"
     },
     "addInTorrentClient": {
-        "message": "Добавить в uTorrent"
+        "message": "Добавить в Transmission"
     },
     "enterNewDirPath": {
         "message": "Введите путь к новой директории"
@@ -348,7 +348,7 @@
         "message": "Открыть во вкладке"
     },
     "optClient": {
-        "message": "uTorrent"
+        "message": "Transmission"
     },
     "optMain": {
         "message": "Общие"
@@ -476,5 +476,11 @@
     },
     "moveNewPath": {
         "message": "Введите новый путь"
+    },
+    "fullPath": {
+        "message": "Полный путь"
+    },
+    "guiPath": {
+        "message": "Путь к веб интерфейсу"
     }
 }

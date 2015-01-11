@@ -10,11 +10,11 @@
     <body>
         <div class="container">
             <div class="search_panel">
-                <h1>uTorrent easy client</h1>
+                <h1>Transmission easy client</h1>
             </div>
             <div class="content">
                 <div class="left menu">
-                    <a href="#client" data-page="client" data-lang="optClient">uTorrent</a>
+                    <a href="#client" data-page="client" data-lang="optClient">Transmission</a>
                     <a href="#main" data-page="main" data-lang="optMain">Общие</a>
                     <a href="#notify" data-page="notify" data-lang="optNotify">Уведомления</a>
                     <a href="#ctx" data-page="ctx" data-lang="optCtx">Контекстное меню</a>
@@ -23,12 +23,13 @@
                 </div>
                 <div class="right">
                     <div class="page client">
-                        <h2 data-lang="optClient">uTorrent</h2>
+                        <h2 data-lang="optClient">Transmission</h2>
                         <label><span data-lang="DLG_SETTINGS_4_CONN_16">Логин</span><input type="text" data-option="login"/></label>
                         <label><span data-lang="DLG_SETTINGS_4_CONN_18">Пароль</span><input type="password" data-option="password"/></label>
                         <label><span data-lang="PRS_COL_IP">IP-адрес</span><input type="text" data-option="ip"/></label>
                         <label><span data-lang="PRS_COL_PORT">Порт</span><input type="number" data-option="port"/></label>
                         <h3 data-lang="ST_CAPT_ADVANCED">Дополнительно</h3>
+                        <label><span data-lang="guiPath">Путь к веб интерфейсу</span><input type="text" data-option="guiPath"/></label>
                         <label><span data-lang="useSSL">Использовать SSL</span><input type="checkbox" data-option="useSSL"/></label>
                         <label><span data-lang="path">Путь</span><input type="text" data-option="path"/></label>
                         <div id="checkContainer">
@@ -46,11 +47,6 @@
                         <label><span data-lang="showSpeedGraph">Отображать график скорости</span><input type="checkbox" data-option="showSpeedGraph"/></label>
                         <label><span data-lang="popupHeight">Высота popup окна</span><input type="number" data-option="popupHeight" min="0"/> <span data-lang="px">пикселей</span></label>
                         <label><span data-lang="popupUpdateInterval">Интервал обновления списка раздач</span><input type="number" data-option="popupUpdateInterval" min="100"/> <span data-lang="ms">миллисекунда</span></label>
-                        <div class="cirilicFixs">
-                            <h3 data-lang="fixCirilicIf">Исправить кириллицу если...</h3>
-                            <label><span data-lang="fixCirilicTitle">Неправильно отображаются названия раздач</span><input type="checkbox" data-option="fixCirilicTitle"/></label>
-                            <label><span data-lang="fixCirilicTorrentPath">Неправильно присваивается директория к добавленной раздаче</span><input type="checkbox" data-option="fixCirilicTorrentPath"/></label>
-                        </div>
                     </div>
                     <div class="page notify">
                         <h2 data-lang="optNotify">Уведомления</h2>
@@ -66,7 +62,7 @@
                         <div>
                             <label><span data-lang="treeViewContextMenu">Древовидное контекстноме меню</span><input type="checkbox" data-option="treeViewContextMenu"/></label>
                             <label><span data-lang="showDefaultFolderContextMenuItem">Отображать директорию по умолчанию</span><input type="checkbox" data-option="showDefaultFolderContextMenuItem"/></label>
-                            <div class="optionItem"><span data-lang="path">Подкаталог</span> <input type="text" id="subPath"/> <button id="addSubPath" data-lang="add">Добавить</button></div>
+                            <div class="optionItem"><span data-lang="fullPath">Подкаталог</span> <input type="text" id="subPath"/> <button id="addSubPath" data-lang="add">Добавить</button></div>
                             <div class="optionItem"><select id="folderList" multiple></select></div>
                             <div class="optionItem">
                                 <button id="folderDeleteSelected" data-lang="deleteSelected">Удалить выбранное</button>

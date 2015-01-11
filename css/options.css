@@ -140,7 +140,7 @@ div.optionItem {
     margin: 5px;
 }
 .client label > span:first-child {
-    min-width: 150px;
+    min-width: 160px;
     display: inline-block;
 }
 .main label > span:first-child {

@@ -110,7 +110,8 @@ var options = function() {
             var defaultValue = options.defaultSettings[key];
             var el = document.querySelector('input[data-option="' + key + '"]');
             if (el === null) {
-                return console.log('El not found!', key);
+                console.log('El not found!', key);
+                continue;
             }
             if (['text', 'number', 'password'].indexOf(el.type) !== -1) {
                 if (options.settings[key] !== defaultValue) {
@@ -282,23 +283,6 @@ var options = function() {
         }
     };
 
-    var bytesToText = function(bytes, nan, ps) {
-        //переводит байты в строчки
-        var sizes = (ps === undefined) ? options.language.sizeList : options.language.sizePsList;
-        sizes = JSON.parse(sizes);
-        if (nan === undefined) {
-            nan = 'n/a';
-        }
-        if (bytes === 0) {
-            return nan;
-        }
-        var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-        if (i === 0) {
-            return (bytes / Math.pow(1024, i)) + ' ' + sizes[i];
-        }
-        return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
-    };
-
     var folderLoadList = function(folderList) {
         for (var i = 0, item; item = folderList[i]; i++) {
             domCache.folderList.appendChild(mono.create('option', {
@@ -409,10 +393,6 @@ var options = function() {
                             });
                         });
                     });
-
-                    if (options.language.lang !== "ru") {
-                        document.querySelector('.cirilicFixs').style.display = 'none';
-                    }
 
                     writeLanguage();
 
