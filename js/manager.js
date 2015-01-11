@@ -2241,7 +2241,7 @@ var manager = {
             {action: 'getFileList', hash: manager.varCache.flListLayer.hash},
             {action: 'setFlColumnArray', data: manager.varCache.flColumnArray}
         ], function(data) {
-            manager.writeFlList(data.api);
+            manager.writeFlList(data.getFileList);
             manager.timer.start();
         });
     },

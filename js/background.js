@@ -359,7 +359,7 @@ var engine = {
                 var utStatus = [];
                 if (field.error > 0) {
                     utStatus[0] = 144;
-                    utStatus[1] = field.errorString || "Unknown error";
+                    utStatus[1] = engine.language.OV_FL_ERROR + ': ' + (field.errorString || "Unknown error");
                 } else {
                     utStatus = engine.tr2utStatus(field.status);
                 }
@@ -478,7 +478,10 @@ var engine = {
                     }
                 }
                 engine.publicStatus('Can\'t send action! '+xhr.statusText+' (Code: '+xhr.status+')');
-                onError && onError();
+                onError && onError({
+                    status: xhr.status,
+                    statusText: xhr.statusText
+                });
             }
         });
     },
@@ -1397,7 +1400,10 @@ var engine = {
         checkSettings: function(message, response) {
             engine.loadSettings(function() {
                 engine.getLanguage(function () {
-                    engine.sendAction(engine.api.getTorrentListRequest, function() {
+                    engine.sendAction(engine.api.getTorrentListRequest, function(data) {
+                        if (data.result !== 'success') {
+                            return response({error: data.result});
+                        }
                         response({});
                     }, function(statusObj) {
                         response({error: statusObj});
