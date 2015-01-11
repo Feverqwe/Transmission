@@ -314,7 +314,7 @@
         "message": "Le fichier est trop gros"
     },
     "addInTorrentClient": {
-        "message": "Ajouter à uTorrent"
+        "message": "Ajouter à Transmission"
     },
     "enterNewDirPath": {
         "message": "Entrez le chemin d'accès vers le nouveau répertoire"
@@ -329,7 +329,7 @@
         "message": "Ouvrez dans l'onglet"
     },
     "optClient": {
-        "message": "uTorrent"
+        "message": "Transmission"
     },
     "optMain": {
         "message": "Principale"
@@ -387,7 +387,7 @@
         "message": "Afficher une notification lorsque un téléchargement est terminé"
     },
     "displayActiveTorrentCountIcon": {
-        "message": "Afficher le nombre de torrents en téléchargement dans l'icone uTorrent"
+        "message": "Afficher le nombre de torrents en téléchargement dans l'icone Transmission"
     },
     "backgroundUpdateInterval": {
         "message": "Intervalle fond actualiser la liste des torrents"

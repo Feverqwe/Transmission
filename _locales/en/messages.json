@@ -318,7 +318,7 @@
         "message": "File is too large"
     },
     "addInTorrentClient": {
-        "message": "Add in uTorrent"
+        "message": "Add in Transmission"
     },
     "enterNewDirPath": {
         "message": "Enter the path to the new directory"
@@ -333,7 +333,7 @@
         "message": "Open in tab"
     },
     "optClient": {
-        "message": "uTorrent"
+        "message": "Transmission"
     },
     "optMain": {
         "message": "Main"
