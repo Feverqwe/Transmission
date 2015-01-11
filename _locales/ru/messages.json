@@ -482,5 +482,11 @@
     },
     "guiPath": {
         "message": "Путь к веб интерфейсу"
+    },
+    "altSpeedEnable": {
+        "message": "Ограничение скорости"
+    },
+    "torrentFileIsExists": {
+        "message": "Торрент уже был добавлен ранее"
     }
 }

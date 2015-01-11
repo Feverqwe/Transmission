@@ -434,28 +434,6 @@ var engine = {
             }
         }
         data.ut.torrentc = Date.now();
-        /*var settings = [];
-        if (args.hasOwnProperty('speed-limit-down')) {
-
-        }
-        if (args.hasOwnProperty('speed-limit-down-enabled')) {
-
-        }
-        if (args.hasOwnProperty('speed-limit-up-enabled')) {
-
-        }
-        if (args.hasOwnProperty('alt-speed-enabled')) {
-
-        }
-        if (args.hasOwnProperty('download-dir')) {
-
-        }
-        if (args.hasOwnProperty('download-dir-free-space')) {
-
-        }
-        if (args.hasOwnProperty('size-bytes')) {
-
-        }*/
         return data;
     },
     sendAction: function(origData, onLoad, onError, force) {
@@ -547,7 +525,6 @@ var engine = {
                     list.push(item_p);
                 }
             }
-            engine.varCache.newFileListener && engine.varCache.newFileListener(newItem);
         }
 
         if (request.method === 'session-get') {
@@ -843,23 +820,6 @@ var engine = {
         };
         xhr.send();
     },
-    setOnFileAddListener: function() {
-        engine.varCache.newFileListener = function(newFile) {
-            delete engine.varCache.newFileListener;
-            if (newFile.length === 0) {
-                engine.showNotification(engine.icons.error, engine.language.torrentFileExists, '');
-                return;
-            }
-            if (newFile.length !== 1) {
-                return;
-            }
-            var item = newFile[0];
-            if (engine.settings.selectDownloadCategoryOnAddItemFromContextMenu) {
-                mono.storage.set({selectedLabel: {label: 'DL', custom: 1}});
-            }
-            engine.showNotification(engine.icons.add, item[2], engine.language.torrentAdded);
-        };
-    },
     sendFile: function(url, folder, label, referer) {
         var isUrl;
         if (isUrl = typeof url === "string") {
@@ -885,7 +845,7 @@ var engine = {
                 args.arguments.metainfo = url;
             }
             if (folder) {
-                args.arguments.download_dir = folder.path;
+                args.arguments['download-dir'] = folder.path;
             }
             var onRequestReady = function() {
                 engine.sendAction(args, function(data) {
@@ -893,7 +853,18 @@ var engine = {
                         engine.showNotification(engine.icons.error, engine.language.OV_FL_ERROR, data.result);
                         return;
                     }
-                    engine.setOnFileAddListener();
+
+                    if (data.arguments['torrent-added']) {
+                        var name = data.arguments['torrent-added'].name;
+                        if (engine.settings.selectDownloadCategoryOnAddItemFromContextMenu) {
+                            mono.storage.set({selectedLabel: {label: 'DL', custom: 1}});
+                        }
+                        engine.showNotification(engine.icons.add, name, engine.language.torrentAdded);
+                    } else
+                    if (data.arguments['torrent-duplicate']) {
+                        var name = data.arguments['torrent-duplicate'].name;
+                        engine.showNotification(engine.icons.error, name, engine.language.torrentFileIsExists);
+                    }
 
                     engine.api.getTorrentListRequest.arguments.ids = 'recently-active';
                     engine.sendAction(engine.api.getTorrentListRequest);

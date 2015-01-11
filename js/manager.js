@@ -108,7 +108,7 @@ var manager = {
         menu: document.querySelector('ul.menu'),
         dlSpeed: document.querySelector('.status-panel td.speed.download'),
         upSpeed: document.querySelector('.status-panel td.speed.upload'),
-        status: document.querySelector('.status-panel td.status'),
+        status: document.querySelector('.status-panel td.status div'),
         statusPanel: document.querySelector('.status-panel'),
         labelBox: document.querySelector('ul.menu li.select select'),
         trLayer: document.querySelector('.torrent-list-layer'),
@@ -465,7 +465,7 @@ var manager = {
     },
     getLabelOptionNode: function(item, isCustom) {
         var hasImage;
-        if (isCustom && item !== 'NOLABEL') {
+        if (isCustom) {
             hasImage = true;
         }
         return mono.create('option', {
@@ -513,10 +513,7 @@ var manager = {
         },
         INACTIVE: function(item) {
             return item.api[9] === 0 && item.api[8] === 0;
-        }/*,
-        NOLABEL: function(item) {
-            return item.api[11].length === 0;
-        }*/
+        }
     },
     trItemIsInFilter: function(item) {
         //проверяет запись на фильтр
@@ -570,6 +567,7 @@ var manager = {
     },
     setStatus: function(statusText) {
         manager.domCache.status.textContent = statusText;
+        manager.domCache.status.title = statusText;
     },
     apiGetDone: function(api, noRound) {
         var value = api[4] / 10;
@@ -1039,12 +1037,7 @@ var manager = {
                             href: '#start',
                             title: manager.language['ML_START'],
                             class: 'start'
-                        })/* Transmission,
-                        mono.create('a', {
-                            href: '#pause',
-                            title: manager.language['ML_PAUSE'],
-                            class: 'pause'
-                        })*/,
+                        }),
                         mono.create('a', {
                             href: '#stop',
                             title: manager.language['ML_STOP'],
@@ -2523,9 +2516,6 @@ var manager = {
                             }
                         }
                     }
-                    /* Transmission
-                    manager.updateLabesCtx(trigger, hash);
-                    */
                 },
                 hide: function() {
                     var hash = this[0].id;

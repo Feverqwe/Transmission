@@ -317,9 +317,13 @@ table.status-panel td {
     padding-top: 2px;
 }
 table.status-panel td.status {
-    width: 35%;
+    width: 34%;
+}
+table.status-panel td.status div {
     text-overflow: ellipsis;
     white-space: nowrap;
+    overflow: hidden;
+    max-width: 250px;
 }
 table.status-panel td.space {
     padding-left: 18px;
