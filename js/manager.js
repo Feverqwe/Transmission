@@ -1858,6 +1858,19 @@ var manager = {
             return;
         }
 
+        if (manager.varCache.flListLayer.pathChanged === undefined) {
+            var firstFile = fileList[0];
+            manager.varCache.flListLayer.pathChanged = null;
+            if (firstFile[5]) {
+                manager.varCache.flListLayer.pathChanged = firstFile[5];
+                var folderPath = flListLayer.origFolderPath + '/' + firstFile[5];
+                mono.create(flListLayer.folderEl, {
+                    title: folderPath,
+                    value: folderPath
+                });
+            }
+        }
+
         for (var index = 0, api; api = fileList[index]; index++) {
             var item = manager.varCache.flListItems[index];
             if (item === undefined) {
@@ -1908,6 +1921,8 @@ var manager = {
 
         var folderEl = manager.domCache.flBottom.querySelector('li.path > input');
         var folder = trItem.api[26];
+        flListLayer.origFolderPath = folder;
+        flListLayer.folderEl = folderEl;
         mono.create(folderEl, {
             title: folder,
             value: folder
@@ -2983,7 +2998,7 @@ var manager = {
     onLoadQuickNotification: function() {
         showNotification.selectFolderTemplate = function(noDefailtFolder) {
             return [
-                {label: {text: manager.language.ST_CAPT_FOLDER}},
+                {label: {text: manager.language.path}},
                 {select: {append: (function(){
                     var folderList = [
                         $('<option>', {text: noDefailtFolder ? '' : manager.language.defaultPath, value: -1})
