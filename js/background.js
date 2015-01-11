@@ -53,7 +53,9 @@ var engine = {
 
         ctxMenuType: 1,
         treeViewContextMenu: 0,
-        showDefaultFolderContextMenuItem: 0
+        showDefaultFolderContextMenuItem: 0,
+
+        showFreeSpace: 1
     },
     torrentListColumnList: {},
     defaultTorrentListColumnList: [
@@ -364,6 +366,7 @@ var engine = {
                 field.statusCode = utStatus[0];
                 field.statusText = utStatus[1];
                 // <status
+                field.percentDone = field.percentDone || 0;
                 field.progress = parseInt((field.recheckProgress || field.percentDone) * 1000);
                 field.shared = field.downloadedEver > 0 ? Math.round(field.uploadedEver / field.downloadedEver * 1000) : 0;
                 if (field.eta < 0) {
@@ -386,6 +389,9 @@ var engine = {
                 field.seeds = seeds;
                 // <seeds/peers in poe
 
+                field.queuePosition = field.queuePosition || 0;
+                field.downloadDir = field.downloadDir || 0;
+
                 var arrayItem = [];
                 for (var n = 0, column; column = engine.api.trUtColumnList[n]; n++) {
                     if (field[column] !== undefined) {
@@ -402,7 +408,7 @@ var engine = {
                 data.ut[type].push(arrayItem);
             }
         }
-        if (type === 'torrents') {
+        if (type === 'torrents' && data.ut.torrents !== undefined) {
             var torrentm = [];
             for (var i = 0, item_s; item_s = engine.varCache.torrents[i]; i++) {
                 var found = false;
@@ -477,9 +483,6 @@ var engine = {
                 } catch (err) {
                     return engine.publicStatus('Data parse error!');
                 }
-                if (data.result !== 'success') {
-                    return onError && onError();
-                }
                 engine.publicStatus('');
                 engine.tr2utTrList(data, origData);
                 onLoad && onLoad(data);
@@ -516,11 +519,15 @@ var engine = {
             }
         }
 
-        var newTorrentList = data.torrentp;
+        var newTorrentList = data.torrents || data.torrentp;
         if (newTorrentList !== undefined) {
             engine.utils(engine.varCache.torrents, newTorrentList);
         }
 
+        if (data.torrents !== undefined) {
+            //Full torrent list
+            engine.varCache.torrents = data.torrents;
+        } else
         if (data.torrentp !== undefined) {
             // Updated torrent list with CID
             var list = engine.varCache.torrents;
@@ -869,8 +876,7 @@ var engine = {
             }
         }
         delete engine.api.getTorrentListRequest.arguments.ids;
-        engine.sendAction(engine.api.getTorrentListRequest, function (data) {
-            var cid = data.torrentc;
+        engine.sendAction(engine.api.getTorrentListRequest, function () {
             var args = {
                 method: 'torrent-add',
                 arguments: {}
@@ -886,12 +892,12 @@ var engine = {
             var onRequestReady = function() {
                 engine.sendAction(args, function(data) {
                     if (data.result && data.result !== 'success') {
-                        engine.showNotification(engine.error_icon, engine.language.OV_FL_ERROR, data.error);
+                        engine.showNotification(engine.icons.error, engine.language.OV_FL_ERROR, data.result);
                         return;
                     }
                     engine.setOnFileAddListener();
 
-                    engine.api.getTorrentListRequest.arguments.ids = cid;
+                    engine.api.getTorrentListRequest.arguments.ids = 'recently-active';
                     engine.sendAction(engine.api.getTorrentListRequest);
                 });
             };

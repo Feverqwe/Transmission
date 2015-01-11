@@ -458,5 +458,11 @@
     },
     "refresh": {
         "message": "Обновить"
+    },
+    "freeSpace": {
+        "message": "Свободно"
+    },
+    "startNow": {
+        "message": "Запустить сейчас"
     }
 }

@@ -157,7 +157,9 @@ var manager = {
         hasGraph: false,
         movebleStyleList: {},
         cid: undefined,
-        settings: {}
+        settings: {},
+
+        freeSpace: undefined
     },
     options: {
         scrollWidth: 17,
@@ -168,7 +170,10 @@ var manager = {
     },
     api: function(data, onReady) {
         data.cid = manager.varCache.cid;
-        mono.sendMessage({action: 'api', data: data}, onReady || function() {
+        mono.sendMessage({action: 'api', data: data}, onReady || function(data) {
+            if (data.result !== 'success') {
+                return;
+            }
             mono.sendMessage({action: 'api', data: {action: 'getTorrentList'}}, function(data) {
                 manager.writeTrList(data);
             });
@@ -2300,6 +2305,37 @@ var manager = {
             }
         }
     },
+    getFreeSpace: function(downloadDir, cb) {
+        mono.sendMessage({action: 'api', data: {
+            method: "free-space",
+            arguments: {
+                path: downloadDir
+            }
+        }}, function(data) {
+            if (data.result !== 'success') {
+                return;
+            }
+            cb(data.arguments && data.arguments['size-bytes']);
+        });
+    },
+    onGetFreeSpace: function(freeSpace) {
+        if (!freeSpace || manager.varCache.freeSpace === freeSpace) return;
+        manager.varCache.freeSpace = freeSpace;
+        var size = manager.bytesToText(freeSpace);
+        var spaceItem = manager.domCache.statusPanel.querySelector('.space');
+        spaceItem.classList.add('disk');
+        spaceItem.title = manager.language.freeSpace + ': ' + size;
+        spaceItem.textContent = '';
+        spaceItem.appendChild(mono.create('div', {
+            text: size,
+            style: {
+                width: spaceItem.clientWidth + 'px'
+            },
+            on: ['click', function() {
+                manager.getFreeSpace(manager.varCache.settings.arguments['download-dir'], manager.onGetFreeSpace);
+            }]
+        }));
+    },
     readSettings: function(data) {
         var dlSpeed = !data.arguments['speed-limit-down-enabled'] ? 0 : parseInt(data.arguments['speed-limit-down']);
         if (manager.varCache.speedLimit.dlSpeed !== dlSpeed) {
@@ -2316,11 +2352,17 @@ var manager = {
         } else {
             manager.domCache.menu.querySelector('.alt_speed').classList.remove('active');
         }
+
+        if (manager.settings.showFreeSpace) {
+            if (data.arguments['download-dir-free-space'] !== undefined) {
+                manager.onGetFreeSpace(data.arguments['download-dir-free-space']);
+            } else
+            if (data.arguments['download-dir'] !== undefined) {
+                manager.getFreeSpace(data.arguments['download-dir'], manager.onGetFreeSpace);
+            }
+        }
+
         manager.varCache.settings = data;
-        // todo: alt-speed-enabled
-        // todo: download-dir
-        // todo: download-dir-free-space
-        // todo: size-bytes
         manager.updateSpeedCtxMenu();
     },
     trToggleColum: function(column) {
@@ -2438,7 +2480,10 @@ var manager = {
         var waitCount = 0;
         var doneCount = 0;
         var from = 0;
-        var onReady = function() {
+        var onReady = function(data) {
+            if (data.result !== 'success') {
+                return;
+            }
             doneCount++;
             if (doneCount !== waitCount) {
                 return;
@@ -2648,7 +2693,7 @@ var manager = {
                     }
                 },
                 forcestart: {
-                    name: manager.language.ML_FORCE_START,
+                    name: manager.language.startNow,
                     callback: function () {
                         var hash = this[0].id;
                         manager.api({
@@ -3346,6 +3391,9 @@ var manager = {
 
                 manager.readSettings({arguments: data.getRemoteSettings});
                 mono.sendMessage({action: 'api', data: {method: 'session-get'}}, function(data) {
+                    if (data.result !== 'success') {
+                        return;
+                    }
                     manager.readSettings(data);
                 });
 
