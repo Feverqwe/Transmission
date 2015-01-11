@@ -168,7 +168,11 @@ var manager = {
     },
     api: function(data, onReady) {
         data.cid = manager.varCache.cid;
-        mono.sendMessage({action: 'api', data: data}, onReady || manager.writeTrList);
+        mono.sendMessage({action: 'api', data: data}, onReady || function() {
+            mono.sendMessage({action: 'api', data: {action: 'getTorrentList'}}, function(data) {
+                manager.writeTrList(data);
+            });
+        });
     },
     moveColumn: function(type, from, to) {
         var columnList = manager.varCache[type + 'ColumnArray'];
@@ -1040,12 +1044,12 @@ var manager = {
                             href: '#start',
                             title: manager.language['ML_START'],
                             class: 'start'
-                        }),
+                        })/* Transmission,
                         mono.create('a', {
                             href: '#pause',
                             title: manager.language['ML_PAUSE'],
                             class: 'pause'
-                        }),
+                        })*/,
                         mono.create('a', {
                             href: '#stop',
                             title: manager.language['ML_STOP'],
@@ -1504,7 +1508,7 @@ var manager = {
             onReady && onReady();
             manager.writeTrList(data);
         };
-       manager.api({action: 'getTorrentList'}, function(data) {
+        manager.api({action: 'getTorrentList'}, function(data) {
             if (manager.varCache.flListLayer.param !== undefined) {
                 return mono.sendMessage({action: 'getFileList', hash: manager.varCache.flListLayer.hash}, function(flData) {
                     data.files = flData.files;
@@ -2077,12 +2081,12 @@ var manager = {
         var started = !!(stat & 1);
 
         var actionList = {
-            recheck: !checking && !started && !queued ? 1 : 0,
+            recheck: !checking ? 1 : 0,
             stop: checking || started || queued ? 1 : 0,
             unpause: (started || checking) && paused ? 1 : 0,
             pause: !paused && (checking || started || queued) ? 1 : 0,
             start: !queued || paused ? 1 : 0,
-            forcestart: (!started || queued || paused) && !checking ? 1 : 0
+            forcestart: (!started || paused) && !checking ? 1 : 0
         };
         if (actionList.pause === 1) {
             actionList.unpause = 0;
@@ -2635,16 +2639,26 @@ var manager = {
                     name: manager.language.ML_START,
                     callback: function () {
                         var hash = this[0].id;
-                        manager.api({list: 1, action: 'start', hash: hash});
+                        manager.api({
+                            method: "torrent-start",
+                            arguments: {
+                                ids: [parseInt(hash.substr(4))]
+                            }
+                        });
                     }
-                }/* Transmission,
+                },
                 forcestart: {
                     name: manager.language.ML_FORCE_START,
                     callback: function () {
                         var hash = this[0].id;
-                        manager.api({list: 1, action: 'forcestart', hash: hash});
+                        manager.api({
+                            method: "torrent-start-now",
+                            arguments: {
+                                ids: [parseInt(hash.substr(4))]
+                            }
+                        });
                     }
-                }*/,
+                }/* Transmission,
                 pause: {
                     name: manager.language.OV_FL_PAUSED,
                     callback: function () {
@@ -2658,12 +2672,17 @@ var manager = {
                         var hash = this[0].id;
                         manager.api({list: 1, action: 'unpause', hash: hash});
                     }
-                },
+                }*/,
                 stop: {
                     name: manager.language.ML_STOP,
                     callback: function () {
                         var hash = this[0].id;
-                        manager.api({list: 1, action: 'stop', hash: hash});
+                        manager.api({
+                            method: "torrent-stop",
+                            arguments: {
+                                ids: [parseInt(hash.substr(4))]
+                            }
+                        });
                     }
                 },
                 s1: '-',
@@ -2671,7 +2690,12 @@ var manager = {
                     name: manager.language.ML_FORCE_RECHECK,
                     callback: function () {
                         var hash = this[0].id;
-                        manager.api({list: 1, action: 'recheck', hash: hash});
+                        manager.api({
+                            method: "torrent-verify",
+                            arguments: {
+                                ids: [parseInt(hash.substr(4))]
+                            }
+                        });
                     }
                 },
                 remove: {
@@ -2685,7 +2709,12 @@ var manager = {
                                 {input: {type: "button", value: manager.language.DLG_BTN_YES, on: [
                                     ['click', function() {
                                         this.close();
-                                        manager.api({list: 1, action: 'remove', hash: hash});
+                                        manager.api({
+                                            method: "torrent-remove",
+                                            arguments: {
+                                                ids: [parseInt(hash.substr(4))]
+                                            }
+                                        });
                                     }]
                                 ]}},
                                 {input: {type: "button", value: manager.language.DLG_BTN_NO, focus: true, on: [
@@ -2704,12 +2733,12 @@ var manager = {
                             name: manager.language.ML_DELETE_TORRENT,
                             callback: function () {
                                 var hash = this[0].id;
-                                var params = {list: 1, action: 'removetorrent', hash: hash};
-                                 //для 2.xx проверяем версию по наличию статуса
-                                if (manager.varCache.trListItems[params.hash].api[21] === undefined) {
-                                    params.action = 'remove';
-                                }
-                                manager.api(params);
+                                manager.api({
+                                    method: "torrent-remove",
+                                    arguments: {
+                                        ids: [parseInt(hash.substr(4))]
+                                    }
+                                });
                             }
                         }/* Transmission,
                         remove_files: {
@@ -2723,12 +2752,13 @@ var manager = {
                             name: manager.language.ML_DELETE_DATATORRENT,
                             callback: function () {
                                 var hash = this[0].id;
-                                var params = {list: 1, action: 'removedatatorrent', hash: hash};
-                                //для 2.xx проверяем версию по наличию статуса
-                                if (manager.varCache.trListItems[params.hash].api[21] === undefined) {
-                                    params.action = 'removedata';
-                                }
-                                manager.api(params);
+                                manager.api({
+                                    method: "torrent-remove",
+                                    arguments: {
+                                        'delete-local-data': true,
+                                        ids: [parseInt(hash.substr(4))]
+                                    }
+                                });
                             }
                         }
                     }
@@ -2990,24 +3020,24 @@ var manager = {
                 mono.sendMessage({
                     action: 'onSendFile',
                     url: URL.createObjectURL(file),
-                    folder: folderRequest,
-                    label: dataForm.label
+                    folder: folderRequest/*,
+                    label: dataForm.label*/
                 });
             }
         };
-        var labelTemplate = showNotification.selectLabelTemplate();
+        /*var labelTemplate = showNotification.selectLabelTemplate();*/
         var folderTemplate = showNotification.selectFolderTemplate();
-        if (labelTemplate[1].select.append.length === 0 && folderTemplate[1].select.append.length === 0) {
+        if (folderTemplate[1].select.append.length === 0/* && labelTemplate[1].select.append.length === 0*/) {
             return onClickYes();
         }
-        if (labelTemplate[1].select.append.length === 0) {
+        /*if (labelTemplate[1].select.append.length === 0) {
             labelTemplate = undefined;
-        }
+        }*/
         if (folderTemplate[1].select.append.length === 0) {
             folderTemplate = undefined;
         }
         showNotification([
-            labelTemplate,
+            /*labelTemplate,*/
             folderTemplate,
             [
                 {input: {type: "button", value: manager.language.DLG_BTN_OK, focus: true, on: [
@@ -3330,18 +3360,23 @@ var manager = {
                         var hashList = [];
                         for (var hash in manager.varCache.trListItems) {
                             var item = manager.varCache.trListItems[hash];
-                            if (item.api[1] !== 233 || item.display !== 1) {
+                            if (item.api[1] !== 128 || item.display !== 1) {
                                 continue;
                             }
                             if (manager.varCache.currentFilter.custom === 0 && item.api[11] !== manager.varCache.currentFilter.label) {
                                 continue;
                             }
-                            hashList.push(hash);
+                            hashList.push(parseInt(hash.substr(4)));
                         }
                         if (hashList.length === 0) {
                             return;
                         }
-                        manager.api($.param({list: 1, action: 'unpause', hash: hashList}, true));
+                        manager.api({
+                            method: "torrent-start",
+                            arguments: {
+                                ids: hashList
+                            }
+                        });
                         return;
                     }
                     if (el.classList.contains('refresh')) {
@@ -3363,12 +3398,17 @@ var manager = {
                             if (manager.varCache.currentFilter.custom === 0 && item.api[11] !== manager.varCache.currentFilter.label) {
                                 continue;
                             }
-                            hashList.push(hash);
+                            hashList.push(parseInt(hash.substr(4)));
                         }
                         if (hashList.length === 0) {
                             return;
                         }
-                        manager.api($.param({list: 1, action: 'pause', hash: hashList}, true));
+                        manager.api({
+                            method: "torrent-stop",
+                            arguments: {
+                                ids: hashList
+                            }
+                        });
                         return;
                     }
                     if (el.classList.contains('add_file')) {
@@ -3415,7 +3455,7 @@ var manager = {
                                     }]
                                 ]}}
                             ],
-                            labelTemplate,
+                            /*labelTemplate,*/
                             folderTemplate,
                             [
                                 {input: {type: "button", value: manager.language.DLG_BTN_OK, name: 'okBtn', on: [
@@ -3430,8 +3470,8 @@ var manager = {
                                         mono.sendMessage({
                                             action: 'onSendFile',
                                             url: dataForm.link,
-                                            folder: folderRequest,
-                                            label: dataForm.label
+                                            folder: folderRequest/*,
+                                            label: dataForm.label*/
                                         });
                                     }]
                                 ]}},
@@ -3524,19 +3564,30 @@ var manager = {
                     if (el.classList.contains('start')) {
                         e.preventDefault();
                         var hash = el.parentNode.parentNode.parentNode.id;
-                        manager.api({list: 1, action: 'start', hash: hash});
+                        manager.api({
+                            method: "torrent-start",
+                            arguments: {
+                                ids: [parseInt(hash.substr(4))]
+                            }
+                        });
                         return;
                     }
+                    /* Transmission
                     if (el.classList.contains('pause')) {
                         e.preventDefault();
                         var hash = el.parentNode.parentNode.parentNode.id;
                         manager.api({list: 1, action: 'pause', hash: hash});
                         return;
-                    }
+                    }*/
                     if (el.classList.contains('stop')) {
                         e.preventDefault();
                         var hash = el.parentNode.parentNode.parentNode.id;
-                        manager.api({list: 1, action: 'stop', hash: hash});
+                        manager.api({
+                            method: "torrent-stop",
+                            arguments: {
+                                ids: [parseInt(hash.substr(4))]
+                            }
+                        });
                         return;
                     }
                 });

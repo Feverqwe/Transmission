@@ -374,8 +374,12 @@ var engine = {
                 var seeds = 0;
                 if (field.trackerStats !== undefined) {
                     for (var n = 0, item; item = field.trackerStats[n]; n++) {
-                        peers += item.leecherCount;
-                        seeds += item.seederCount;
+                        if (item.leecherCount > 0) {
+                            peers += item.leecherCount;
+                        }
+                        if (item.seederCount > 0) {
+                            seeds += item.seederCount;
+                        }
                     }
                 }
                 field.peers = peers;
@@ -536,8 +540,7 @@ var engine = {
                     list.push(item_p);
                 }
             }
-            // todo: fix me
-            // engine.varCache.newFileListener && engine.varCache.newFileListener(newItem);
+            engine.varCache.newFileListener && engine.varCache.newFileListener(newItem);
         }
 
         if (request.method === 'session-get') {
@@ -865,28 +868,43 @@ var engine = {
                 return;
             }
         }
-        engine.sendAction({list: 1}, function (data) {
+        delete engine.api.getTorrentListRequest.arguments.ids;
+        engine.sendAction(engine.api.getTorrentListRequest, function (data) {
             var cid = data.torrentc;
-            var args = {};
+            var args = {
+                method: 'torrent-add',
+                arguments: {}
+            };
             if (isUrl) {
-                args.action = 'add-url';
-                args.s = url;
+                args.arguments.filename = url;
             } else {
-                args.action = 'add-file';
-                args.torrent_file = url;
+                args.arguments.metainfo = url;
             }
             if (folder) {
-                args.download_dir = folder.download_dir;
-                args.path = folder.path;
+                args.arguments.download_dir = folder.path;
             }
-            engine.sendAction(args, function (data) {
-                if (data.error !== undefined) {
-                    engine.showNotification(engine.icons.error, engine.language.OV_FL_ERROR, data.error);
-                    return;
-                }
-                engine.setOnFileAddListener();
-                engine.sendAction({list: 1, cid: cid});
-            });
+            var onRequestReady = function() {
+                engine.sendAction(args, function(data) {
+                    if (data.result && data.result !== 'success') {
+                        engine.showNotification(engine.error_icon, engine.language.OV_FL_ERROR, data.error);
+                        return;
+                    }
+                    engine.setOnFileAddListener();
+
+                    engine.api.getTorrentListRequest.arguments.ids = cid;
+                    engine.sendAction(engine.api.getTorrentListRequest);
+                });
+            };
+            if (args.arguments.filename !== undefined) {
+                return onRequestReady();
+            }
+            var reader = new window.FileReader();
+            reader.readAsDataURL(args.arguments.metainfo);
+            reader.onloadend = function() {
+                var fileDataPos = reader.result.indexOf(',');
+                args.arguments.metainfo = reader.result.substr(fileDataPos + 1);
+                onRequestReady();
+            }
         });
     },
     onCtxMenuCall: function (e) {
