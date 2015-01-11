@@ -439,5 +439,38 @@
     },
     "refresh": {
         "message": "Rafraîchir"
+    },
+    "freeSpace": {
+        "message": "Disponible"
+    },
+    "startNow": {
+        "message": "Démarrer maintenant"
+    },
+    "rename": {
+        "message": "Renommer"
+    },
+    "renameText": {
+        "message": "Tapez un nouveau nom"
+    },
+    "move": {
+        "message": "Déplacer"
+    },
+    "moveNewPath": {
+        "message": "Entrez le nouveau chemin d'accès"
+    },
+    "fullPath": {
+        "message": "Répertoire (chemin complet)"
+    },
+    "guiPath": {
+        "message": "WebUI chemin"
+    },
+    "altSpeedEnable": {
+        "message": "Temporaire Des Limites De Vitesse"
+    },
+    "torrentFileIsExists": {
+        "message": "Torrent a été ajouté avant"
+    },
+    "showFreeSpace": {
+        "message": "Pour afficher le nombre d'espace disque disponible"
     }
 }

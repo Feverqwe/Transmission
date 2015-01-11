@@ -443,5 +443,38 @@
     },
     "refresh": {
         "message": "Refresh"
+    },
+    "freeSpace": {
+        "message": "Free space"
+    },
+    "startNow": {
+        "message": "Start now"
+    },
+    "rename": {
+        "message": "Rename"
+    },
+    "renameText": {
+        "message": "Enter file name"
+    },
+    "move": {
+        "message": "Move"
+    },
+    "moveNewPath": {
+        "message": "Enter new path"
+    },
+    "fullPath": {
+        "message": "Directory (full path)"
+    },
+    "guiPath": {
+        "message": "WebUI path"
+    },
+    "altSpeedEnable": {
+        "message": "Temporary Speed Limits"
+    },
+    "torrentFileIsExists": {
+        "message": "Torrent was added before"
+    },
+    "showFreeSpace": {
+        "message": "Display the number of available disk space"
     }
 }
