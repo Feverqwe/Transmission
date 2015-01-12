@@ -866,9 +866,6 @@ var engine = {
                     var name = data.arguments['torrent-duplicate'].name;
                     engine.showNotification(engine.icons.error, name, engine.language.torrentFileIsExists);
                 }
-
-                engine.api.getTorrentListRequest.arguments.ids = 'recently-active';
-                engine.sendAction(engine.api.getTorrentListRequest);
             });
         };
         if (args.arguments.filename !== undefined) {
