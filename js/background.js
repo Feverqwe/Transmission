@@ -467,15 +467,15 @@ var engine = {
                 engine.readResponse(data, origData);
             },
             error: function(xhr) {
+                if (force === undefined) {
+                    force = 0;
+                }
+                force++;
                 if (xhr.status === 409) {
-                    if (force === undefined) {
-                        force = 0;
-                    }
-                    force++;
                     engine.varCache.token = xhr.getResponseHeader("X-Transmission-Session-Id");
-                    if (force < 2) {
-                        return engine.sendAction.call(engine, origData, onLoad, onError, force);
-                    }
+                }
+                if (force < 2) {
+                    return engine.sendAction.call(engine, origData, onLoad, onError, force);
                 }
                 engine.publicStatus('Can\'t send action! '+xhr.statusText+' (Code: '+xhr.status+')');
                 onError && onError({
@@ -836,54 +836,51 @@ var engine = {
                 return;
             }
         }
-        delete engine.api.getTorrentListRequest.arguments.ids;
-        engine.sendAction(engine.api.getTorrentListRequest, function () {
-            var args = {
-                method: 'torrent-add',
-                arguments: {}
-            };
-            if (isUrl) {
-                args.arguments.filename = url;
-            } else {
-                args.arguments.metainfo = url;
-            }
-            if (folder) {
-                args.arguments['download-dir'] = folder.path;
-            }
-            var onRequestReady = function() {
-                engine.sendAction(args, function(data) {
-                    if (data.result && data.result !== 'success') {
-                        engine.showNotification(engine.icons.error, engine.language.OV_FL_ERROR, data.result);
-                        return;
-                    }
+        var args = {
+            method: 'torrent-add',
+            arguments: {}
+        };
+        if (isUrl) {
+            args.arguments.filename = url;
+        } else {
+            args.arguments.metainfo = url;
+        }
+        if (folder) {
+            args.arguments['download-dir'] = folder.path;
+        }
+        var onRequestReady = function() {
+            engine.sendAction(args, function(data) {
+                if (data.result && data.result !== 'success') {
+                    engine.showNotification(engine.icons.error, engine.language.OV_FL_ERROR, data.result);
+                    return;
+                }
 
-                    if (data.arguments['torrent-added']) {
-                        var name = data.arguments['torrent-added'].name;
-                        if (engine.settings.selectDownloadCategoryOnAddItemFromContextMenu) {
-                            mono.storage.set({selectedLabel: {label: 'DL', custom: 1}});
-                        }
-                        engine.showNotification(engine.icons.add, name, engine.language.torrentAdded);
-                    } else
-                    if (data.arguments['torrent-duplicate']) {
-                        var name = data.arguments['torrent-duplicate'].name;
-                        engine.showNotification(engine.icons.error, name, engine.language.torrentFileIsExists);
+                if (data.arguments['torrent-added']) {
+                    var name = data.arguments['torrent-added'].name;
+                    if (engine.settings.selectDownloadCategoryOnAddItemFromContextMenu) {
+                        mono.storage.set({selectedLabel: {label: 'DL', custom: 1}});
                     }
+                    engine.showNotification(engine.icons.add, name, engine.language.torrentAdded);
+                } else
+                if (data.arguments['torrent-duplicate']) {
+                    var name = data.arguments['torrent-duplicate'].name;
+                    engine.showNotification(engine.icons.error, name, engine.language.torrentFileIsExists);
+                }
 
-                    engine.api.getTorrentListRequest.arguments.ids = 'recently-active';
-                    engine.sendAction(engine.api.getTorrentListRequest);
-                });
-            };
-            if (args.arguments.filename !== undefined) {
-                return onRequestReady();
-            }
-            var reader = new window.FileReader();
-            reader.readAsDataURL(args.arguments.metainfo);
-            reader.onloadend = function() {
-                var fileDataPos = reader.result.indexOf(',');
-                args.arguments.metainfo = reader.result.substr(fileDataPos + 1);
-                onRequestReady();
-            }
-        });
+                engine.api.getTorrentListRequest.arguments.ids = 'recently-active';
+                engine.sendAction(engine.api.getTorrentListRequest);
+            });
+        };
+        if (args.arguments.filename !== undefined) {
+            return onRequestReady();
+        }
+        var reader = new window.FileReader();
+        reader.readAsDataURL(args.arguments.metainfo);
+        reader.onloadend = function() {
+            var fileDataPos = reader.result.indexOf(',');
+            args.arguments.metainfo = reader.result.substr(fileDataPos + 1);
+            onRequestReady();
+        }
     },
     onCtxMenuCall: function (e) {
         /**
@@ -1391,11 +1388,6 @@ var engine = {
         },
         getTraffic: function(message, response) {
             response({list: engine.varCache.trafficList, startTime: engine.varCache.startTime});
-        },
-        getDirList: function(message, response) {
-            engine.sendAction({action: 'list-dirs'}, response, function() {
-                response({});
-            });
         },
         checkSettings: function(message, response) {
             engine.loadSettings(function() {

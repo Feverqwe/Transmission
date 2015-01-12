@@ -444,6 +444,9 @@
     "refresh": {
         "message": "Refresh"
     },
+    "checkSettings": {
+        "message": "Сheck the settings"
+    },
     "freeSpace": {
         "message": "Free space"
     },

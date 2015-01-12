@@ -440,6 +440,9 @@
     "refresh": {
         "message": "Rafraîchir"
     },
+    "checkSettings": {
+        "message": "Les paramètres Сheck"
+    },
     "freeSpace": {
         "message": "Disponible"
     },
