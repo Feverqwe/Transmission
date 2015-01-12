@@ -468,12 +468,15 @@
         "message": "WebUI chemin"
     },
     "altSpeedEnable": {
-        "message": "Temporaire Des Limites De Vitesse"
+        "message": "Limites de vitesse temporaires"
     },
     "torrentFileIsExists": {
         "message": "Torrent a été ajouté avant"
     },
     "showFreeSpace": {
         "message": "Pour afficher le nombre d'espace disque disponible"
+    },
+    "reannounce": {
+        "message": "Demander plus d'pairs"
     }
 }

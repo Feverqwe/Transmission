@@ -479,5 +479,8 @@
     },
     "showFreeSpace": {
         "message": "Display the number of available disk space"
+    },
+    "reannounce": {
+        "message": "Ask more peers"
     }
 }
