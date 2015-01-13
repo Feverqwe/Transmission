@@ -2633,107 +2633,165 @@ var manager = {
                     }
                 },
                 's2': '-',
-                rename: {
-                    name: manager.language.rename,
-                    callback: function (key, trigger) {
-                        var hash = this[0].id;
-                        var currentName = manager.varCache.trListItems[hash].api[2];
-                        showNotification([
-                            [
-                                {label: {text: manager.language.renameText}},
-                                {input: {type: 'text', name: 'newName', value: currentName, focus: true, on: [
-                                    ['keydown', function(e) {
-                                        if (e.keyCode === 13) {
-                                            this.nodeCache.okBtn.trigger('click');
-                                        }
-                                    }]
-                                ]}}
-                            ],
-                            [
-                                {input: {type: "button", name: 'okBtn', value: manager.language.DLG_BTN_APPLY, on: [
-                                    ['click', function() {
-                                        var formData = this.getFormData();
-                                        var name = formData.newName;
-                                        this.close();
-                                        if (!name) return;
-                                        manager.api({
-                                            method: "torrent-rename-path",
-                                            arguments: {
-                                                ids: [parseInt(hash.substr(4))],
-                                                path: currentName,
-                                                name: name
-                                            }
-                                        });
-                                    }]
-                                ]}},
-                                {input: {type: "button", value: manager.language.DLG_BTN_CANCEL, on: [
-                                    ['click', function() {
-                                        this.close();
-                                    }]
-                                ]}}
-                            ]
-                        ]);
-                    }
-                },
-                move: {
-                    name: manager.language.move,
-                    callback: function (key, trigger) {
-                        var hash = this[0].id;
-                        var currentLocation = manager.varCache.trListItems[hash].api[26];
-                        var folderTemplate = showNotification.selectFolderTemplate(1);
-                        if (folderTemplate[1].select.append.length === 0) {
-                            folderTemplate = undefined;
-                        }
-                        showNotification([
-                            [
-                                {label: {text: manager.language.moveNewPath}},
-                                {input: {type: 'text', name: 'newLocation', value: currentLocation, focus: true, on: [
-                                    ['keydown', function(e) {
-                                        if (e.keyCode === 13) {
-                                            this.nodeCache.okBtn.trigger('click');
-                                        }
-                                    }]
-                                ]}}
-                            ],
-                            folderTemplate,
-                            [
-                                {input: {type: "button", name: 'okBtn', value: manager.language.DLG_BTN_APPLY, on: [
-                                    ['click', function() {
-                                        var formData = this.getFormData();
-                                        var location = formData.newLocation;
-                                        if (formData.folder > -1) {
-                                            location = manager.varCache.folderList[formData.folder][1];
-                                        }
-                                        this.close();
-                                        mono.sendMessage({action: 'api', data: {
-                                            method: "torrent-set-location",
-                                            arguments: {
-                                                ids: [parseInt(hash.substr(4))],
-                                                location: location,
-                                                move: true
-                                            }
-                                        }});
-                                    }]
-                                ]}},
-                                {input: {type: "button", value: manager.language.DLG_BTN_CANCEL, on: [
-                                    ['click', function() {
-                                        this.close();
-                                    }]
-                                ]}}
-                            ]
-                        ]);
-                    }
-                },
-                reannounce: {
-                    name: manager.language.reannounce,
-                    callback: function (key, trigger) {
-                        var hash = this[0].id;
-                        mono.sendMessage({action: 'api', data: {
-                            method: "torrent-reannounce",
-                            arguments: {
-                                ids: [parseInt(hash.substr(4))]
+                extra: {
+                    name: manager.language.extra,
+                    items: {
+                        rename: {
+                            name: manager.language.rename,
+                            callback: function (key, trigger) {
+                                var hash = this[0].id;
+                                var currentName = manager.varCache.trListItems[hash].api[2];
+                                showNotification([
+                                    [
+                                        {label: {text: manager.language.renameText}},
+                                        {input: {type: 'text', name: 'newName', value: currentName, focus: true, on: [
+                                            ['keydown', function(e) {
+                                                if (e.keyCode === 13) {
+                                                    this.nodeCache.okBtn.trigger('click');
+                                                }
+                                            }]
+                                        ]}}
+                                    ],
+                                    [
+                                        {input: {type: "button", name: 'okBtn', value: manager.language.DLG_BTN_APPLY, on: [
+                                            ['click', function() {
+                                                var formData = this.getFormData();
+                                                var name = formData.newName;
+                                                this.close();
+                                                if (!name) return;
+                                                manager.api({
+                                                    method: "torrent-rename-path",
+                                                    arguments: {
+                                                        ids: [parseInt(hash.substr(4))],
+                                                        path: currentName,
+                                                        name: name
+                                                    }
+                                                });
+                                            }]
+                                        ]}},
+                                        {input: {type: "button", value: manager.language.DLG_BTN_CANCEL, on: [
+                                            ['click', function() {
+                                                this.close();
+                                            }]
+                                        ]}}
+                                    ]
+                                ]);
                             }
-                        }});
+                        },
+                        move: {
+                            name: manager.language.move,
+                            callback: function (key, trigger) {
+                                var hash = this[0].id;
+                                var currentLocation = manager.varCache.trListItems[hash].api[26];
+                                var folderTemplate = showNotification.selectFolderTemplate(1);
+                                if (folderTemplate[1].select.append.length === 0) {
+                                    folderTemplate = undefined;
+                                }
+                                showNotification([
+                                    [
+                                        {label: {text: manager.language.moveNewPath}},
+                                        {input: {type: 'text', name: 'newLocation', value: currentLocation, focus: true, on: [
+                                            ['keydown', function(e) {
+                                                if (e.keyCode === 13) {
+                                                    this.nodeCache.okBtn.trigger('click');
+                                                }
+                                            }]
+                                        ]}}
+                                    ],
+                                    folderTemplate,
+                                    [
+                                        {input: {type: "button", name: 'okBtn', value: manager.language.DLG_BTN_APPLY, on: [
+                                            ['click', function() {
+                                                var formData = this.getFormData();
+                                                var location = formData.newLocation;
+                                                if (formData.folder > -1) {
+                                                    location = manager.varCache.folderList[formData.folder][1];
+                                                }
+                                                this.close();
+                                                mono.sendMessage({action: 'api', data: {
+                                                    method: "torrent-set-location",
+                                                    arguments: {
+                                                        ids: [parseInt(hash.substr(4))],
+                                                        location: location,
+                                                        move: true
+                                                    }
+                                                }});
+                                            }]
+                                        ]}},
+                                        {input: {type: "button", value: manager.language.DLG_BTN_CANCEL, on: [
+                                            ['click', function() {
+                                                this.close();
+                                            }]
+                                        ]}}
+                                    ]
+                                ]);
+                            }
+                        },
+                        reannounce: {
+                            name: manager.language.reannounce,
+                            callback: function (key, trigger) {
+                                var hash = this[0].id;
+                                mono.sendMessage({action: 'api', data: {
+                                    method: "torrent-reannounce",
+                                    arguments: {
+                                        ids: [parseInt(hash.substr(4))]
+                                    }
+                                }});
+                            }
+                        }
+                    }
+                },
+                queue: {
+                    name: manager.language.OV_COL_ORDER,
+                    items: {
+                        top: {
+                            name: manager.language.queueTop,
+                            callback: function (key, trigger) {
+                                var hash = this[0].id;
+                                manager.api({
+                                    method: "queue-move-top",
+                                    arguments: {
+                                        ids: [parseInt(hash.substr(4))]
+                                    }
+                                });
+                            }
+                        },
+                        up: {
+                            name: manager.language.queueUp,
+                            callback: function (key, trigger) {
+                                var hash = this[0].id;
+                                manager.api({
+                                    method: "queue-move-up",
+                                    arguments: {
+                                        ids: [parseInt(hash.substr(4))]
+                                    }
+                                });
+                            }
+                        },
+                        down: {
+                            name: manager.language.queueDown,
+                            callback: function (key, trigger) {
+                                var hash = this[0].id;
+                                manager.api({
+                                    method: "queue-move-down",
+                                    arguments: {
+                                        ids: [parseInt(hash.substr(4))]
+                                    }
+                                });
+                            }
+                        },
+                        bottom: {
+                            name: manager.language.queueBottom,
+                            callback: function (key, trigger) {
+                                var hash = this[0].id;
+                                manager.api({
+                                    method: "queue-move-bottom",
+                                    arguments: {
+                                        ids: [parseInt(hash.substr(4))]
+                                    }
+                                });
+                            }
+                        }
                     }
                 },
                 's3': '-',

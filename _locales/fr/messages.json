@@ -478,5 +478,20 @@
     },
     "reannounce": {
         "message": "Demander plus d'pairs"
+    },
+    "extra": {
+        "message": "Supplémentaire"
+    },
+    "queueUp": {
+        "message": "Haut"
+    },
+    "queueDown": {
+        "message": "Bas"
+    },
+    "queueTop": {
+        "message": "Premier"
+    },
+    "queueBottom": {
+        "message": "Dernier"
     }
 }

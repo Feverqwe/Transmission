@@ -497,5 +497,20 @@
     },
     "reannounce": {
         "message": "Запросить пиров"
+    },
+    "extra": {
+        "message": "Дополнительно"
+    },
+    "queueUp": {
+        "message": "Вверх"
+    },
+    "queueDown": {
+        "message": "Вниз"
+    },
+    "queueTop": {
+        "message": "Первый"
+    },
+    "queueBottom": {
+        "message": "Последний"
     }
 }

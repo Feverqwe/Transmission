@@ -122,9 +122,9 @@ var engine = {
                 fields: ["id", "name", "totalSize", "percentDone", 'downloadedEver', 'uploadedEver',
                     'rateUpload', 'rateDownload', 'eta', 'peersSendingToUs', 'peersGettingFromUs',
                     'queuePosition', 'addedDate', 'doneDate', 'downloadDir', 'recheckProgress',
-                    'status', 'error', 'errorString', 'trackerStats']
-            },
-            ids: undefined
+                    'status', 'error', 'errorString', 'trackerStats'],
+                ids: undefined
+            }
         },
         getFileListRequest: {
             method: "torrent-get",
@@ -866,6 +866,8 @@ var engine = {
                     var name = data.arguments['torrent-duplicate'].name;
                     engine.showNotification(engine.icons.error, name, engine.language.torrentFileIsExists);
                 }
+
+                engine.updateTrackerList();
             });
         };
         if (args.arguments.filename !== undefined) {
@@ -1317,12 +1319,12 @@ var engine = {
     storageCache: {},
     hookList: {
         getTorrentList: function(data, response) {
+            var request = engine.api.getTorrentListRequest;
             if (data.cid) {
-                engine.api.getTorrentListRequest.arguments.ids = 'recently-active';
-            } else {
-                delete engine.api.getTorrentListRequest.arguments.ids;
+                request = mono.cloneObj(request);
+                request.arguments.ids = 'recently-active';
             }
-            engine.sendAction(engine.api.getTorrentListRequest, function(data) {
+            engine.sendAction(request, function(data) {
                 if (data.result !== 'success') {
                     return;
                 }
