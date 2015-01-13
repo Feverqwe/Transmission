@@ -501,12 +501,6 @@
     "extra": {
         "message": "Дополнительно"
     },
-    "queueUp": {
-        "message": "Вверх"
-    },
-    "queueDown": {
-        "message": "Вниз"
-    },
     "queueTop": {
         "message": "Первый"
     },

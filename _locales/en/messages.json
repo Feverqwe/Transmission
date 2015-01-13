@@ -486,12 +486,6 @@
     "extra": {
         "message": "Extra"
     },
-    "queueUp": {
-        "message": "Up"
-    },
-    "queueDown": {
-        "message": "Down"
-    },
     "queueTop": {
         "message": "Top"
     },

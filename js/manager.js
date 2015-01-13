@@ -2741,7 +2741,7 @@ var manager = {
                         }
                     }
                 },
-                queue: {
+                order: {
                     name: manager.language.OV_COL_ORDER,
                     items: {
                         top: {
@@ -2757,7 +2757,7 @@ var manager = {
                             }
                         },
                         up: {
-                            name: manager.language.queueUp,
+                            name: manager.language.up,
                             callback: function (key, trigger) {
                                 var hash = this[0].id;
                                 manager.api({
@@ -2769,7 +2769,7 @@ var manager = {
                             }
                         },
                         down: {
-                            name: manager.language.queueDown,
+                            name: manager.language.down,
                             callback: function (key, trigger) {
                                 var hash = this[0].id;
                                 manager.api({
