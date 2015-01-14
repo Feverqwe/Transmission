@@ -490,7 +490,7 @@ var mono = (typeof mono === 'undefined') ? undefined : mono;
     },
     sendTo: function(message, tabId) {
       chrome.tabs.sendRequest(tabId, message, function(message) {
-        if (message.responseId !== undefined) {
+        if (message && message.responseId !== undefined) {
           return msgTools.callCb(message);
         }
       });
@@ -540,7 +540,7 @@ var mono = (typeof mono === 'undefined') ? undefined : mono;
         message.toBgPage = 1;
       }
       chrome.extension.sendRequest(message, function(message) {
-        if (message.responseId !== undefined) {
+        if (message && message.responseId !== undefined) {
           return msgTools.callCb(message);
         }
       });
