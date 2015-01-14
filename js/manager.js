@@ -1218,7 +1218,7 @@ var manager = {
     },
     trSkipItem: function(api) {
         if (manager.settings.hideSeedStatusItem && api[4] === 1000 && api[1] === 201 ||
-            manager.settings.hideFnishStatusItem && api[4] === 1000 && api[1] === 136) {
+            manager.settings.hideFnishStatusItem && api[4] === 1000 && api[1] === 128) {
             return true;
         }
     },
