@@ -129,6 +129,14 @@ only screen and (                min-resolution: 2dppx) {
         background-image: url("../images/magnet@2x.png");
         background-size: 28px;
     }
+    ul.menu a.alt_speed{
+        background-image: url("../images/alt_speed@2x.png");
+        background-size: 28px;
+    }
+    ul.menu a.alt_speed.active{
+        background-image: url("../images/alt_speed_active@2x.png");
+        background-size: 28px;
+    }
     table.status-panel td.space.disk {
         background-image: url(../images/free_space@2x.png);
         background-size: 16px;
