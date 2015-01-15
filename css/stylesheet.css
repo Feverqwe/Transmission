@@ -93,7 +93,7 @@ ul.menu a.alt_speed{
 }
 ul.menu a.alt_speed.active{
     background-image: url("../images/alt_speed_active.png");
-    box-shadow: inset 0 0 3px 0px #000;
+    box-shadow: inset 0 0 1px 0px #000;
 }
 ul.menu a.btn:hover {
     border: 1px solid #a9acb1;
