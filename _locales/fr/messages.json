@@ -443,6 +443,9 @@
     "checkSettings": {
         "message": "Les paramètres Сheck"
     },
+    "showFreeSpace": {
+        "message": "Pour afficher le nombre d'espace disque disponible"
+    },
     "freeSpace": {
         "message": "Disponible"
     },
@@ -472,9 +475,6 @@
     },
     "torrentFileIsExists": {
         "message": "Torrent a été ajouté avant"
-    },
-    "showFreeSpace": {
-        "message": "Pour afficher le nombre d'espace disque disponible"
     },
     "reannounce": {
         "message": "Demander plus d'pairs"

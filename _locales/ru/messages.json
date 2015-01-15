@@ -462,6 +462,9 @@
     "checkSettings": {
         "message": "Проверить настройки"
     },
+    "showFreeSpace": {
+        "message": "Отображать количество свободного места на диске"
+    },
     "freeSpace": {
         "message": "Свободно"
     },
@@ -491,9 +494,6 @@
     },
     "torrentFileIsExists": {
         "message": "Торрент уже был добавлен ранее"
-    },
-    "showFreeSpace": {
-        "message": "Отображать количество свободного места на диске"
     },
     "reannounce": {
         "message": "Запросить пиров"

@@ -447,6 +447,9 @@
     "checkSettings": {
         "message": "Сheck the settings"
     },
+    "showFreeSpace": {
+        "message": "Display the number of available disk space"
+    },
     "freeSpace": {
         "message": "Free space"
     },
@@ -476,9 +479,6 @@
     },
     "torrentFileIsExists": {
         "message": "Torrent was added before"
-    },
-    "showFreeSpace": {
-        "message": "Display the number of available disk space"
     },
     "reannounce": {
         "message": "Ask more peers"
