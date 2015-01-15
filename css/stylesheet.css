@@ -344,7 +344,7 @@ table.status-panel td.status div {
 table.status-panel td.space {
     padding-left: 18px;
     background-repeat: no-repeat;
-    background-position-y: 2px;
+    background-position: 0 2px;
     width: 15%;
 }
 table.status-panel td.space div {
