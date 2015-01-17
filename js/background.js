@@ -1386,7 +1386,7 @@ var engine = {
             engine.sendFile(message.url, message.folder, message.label);
         },
         getTraffic: function(message, response) {
-            response({list: engine.varCache.trafficList, startTime: engine.varCache.startTime});
+            response({trafficList: engine.varCache.trafficList, startTime: engine.varCache.startTime});
         },
         checkSettings: function(message, response) {
             engine.loadSettings(function() {

@@ -1,142 +1,121 @@
-var graph = function () {
-    var body;
-    var x;
-    var y;
-    var line;
-    var svg;
-    //количество пиков на графике 1 пик - 1 секунда
-    var _limit = 90;
-    var traffic = undefined;
-    var startTime = 0;
+var graph = (function() {
+    var startTime;
+    var trafficList;
+    var limit;
+    var isReady;
 
-    var getInfo = function (data) {
-        var min;
-        var max;
-        var start;
-        var end;
-        var traf0 = data[0].values;
-        var values_len = traf0.length;
-        var startItem = 0;
-        if (values_len === 0) {
-            return;
+    var gX, gY, gLine, gSvg;
+
+    var getInfo = function(trim) {
+        var dlSpeedItem = trafficList[0];
+        var upSpeedItem = trafficList[1];
+        var dlSpeedList = dlSpeedItem.values;
+        var upSpeedList = upSpeedItem.values;
+        var len = dlSpeedList.length;
+        if (len === 0) {
+            var now = parseInt(Date.now() / 1000) - startTime;
+            dlSpeedList.push({time: now, pos: 0});
+            upSpeedList.push({time: now, pos: 0});
         }
-        if ( values_len > _limit) {
-            startItem = values_len - _limit;
+        var startIndex = 0;
+        if (len > limit) {
+            startIndex = len - limit;
         }
-        end = traf0[values_len - 1].time;
-        start = end - _limit;
-        min = 0;
-        max = traf0[values_len - 1].pos;
-        data.forEach(function (subdata) {
-            var out_index;
-            for (var i = startItem, item; item = subdata.values[i]; i++) {
-                if (item.time < start) {
-                    out_index = i;
+
+        var endTime = dlSpeedList.slice(-1)[0].time;
+
+        var startGTime = endTime - limit;
+        var min = 0;
+        var max = 0;
+        var outIndex;
+        for (var n = 0, speedItem; speedItem = trafficList[n]; n++) {
+            for (var i = startIndex, item; item = speedItem.values[i]; i++) {
+                if (item.time < startGTime) {
+                    outIndex = i;
                     continue;
                 }
-                if (item.pos > max) {
+                if (max < item.pos) {
                     max = item.pos;
                 }
             }
-            if (out_index !== undefined && subdata.values[out_index].pos > max) {
-                max = subdata.values[out_index].pos;
+            if (outIndex !== undefined && speedItem.values[outIndex].pos > max) {
+                max = speedItem.values[outIndex].pos;
             }
-        });
-        return {min: min, max: max, start: start, end: end};
+        }
+        if (outIndex !== undefined && (trim || len > limit * 1.5)) {
+            dlSpeedList.splice(0, outIndex);
+            upSpeedList.splice(0, outIndex);
+        }
+        return {x: [startGTime, endTime], y: [min, max]};
     };
 
-    var createLines = function (data) {
-        if (data === undefined) {
-            return;
-        }
-        var min = getInfo(data);
-        if (min === undefined) {
-            return;
-        }
-        var max = min.max;
-        var start = min.start;
-        var end = min.end;
-        min = min.min;
-        x.domain([start, end]);
-        y.domain([min,max]);
-        var city = svg.selectAll(".city").data(data).enter().append("g").attr("class", "city");
+    var updateLines = function() {
+        var info = getInfo();
+        gY.domain(info.y);
+        gX.domain(info.x);
+        gSvg.selectAll("path").transition().ease('quad').attr("d", function (d) {
+            return gLine(d.values);
+        });
+    };
+
+    var createLines = function() {
+        var info = getInfo(1);
+        gX.domain(info.x);
+        gY.domain(info.y);
+
+        var city = gSvg.selectAll(".city").data(trafficList).enter().append("g").attr("class", "city");
         city.append("path")
             .attr("class", "line")
             .attr("d", function (d) {
-                return line(d.values);
+                return gLine(d.values);
             })
-            .style("stroke", function(d) { return (d.name === 'download')?'#3687ED':'#41B541'; });
-    };
-    var updateLines = function (data) {
-        var min = getInfo(data, true);
-        var max = min.max;
-        var start = min.start;
-        var end = min.end;
-        min = min.min;
-        x.domain([start, end]);
-        y.domain([min,max]);
-        svg.selectAll("path").transition().ease('quad').attr("d", function (d) {
-            return line(d.values);
-        });
+            .style("stroke", function (d) {
+                return (d.name === 'download') ? '#3687ED' : '#41B541';
+            });
+        isReady = 1;
     };
 
-    var init = function () {
-        var width = body.width();
-        var limit = parseInt(width / 10);
-        if (limit < _limit) {
-            _limit = limit;
-        }
+    var createGraph = function() {
+        var width = document.querySelector('li.graph').clientWidth;
+        limit = parseInt(width / 10);
         var height = 30;
-        x = d3.time.scale().range([0, width]);
-        y = d3.scale.linear().range([height, 0]);
 
-        line = d3.svg.line().interpolate("basis")
+        gX = d3.time.scale().range([0, width]);
+        gY = d3.scale.linear().range([height, 0]);
+
+        gLine = d3.svg.line().interpolate("basis")
             .x(function (d) {
-                return x(d.time);
+                return gX(d.time);
             })
             .y(function (d) {
-                return y(d.pos);
+                return gY(d.pos);
             });
-        svg = d3.select("li.graph").append("svg").attr({"width": width, "height": height}).append("g");
-        createLines(traffic);
+        gSvg = d3.select("li.graph").append("svg").attr({"width": width, "height": height}).append("g");
+        createLines();
     };
-    var addData = function (dl_sum, up_sum) {
-        var limit = 90;
-        var time = parseInt(Date.now()/1000) - startTime;
-        var traf0 = traffic[0];
-        var traf1 = traffic[1];
-        var values_len = traf0.values.length;
-        if (values_len > 1 && time - limit > traf0.values[values_len - 1].time) {
-            traf0.values = traf0.values.slice(-1);
-            traf1.values = traf1.values.slice(-1);
-        }
-        traf0.values.push({time: time, pos: dl_sum});
-        traf1.values.push({time: time, pos: up_sum});
-        if (values_len > limit * 3) {
-            traf0.values.splice(0, values_len - limit);
-            traf1.values.splice(0, values_len - limit);
-        }
-    };
-    return {
-        move: function (dl, up) {
-            if (traffic === undefined) {
-                return;
-            }
-            addData(dl, up);
-            updateLines(traffic);
-        },
-        run: function () {
-            body = $('li.graph');
-            mono.sendMessage({action: 'getTraffic'}, function(response) {
-                startTime = response.startTime;
-                traffic = response.list;
-                init();
 
-                if (typeof define !== "undefined" && define.amd) {
-                    define('graph');
-                }
-            }, 'bg');
+    var addData = function(dlSpeed, upSpeed) {
+        var dlSpeedList = trafficList[0].values;
+        var upSpeedList = trafficList[1].values;
+        var now = parseInt(Date.now() / 1000) - startTime;
+        dlSpeedList.push({time: now, pos: dlSpeed});
+        upSpeedList.push({time: now, pos: upSpeed});
+    };
+
+    mono.sendMessage({action: 'getTraffic'}, function (response) {
+        startTime = response.startTime;
+        trafficList = response.trafficList;
+        createGraph();
+
+        if (typeof define !== "undefined" && define.amd) {
+            define('graph');
+        }
+    });
+    return {
+        move: function(dlSpeed, upSpeed) {
+            if (isReady !== 1) return;
+            addData(dlSpeed, upSpeed);
+            updateLines();
         }
     }
-}();
-graph.run();
+})();
