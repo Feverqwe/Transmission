@@ -42,17 +42,27 @@ var graph = (function() {
                 max = speedItem.values[outIndex].pos;
             }
         }
-        if (outIndex !== undefined && (trim || len > limit * 1.5)) {
+        if (outIndex === undefined && startIndex > limit) {
+            outIndex = startIndex;
+        }
+        var isTrimed = false;
+        if (outIndex !== undefined && (trim || len > limit * 2)) {
             dlSpeedList.splice(0, outIndex);
             upSpeedList.splice(0, outIndex);
+            isTrimed = 1;
         }
-        return {x: [startGTime, endTime], y: [min, max]};
+        return {x: [startGTime, endTime], y: [min, max], trim: isTrimed};
     };
 
     var updateLines = function() {
         var info = getInfo();
         gY.domain(info.y);
         gX.domain(info.x);
+        if (info.trim) {
+            gSvg.selectAll("path").attr("d", function (d) {
+                return gLine(d.values.slice(0, -1));
+            });
+        }
         gSvg.selectAll("path").transition().ease('quad').attr("d", function (d) {
             return gLine(d.values);
         });
