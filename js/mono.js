@@ -147,9 +147,6 @@ var mono = (typeof mono === 'undefined') ? undefined : mono;
 
       if (msgTools.cbStack.length > mono.messageStack) {
         msgTools.clean();
-        if (msgTools.cbStack.length > mono.messageStack) {
-          delete msgTools.cbObj[msgTools.cbStack.shift()];
-        }
       }
       var id = message.callbackId = msgTools.idPrefix+(++msgTools.id);
       msgTools.cbObj[id] = {fn: cb, time: Date.now()};
