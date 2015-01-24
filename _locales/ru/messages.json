@@ -459,6 +459,9 @@
     "selectAll": {
         "message": "Выбрать всё"
     },
+    "selectAll_SHORT": {
+        "message": " "
+    },
     "refresh": {
         "message": "Обновить"
     },

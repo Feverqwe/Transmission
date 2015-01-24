@@ -444,6 +444,9 @@
     "selectAll": {
         "message": "Select all"
     },
+    "selectAll_SHORT": {
+        "message": " "
+    },
     "refresh": {
         "message": "Refresh"
     },
