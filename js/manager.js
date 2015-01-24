@@ -2653,6 +2653,7 @@ var manager = {
                     name: manager.language.ML_REMOVE,
                     callback: function () {
                         var hash = this[0].id;
+                        var _this = this;
                         this.addClass('force');
                         var list = manager.varCache.trSelectedHashList.slice(0);
                         var trTitle = list.length !== 1 ? '' : manager.varCache.trListItems[hash].api[2];
@@ -2679,6 +2680,7 @@ var manager = {
                             ]
                         ], function() {
                             manager.unCheckAll('tr', 1);
+                            _this.removeClass('selected');
                         });
                     }
                 },
@@ -2721,6 +2723,7 @@ var manager = {
                             name: manager.language.rename,
                             callback: function (key, trigger) {
                                 var hash = this[0].id;
+                                var _this = this;
                                 this.addClass('force');
                                 var currentName = manager.varCache.trListItems[hash].api[2];
                                 showNotification([
@@ -2759,6 +2762,7 @@ var manager = {
                                     ]
                                 ], function() {
                                     manager.unCheckAll('tr', 1);
+                                    _this.removeClass('selected');
                                 });
                             }
                         },
@@ -2766,6 +2770,7 @@ var manager = {
                             name: manager.language.move,
                             callback: function (key, trigger) {
                                 var hash = this[0].id;
+                                var _this = this;
                                 this.addClass('force');
                                 var currentLocation = manager.varCache.trListItems[hash].api[26];
                                 var folderTemplate = showNotification.selectFolderTemplate(1);
@@ -2811,6 +2816,7 @@ var manager = {
                                     ]
                                 ], function() {
                                     manager.unCheckAll('tr', 1);
+                                    _this.removeClass('selected');
                                 });
                             }
                         },
