@@ -2904,9 +2904,16 @@ var manager = {
                     } else {
                         this.addClass('force');
                     }
+                    
+                    var renameNode;
                     var priority = manager.varCache.flListItems[index].api[3];
                     for (var action in trigger.items) {
                         var item = trigger.items[action];
+
+                        if (action === 'rename') {
+                            renameNode = item;
+                        }
+
                         if (item.priority === undefined) {
                             continue;
                         }
@@ -2918,6 +2925,7 @@ var manager = {
                             item.$node.prepend(item.labelNode = $('<label>', {text: '●'}));
                         }
                     }
+
                     manager.varCache.flListLayer.ctxSelectArray = [];
                     var itemList = manager.getCheckBoxList('fl', 1, 1);
                     for (var i = 0, item; item = itemList[i]; i++) {
@@ -2926,6 +2934,24 @@ var manager = {
 
                     if (!manager.varCache.flListItems[index].cell.hasOwnProperty('checkbox')) {
                         manager.varCache.flListLayer.ctxSelectArray.push(index)
+                    }
+
+                    if (manager.varCache.flListLayer.ctxSelectArray.length > 1) {
+                        if (renameNode.display !== 0) {
+                            renameNode.display = 0;
+                            var el = renameNode.$node[0];
+                            el.classList.add('hidden');
+                            el.classList.add('not-selectable');
+                            el.style.display = 'none';
+                        }
+                    } else {
+                        if (renameNode.display === 0) {
+                            renameNode.display = 1;
+                            var el = renameNode.$node[0];
+                            el.classList.remove('hidden');
+                            el.classList.remove('not-selectable');
+                            el.style.display = 'block';
+                        }
                     }
                 },
                 hide: function () {
@@ -2983,6 +3009,8 @@ var manager = {
                 rename: {
                     name: manager.language.rename,
                     callback: function (key, trigger) {
+                        var _this = this;
+                        this.addClass('force');
                         var hash = manager.varCache.flListLayer.hash;
                         var index = this[0].dataset.index;
                         var currentFileName = manager.varCache.flListItems[index].api[0];
@@ -3025,7 +3053,10 @@ var manager = {
                                     }]
                                 ]}}
                             ]
-                        ]);
+                        ], function() {
+                            manager.unCheckAll('fl');
+                            _this.removeClass('selected');
+                        });
                     }
                 }
             }
