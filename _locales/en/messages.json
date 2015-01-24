@@ -221,7 +221,7 @@
         "message": "Are you sure you want to remove the selected torrent?"
     },
     "OV_CONFIRM_DELETE_MULTIPLE": {
-       "message": "Are you sure you want to remove the %d selected torrents?"
+        "message": "Are you sure you want to remove the %d selected torrents?"
     },
     "DLG_BTN_YES": {
         "message": "Yes"
