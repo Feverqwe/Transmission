@@ -304,7 +304,8 @@ div.torrent-list-layer table td.actions div.btns > a {
 
     opacity: 0.65;
 }
-div.torrent-list-layer table tr:hover td.actions div.btns > a {
+div.torrent-list-layer table tr:hover td.actions div.btns > a,
+div.torrent-list-layer table tr.selected td.actions div.btns > a{
     opacity: 0.8;
     -webkit-filter: invert(100%);
     filter: invert(100%);
