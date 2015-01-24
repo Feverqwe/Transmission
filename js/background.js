@@ -60,6 +60,7 @@ var engine = {
     },
     torrentListColumnList: {},
     defaultTorrentListColumnList: [
+         {column: 'checkbox',    display: 1, order: 0, width: 19,  lang: 'selectAll'},
          {column: 'name',        display: 1, order: 1, width: 200, lang: 'OV_COL_NAME'},
          {column: 'order',       display: 0, order: 1, width: 20,  lang: 'OV_COL_ORDER'},
          {column: 'size',        display: 1, order: 1, width: 60,  lang: 'OV_COL_SIZE'},
@@ -594,7 +595,26 @@ var engine = {
             engine.settings = settings;
 
             columnList.forEach(function(item) {
-                engine[item] = storage.hasOwnProperty(item) ? storage[item] : engine['default'+engine.capitalize(item)];
+                var defItem = 'default'+engine.capitalize(item);
+                engine[item] = storage.hasOwnProperty(item) ? storage[item] : engine[defItem];
+                if (engine[defItem].length !== engine[item].length) {
+                    for (var n = 0, dItem; dItem = engine[defItem][n]; n++) {
+                        var found = false;
+                        for (var g = 0, nItem; nItem = engine[item][g]; g++) {
+                            if (nItem.column === dItem.column) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            if (dItem.column === 'checkbox') {
+                                engine[item].unshift(dItem);
+                            } else {
+                                engine[item].push(dItem);
+                            }
+                        }
+                    }
+                }
             });
 
             engine.varCache.webUiUrl = (settings.useSSL ? 'https://' : 'http://') + settings.ip + ':' + settings.port + '/' + settings.path;
