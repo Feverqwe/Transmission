@@ -2336,7 +2336,10 @@ var manager = {
             }
             checkedInputCount++;
         }
-        manager.domCache[type + 'FixedHead'].getElementsByTagName('input')[0].checked = checkedInputCount === checkBoxList.length;
+        var checkbox = manager.domCache[type + 'FixedHead'].getElementsByTagName('input')[0];
+        if (checkbox) {
+            checkbox.checked = checkedInputCount === checkBoxList.length;
+        }
     },
     unCheckAll: function(type, onlyVisible) {
         var checkBoxList = manager.getCheckBoxList(type, 1, onlyVisible);
