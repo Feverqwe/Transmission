@@ -60,7 +60,7 @@ var engine = {
     },
     torrentListColumnList: {},
     defaultTorrentListColumnList: [
-         {column: 'checkbox',    display: 1, order: 0, width: 19,  lang: 'selectAll'},
+         {column: 'checkbox',    display: 0, order: 0, width: 19,  lang: 'selectAll'},
          {column: 'name',        display: 1, order: 1, width: 200, lang: 'OV_COL_NAME'},
          {column: 'order',       display: 0, order: 1, width: 20,  lang: 'OV_COL_ORDER'},
          {column: 'size',        display: 1, order: 1, width: 60,  lang: 'OV_COL_SIZE'},
