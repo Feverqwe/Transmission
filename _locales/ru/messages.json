@@ -235,6 +235,9 @@
     "OV_CONFIRM_DELETE_ONE": {
         "message": "Вы действительно хотите удалить выбранный торрент?"
     },
+    "OV_CONFIRM_DELETE_MULTIPLE": {
+        "message": "Вы действительно хотите удалить %d выбранных торрента(ов)?"
+    },
     "DLG_BTN_YES": {
         "message": "Да"
     },

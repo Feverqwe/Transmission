@@ -2654,7 +2654,7 @@ var manager = {
                         var list = manager.varCache.trSelectedHashList.slice(0);
                         var trTitle = list.length !== 1 ? '' : manager.varCache.trListItems[hash].api[2];
                         showNotification([
-                            [{label: {text: manager.language.OV_CONFIRM_DELETE_ONE}},
+                            [{label: {text: (!trTitle) ? manager.language.OV_CONFIRM_DELETE_MULTIPLE.replace('%d', list.length) : manager.language.OV_CONFIRM_DELETE_ONE}},
                                 {span: {text: trTitle, class: 'fileName'}}],
                             [
                                 {input: {type: "button", value: manager.language.DLG_BTN_YES, on: [

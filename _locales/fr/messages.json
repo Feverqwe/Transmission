@@ -216,6 +216,9 @@
     "OV_CONFIRM_DELETE_ONE": {
         "message": "Souhaitez-vous vraiment annuler le torrent sélectionné?"
     },
+    "OV_CONFIRM_DELETE_MULTIPLE": {
+        "message": "Souhaitez-vous vraiment annuler les %d torrents sélectionnés?"
+    },
     "DLG_BTN_YES": {
         "message": "Oui"
     },
