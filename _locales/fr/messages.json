@@ -440,9 +440,6 @@
     "selectAll": {
         "message": "Sélectionner tous"
     },
-    "selectAll_SHORT": {
-        "message": " "
-    },
     "refresh": {
         "message": "Rafraîchir"
     },

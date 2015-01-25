@@ -166,7 +166,9 @@ var manager = {
         trWordWrap: false,
         flWordWrap: true,
         windowMode: false,
-        noSleep: false
+        noSleep: false,
+        trHasSelectCell: false,
+        flHasSelectCell: false
     },
     api: function(data, onReady) {
         data.cid = manager.varCache.cid;
@@ -265,6 +267,7 @@ var manager = {
     trWriteHead: function() {
         var styleBody = '';
         var width = 0;
+        manager.options.trHasSelectCell = false;
         var head = mono.create('tr', {
             append: (function() {
                 var thList = [];
@@ -289,7 +292,14 @@ var manager = {
                             ['drop', manager.onDrop]
                         ],
                         append: [
-                            mono.create('div', {
+                            (key === 'checkbox') ? mono.create('div', {
+                                append: mono.create('input', {
+                                    type: 'checkbox'
+                                }),
+                                onCreate: function() {
+                                    manager.options.trHasSelectCell = true;
+                                }
+                            }) : mono.create('div', {
                                 text: manager.language[value.lang+'_SHORT'] || manager.language[value.lang]
                             }),
                             resizeEl,
@@ -356,6 +366,7 @@ var manager = {
     flWriteHead: function() {
         var styleBody = '';
         var width = 0;
+        manager.options.flHasSelectCell = false;
         var head = mono.create('tr', {
             append: (function() {
                 var thList = [];
@@ -383,7 +394,10 @@ var manager = {
                             (key === 'checkbox') ? mono.create('div', {
                                 append: mono.create('input', {
                                     type: 'checkbox'
-                                })
+                                }),
+                                onCreate: function() {
+                                    manager.options.flHasSelectCell = true;
+                                }
                             }) : mono.create('div', {
                                 text: manager.language[value.lang+'_SHORT'] || manager.language[value.lang]
                             }),
@@ -536,7 +550,7 @@ var manager = {
         if (!currentLabel.custom) {
             return document.body.appendChild(manager.varCache['style.tr-filter'] = mono.create('style', {
                 class: 'tr-filter',
-                text: '.torrent-table-body tbody > tr {' +
+                text: '.torrent-table-body tbody > tr:not(.selected) {' +
                     'display: none;' +
                 '}' +
                 '.torrent-table-body tbody > tr[data-label="' + currentLabel.label + '"] {' +
@@ -561,7 +575,7 @@ var manager = {
 
         document.body.appendChild(manager.varCache['style.tr-filter'] = mono.create('style', {
             class: 'tr-filter',
-            text: '.torrent-table-body tbody > tr.filtered{' +
+            text: '.torrent-table-body tbody > tr.filtered:not(.selected){' +
                 'display: none;' +
             '}'
         }));
@@ -1914,7 +1928,7 @@ var manager = {
         trNode.classList.add('selected');
 
         manager.unCheckAll('tr');
-        var checkBox = trNode.querySelector('input');
+        var checkBox = !manager.options.flHasSelectCell ? undefined : trNode.getElementsByTagName('input')[0];
         if (checkBox) {
             checkBox.checked = true;
             checkBox.dispatchEvent(new CustomEvent('change', {bubbles: true}));
@@ -2298,6 +2312,8 @@ var manager = {
         manager.setSpeedDom(type, speed);
     },
     getCheckBoxList: function(type, isChecked, isVisible) {
+        if (!manager.options[type+'HasSelectCell']) return [];
+
         if (isChecked === 0) {
             isChecked = ':not(:checked)'
         } else
@@ -2324,7 +2340,9 @@ var manager = {
         return visibleCheckBoxList;
     },
     selectAllCheckBox: function(type) {
-        var checkBoxList = manager.getCheckBoxList(type, undefined, 1);
+        if (!manager.options[type+'HasSelectCell']) return;
+
+        var checkBoxList = manager.getCheckBoxList(type, undefined, type === 'fl');
         var checkedInputCount = 0;
         for (var i = 0, el; el = checkBoxList[i]; i++) {
             if (!el.checked) {
@@ -2338,6 +2356,8 @@ var manager = {
         }
     },
     unCheckAll: function(type, onlyVisible) {
+        if (!manager.options[type+'HasSelectCell']) return;
+
         var checkBoxList = manager.getCheckBoxList(type, 1, onlyVisible);
         for (var i = 0, el; el = checkBoxList[i]; i++) {
             el.checked = false;
@@ -2393,6 +2413,40 @@ var manager = {
                 request.arguments['priority-'+priority] = list;
             }
             mono.sendMessage({action: 'api', data: request}, onReady);
+        }
+    },
+    setCheckboxState: function(type, node, state) {
+        if (state) {
+            if (node.classList.contains('selected')) {
+                return node.classList.add('force');
+            }
+
+            node.classList.add('selected');
+
+            if (!manager.options[type+'HasSelectCell']) return;
+            var checkbox = node.getElementsByTagName('input')[0];
+            if (checkbox !== undefined) {
+                checkbox.checked = true;
+                checkbox.dispatchEvent(new CustomEvent('change', {bubbles: true}));
+            }
+            return;
+        }
+
+        if (node.classList.contains('selected')) {
+            if (node.classList.contains('force')) {
+                return node.classList.remove('force');
+            }
+
+            if (type === 'tr' && manager.varCache.flListLayer.hash === node.id) return;
+
+            node.classList.remove('selected');
+
+            if (!manager.options[type+'HasSelectCell']) return;
+            var checkbox = node.getElementsByTagName('input')[0];
+            if (checkbox !== undefined) {
+                checkbox.checked = false;
+                checkbox.dispatchEvent(new CustomEvent('change', {bubbles: true}));
+            }
         }
     },
     onLoadContextMenu: function() {
@@ -2503,29 +2557,23 @@ var manager = {
             className: "torrent",
             events: {
                 show: function(trigger) {
-                    if (!this.hasClass('selected')) {
-                        this.addClass('selected');
-                        this.find('input').trigger('click');
-                    } else {
-                        this.addClass('force');
-                    }
-
+                    manager.setCheckboxState('tr', this[0], 1);
                     manager.varCache.trSelectedHashList = [];
-                    var itemList = manager.getCheckBoxList('tr', 1, 1);
-                    for (var i = 0, item; item = itemList[i]; i++) {
-                        manager.varCache.trSelectedHashList.push(parseInt(item.parentNode.parentNode.id.substr(4)));
-                    }
 
                     var hash = this[0].id;
-
-                    if (!manager.varCache.trListItems[hash].cell.hasOwnProperty('checkbox')) {
-                        manager.varCache.trSelectedHashList.push(parseInt(hash.substr(4)))
+                    if (!manager.options.trHasSelectCell) {
+                        manager.varCache.trSelectedHashList.push(parseInt(hash.substr(4)));
+                    } else {
+                        var itemList = manager.getCheckBoxList('tr', 1, 1);
+                        for (var i = 0, item; item = itemList[i]; i++) {
+                            manager.varCache.trSelectedHashList.push(parseInt(item.parentNode.parentNode.id.substr(4)));
+                        }
                     }
 
                     var api;
                     var availActions;
                     var isMany = false;
-                    if (itemList.length > 1) {
+                    if (manager.varCache.trSelectedHashList.length > 1) {
                         isMany = true;
                         availActions = {
                             extra: 0,
@@ -2583,15 +2631,7 @@ var manager = {
                     }
                 },
                 hide: function() {
-                    if (this.hasClass('selected') && !this.hasClass('force')) {
-                        var hash = this[0].id;
-                        if (manager.varCache.flListLayer.hash !== hash) {
-                            this.removeClass('selected');
-                            this.find('input').trigger('click');
-                        }
-                    } else {
-                        this.removeClass('force');
-                    }
+                    manager.setCheckboxState('tr', this[0], 0);
                     manager.varCache.trSelectedHashList = [];
                 }
             },
@@ -2893,27 +2933,49 @@ var manager = {
             className: "filelist",
             events: {
                 show: function (trigger) {
+                    manager.setCheckboxState('fl', this[0], 1);
+                    manager.varCache.flListLayer.ctxSelectArray = [];
+
                     var index = this[0].dataset.index;
-                    if (!this.hasClass('selected')) {
-                        this.addClass('selected');
-                        this.find('input').trigger('click');
+                    if (!manager.options.flHasSelectCell) {
+                        manager.varCache.flListLayer.ctxSelectArray.push(index);
                     } else {
-                        this.addClass('force');
+                        var itemList = manager.getCheckBoxList('fl', 1, 1);
+                        for (var i = 0, item; item = itemList[i]; i++) {
+                            manager.varCache.flListLayer.ctxSelectArray.push(parseInt(item.parentNode.parentNode.dataset.index));
+                        }
                     }
-                    
-                    var renameNode;
+
+                    var isManyItems = manager.varCache.flListLayer.ctxSelectArray.length > 1;
+
                     var priority = manager.varCache.flListItems[index].api[3];
                     for (var action in trigger.items) {
                         var item = trigger.items[action];
 
                         if (action === 'rename') {
-                            renameNode = item;
+                            var el = item.$node[0];
+                            if (isManyItems) {
+                                if (item.display !== 0) {
+                                    item.display = 0;
+                                    el.classList.add('hidden');
+                                    el.classList.add('not-selectable');
+                                    el.style.display = 'none';
+                                }
+                            } else {
+                                if (item.display === 0) {
+                                    item.display = 1;
+                                    el.classList.remove('hidden');
+                                    el.classList.remove('not-selectable');
+                                    el.style.display = 'block';
+                                }
+                            }
+                            continue;
                         }
 
                         if (item.priority === undefined) {
                             continue;
                         }
-                        if (item.priority !== priority) {
+                        if (item.priority !== priority || isManyItems) {
                             item.labelNode && item.labelNode.remove();
                             delete item.labelNode;
                         } else
@@ -2921,42 +2983,9 @@ var manager = {
                             item.$node.prepend(item.labelNode = $('<label>', {text: '●'}));
                         }
                     }
-
-                    manager.varCache.flListLayer.ctxSelectArray = [];
-                    var itemList = manager.getCheckBoxList('fl', 1, 1);
-                    for (var i = 0, item; item = itemList[i]; i++) {
-                        manager.varCache.flListLayer.ctxSelectArray.push(parseInt(item.parentNode.parentNode.dataset.index));
-                    }
-
-                    if (!manager.varCache.flListItems[index].cell.hasOwnProperty('checkbox')) {
-                        manager.varCache.flListLayer.ctxSelectArray.push(index)
-                    }
-
-                    if (manager.varCache.flListLayer.ctxSelectArray.length > 1) {
-                        if (renameNode.display !== 0) {
-                            renameNode.display = 0;
-                            var el = renameNode.$node[0];
-                            el.classList.add('hidden');
-                            el.classList.add('not-selectable');
-                            el.style.display = 'none';
-                        }
-                    } else {
-                        if (renameNode.display === 0) {
-                            renameNode.display = 1;
-                            var el = renameNode.$node[0];
-                            el.classList.remove('hidden');
-                            el.classList.remove('not-selectable');
-                            el.style.display = 'block';
-                        }
-                    }
                 },
                 hide: function () {
-                    if (this.hasClass('selected') && !this.hasClass('force')) {
-                        this.removeClass('selected');
-                        this.find('input').trigger('click');
-                    } else {
-                        this.removeClass('force');
-                    }
+                    manager.setCheckboxState('fl', this[0], 0);
                     manager.varCache.flListLayer.ctxSelectArray = [];
                 }
             },
@@ -3790,6 +3819,7 @@ var manager = {
                     } else {
                         el.parentNode.parentNode.classList.remove("selected");
                     }
+                    manager.selectAllCheckBox('tr');
                 });
 
                 manager.domCache.flBody.addEventListener('change', function(e) {
@@ -3802,6 +3832,27 @@ var manager = {
                         el.parentNode.parentNode.classList.remove("selected");
                     }
                     manager.selectAllCheckBox('fl');
+                });
+
+                manager.domCache.trFixedHead.addEventListener('change', function(e) {
+                    var el = e.target;
+                    if (el.tagName !== 'INPUT') return;
+
+                    var checkBoxList;
+                    if (el.checked) {
+                        checkBoxList = manager.getCheckBoxList('tr', 0, 1);
+                        for (var i = 0, item; item = checkBoxList[i]; i++) {
+                            item.checked = true;
+                            item.parentNode.parentNode.classList.add("selected");
+                        }
+                    } else {
+                        checkBoxList = manager.getCheckBoxList('tr', 1, 1);
+                        for (var i = 0, item; item = checkBoxList[i]; i++) {
+                            item.checked = false;
+                            item.parentNode.parentNode.classList.remove("selected");
+                        }
+                    }
+                    manager.selectAllCheckBox('tr');
                 });
 
                 manager.domCache.flFixedHead.addEventListener('change', function(e) {
