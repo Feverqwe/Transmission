@@ -3407,7 +3407,7 @@ var manager = {
                 manager.language = data.getLanguage;
                 manager.settings = data.getSettings;
 
-                if (manager.settings.login === null || manager.settings.password === null) {
+                if (manager.settings.requireAuthentication && (manager.settings.login === null || manager.settings.password === null)) {
                     console.timeEnd('manager render');
                     console.timeEnd('manager');
                     return window.location = "options.html";

@@ -56,7 +56,9 @@ var engine = {
 
         showFreeSpace: 1,
 
-        guiPath: ''
+        guiPath: '',
+
+        requireAuthentication: 1
     },
     torrentListColumnList: {},
     defaultTorrentListColumnList: [
@@ -442,7 +444,8 @@ var engine = {
 
         var headers = {};
 
-        if (engine.settings.login && engine.settings.password) {
+
+        if (engine.settings.requireAuthentication && engine.settings.login !== null && engine.settings.password !== null) {
             headers.Authorization = 'Basic ' + window.btoa(engine.settings.login + ":" + engine.settings.password);
         }
         if (engine.varCache.token !== null) {

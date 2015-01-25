@@ -490,5 +490,8 @@
     },
     "queueBottom": {
         "message": "Dernier"
+    },
+    "requireAuthentication": {
+        "message": "Authentification requise"
     }
 }

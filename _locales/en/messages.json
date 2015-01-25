@@ -494,5 +494,8 @@
     },
     "queueBottom": {
         "message": "Bottom"
+    },
+    "requireAuthentication": {
+        "message": "Authentication is required"
     }
 }
