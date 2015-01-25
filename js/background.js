@@ -1539,6 +1539,9 @@ var engine = {
             chrome.browserAction.setBadgeBackgroundColor({
                 color: [0, 0, 0, 40]
             });
+            chrome.browserAction.setBadgeText({
+                text: ''
+            });
         }
 
         engine.varCache.msgStack = [];
