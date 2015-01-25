@@ -1928,7 +1928,7 @@ var manager = {
         trNode.classList.add('selected');
 
         manager.unCheckAll('tr');
-        var checkBox = !manager.options.flHasSelectCell ? undefined : trNode.getElementsByTagName('input')[0];
+        var checkBox = !manager.options.trHasSelectCell ? undefined : trNode.getElementsByTagName('input')[0];
         if (checkBox) {
             checkBox.checked = true;
             checkBox.dispatchEvent(new CustomEvent('change', {bubbles: true}));
