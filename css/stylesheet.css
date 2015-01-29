@@ -169,6 +169,9 @@ table tbody td {
     padding-left: 2px;
     padding-right: 2px;
 }
+table thead th:first-child {
+    padding-right: 1px;
+}
 table thead tr th {
     border-right: 1px solid #c0c0c0;
     position: relative;
@@ -194,6 +197,15 @@ th div {
 td div {
     overflow: hidden;
     white-space: nowrap;
+}
+div.torrent-list-layer table .checkbox {
+    text-align: center;
+}
+div.torrent-list-layer table .checkbox input {
+    margin: 0;
+    margin-top: 2.5px;
+    margin-bottom: 2.5px;
+    margin-right: 1px;
 }
 div.torrent-list-layer table .name {
     text-align: left;
@@ -427,8 +439,10 @@ div.fl-layer table.fl-table-body td.checkbox {
     text-align: center;
 }
 div.fl-layer table .checkbox input {
+    margin: 0;
     margin-top: 2.5px;
     margin-bottom: 2.5px;
+    margin-left: 1px;
 }
 div.fl-layer table .name > div {
     text-align: left;
