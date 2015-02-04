@@ -18,7 +18,13 @@
         "message": "Nom"
     },
     "OV_COL_ORDER": {
-        "message": "#"
+        "message": "File d'attente",
+        "modifed": 1,
+        "originalKey": "OV_FL_QUEUED"
+    },
+    "OV_COL_ORDER_SHORT": {
+        "message": "#",
+        "originalKey": "OV_COL_ORDER"
     },
     "OV_COL_SIZE": {
         "message": "Taille"

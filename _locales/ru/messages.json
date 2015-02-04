@@ -20,6 +20,10 @@
     "OV_COL_ORDER": {
         "message": "Позиция"
     },
+    "OV_COL_ORDER_SHORT": {
+        "message": "#",
+        "modifed": 1
+    },
     "OV_COL_SIZE": {
         "message": "Размер"
     },
