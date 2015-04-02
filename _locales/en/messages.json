@@ -1,15 +1,15 @@
 {
     "appDesc": {
-        "message": "This extension add Transmission web GUI in your web browser"
+        "message": "Extension add Transmission web GUI in your web browser"
     },
     "lang": {
         "message": "en"
     },
     "sizeList": {
-        "message": "[\"b\", \"Kb\", \"Mb\", \"Gb\", \"Tb\", \"Pb\", \"Eb\"]"
+        "message": "[\"B\", \"kB\", \"MB\", \"GB\", \"TB\", \"PB\", \"EB\"]"
     },
     "sizePsList": {
-        "message": "[\"b/s\", \"Kb/s\", \"Mb/s\", \"Gb/s\", \"Tb/s\", \"Pb/s\", \"Eb/s\"]"
+        "message": "[\"B/s\", \"kB/s\", \"MB/s\", \"GB/s\", \"TB/s\", \"PB/s\", \"EB/s\"]"
     },
     "timeOutList": {
         "message": "[\"w\", \"d\", \"h\", \"m\", \"s\"]"
