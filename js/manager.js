@@ -359,7 +359,7 @@ var manager = {
 
             mono.isChrome && setTimeout(function() {
                 var innerWidth = window.innerWidth;
-                if (innerWidth < 723) {
+                if (innerWidth < 723 && innerWidth < width) {
                     document.body.style.minWidth = innerWidth + 'px';
                     document.body.style.width = innerWidth + 'px';
                 }
