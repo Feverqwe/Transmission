@@ -356,6 +356,14 @@ var manager = {
             }
             document.body.style.width = width + 'px';
             mono.isFF && mono.sendMessage({action: 'resize', width: width}, undefined, 'service');
+
+            mono.isChrome && setTimeout(function() {
+                var innerWidth = window.innerWidth;
+                if (innerWidth < 723) {
+                    document.body.style.minWidth = innerWidth + 'px';
+                    document.body.style.width = innerWidth + 'px';
+                }
+            });
         }
 
         manager.domCache.trFixedHead.appendChild(head);
