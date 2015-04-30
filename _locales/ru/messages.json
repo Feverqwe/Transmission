@@ -152,9 +152,6 @@
     "OV_FL_QUEUED_SEED": {
         "message": "Ожидает раздачи"
     },
-    "OV_FL_SEEDING": {
-        "message": "Раздается"
-    },
     "OV_FL_STOPPED": {
         "message": "Остановлен"
     },

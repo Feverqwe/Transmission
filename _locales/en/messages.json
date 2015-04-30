@@ -141,9 +141,6 @@
     "OV_FL_QUEUED_SEED": {
         "message": "Queued Seed"
     },
-    "OV_FL_SEEDING": {
-        "message": "Seeding"
-    },
     "OV_FL_STOPPED": {
         "message": "Stopped"
     },

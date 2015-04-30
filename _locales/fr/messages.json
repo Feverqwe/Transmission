@@ -137,9 +137,6 @@
     "OV_FL_QUEUED_SEED": {
         "message": "Partage en attente"
     },
-    "OV_FL_SEEDING": {
-        "message": "Partage"
-    },
     "OV_FL_STOPPED": {
         "message": "Arrêté"
     },
