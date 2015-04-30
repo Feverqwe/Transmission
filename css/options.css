@@ -11,6 +11,10 @@ body {
     min-width: 780px;
 }
 
+body.loading {
+    visibility: hidden;
+}
+
 .user-select {
     -webkit-user-select: initial;
     -moz-user-select: initial;
