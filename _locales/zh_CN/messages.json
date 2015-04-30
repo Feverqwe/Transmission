@@ -2,12 +2,6 @@
     "lang": {
         "message": "zh-CN"
     },
-    "sizeList": {
-        "message": "[\"B\", \"kB\", \"MB\", \"GB\", \"TB\", \"PB\", \"EB\"]"
-    },
-    "sizePsList": {
-        "message": "[\"B/s\", \"kB/s\", \"MB/s\", \"GB/s\", \"TB/s\", \"PB/s\", \"EB/s\"]"
-    },
     "timeOutList": {
         "message": "[\"周\", \"天\", \"小时\", \"分钟\", \"秒\"]"
     },
