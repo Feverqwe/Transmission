@@ -680,22 +680,32 @@ var engine = {
         }
         return language;
     },
-    getLanguage: function(cb, force) {
+    setLanguage: function(languageWordList) {
+        var wordList = engine.language;
+        if (!wordList) {
+            engine.language = wordList = {};
+        }
+        for (var key in languageWordList) {
+            wordList[key] = languageWordList[key];
+        }
+    },
+    loadLanguage: function(cb, force) {
         var lang = force || engine.checkAvailableLanguage((engine.settings.lang || engine.detectLanguage()));
 
         engine.settings.lang = engine.settings.lang || lang;
 
+        if (engine.language && engine.language.lang === lang) {
+            return cb();
+        }
+
         var url = '_locales/' + lang.replace('-', '_') + '/messages.json';
         if (mono.isFF) {
             try {
-                engine.language = engine.readChromeLocale(JSON.parse(require('sdk/self').data.load(url)));
+                engine.setLanguage(engine.readChromeLocale(JSON.parse(require('sdk/self').data.load(url))));
                 cb();
             } catch (e) {
-                console.log(e);
-                if (lang !== 'en') {
-                    return engine.getLanguage(cb, 'en');
-                }
-                console.error('Can\'t load language!');
+                console.error('Can\'t load language!', lang);
+                cb();
             }
             return;
         }
@@ -703,16 +713,19 @@ var engine = {
             url: url,
             dataType: 'JSON',
             success: function(data) {
-                engine.language = engine.readChromeLocale(data);
+                engine.setLanguage(engine.readChromeLocale(data));
                 cb();
             },
             error: function() {
-                if (lang !== 'en') {
-                    return engine.getLanguage(cb, 'en');
-                }
-                console.error('Can\'t load language!');
+                console.error('Can\'t load language!', lang);
+                cb();
             }
         });
+    },
+    getLanguage: function(cb) {
+        engine.loadLanguage(function() {
+            engine.loadLanguage(cb);
+        }, 'en');
     },
     trafficCounter: function(torrentList) {
         var limit = 90;
