@@ -681,18 +681,16 @@ var engine = {
         return language;
     },
     setLanguage: function(languageWordList) {
-        var wordList = engine.language;
-        if (!wordList) {
-            engine.language = wordList = {};
-        }
         for (var key in languageWordList) {
-            wordList[key] = languageWordList[key];
+            engine.language[key] = languageWordList[key];
         }
     },
     loadLanguage: function(cb, force) {
         var lang = force || engine.checkAvailableLanguage((engine.settings.lang || engine.detectLanguage()));
 
-        engine.settings.lang = engine.settings.lang || lang;
+        if (!force) {
+            engine.settings.lang = engine.settings.lang || lang;
+        }
 
         if (engine.language && engine.language.lang === lang) {
             return cb();
@@ -723,6 +721,7 @@ var engine = {
         });
     },
     getLanguage: function(cb) {
+        engine.language = {};
         engine.loadLanguage(function() {
             engine.loadLanguage(cb);
         }, 'en');
