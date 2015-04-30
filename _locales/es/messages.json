@@ -1,6 +1,15 @@
 {
+    "appDesc": {
+        "message": "La extensión de añadir Transmission GUI web en su navegador web"
+    },
     "lang": {
         "message": "es"
+    },
+    "sizeList": {
+        "message": "[\"B\", \"kB\", \"MB\", \"GB\", \"TB\", \"PB\", \"EB\"]"
+    },
+    "sizePsList": {
+        "message": "[\"B/s\", \"kB/s\", \"MB/s\", \"GB/s\", \"TB/s\", \"PB/s\", \"EB/s\"]"
     },
     "timeOutList": {
         "message": "[\"w\", \"d\", \"h\", \"m\", \"s\"]"
@@ -296,5 +305,200 @@
         "message": "Actualizar",
         "originalKey": "DLG_RSSDOWNLOADER_22",
         "modifed": 1
+    },
+    "deleteSelected": {
+        "message": "Eliminar seleccionados",
+        "originalKey": "DLG_RSSDOWNLOADER_35",
+        "modifed": 1
+    },
+
+
+
+    "torrentAdded": {
+        "message": "Se añadió Torrent!"
+    },
+    "unexpectedError": {
+        "message": "Unexpected error!"
+    },
+    "fileSizeError": {
+        "message": "El archivo es demasiado grande"
+    },
+    "addInTorrentClient": {
+        "message": "Añadir en la Transmission"
+    },
+    "enterNewDirPath": {
+        "message": "Introduzca la ruta de acceso al nuevo directorio"
+    },
+    "torrentFileExists": {
+        "message": "Probablemente el archivo torrent ya existe!"
+    },
+    "currentDirectory": {
+        "message": "Directorio actual"
+    },
+    "openInTab": {
+        "message": "Abrir en pestaña"
+    },
+    "optClient": {
+        "message": "Transmission"
+    },
+    "optMain": {
+        "message": "Principal"
+    },
+    "optNotify": {
+        "message": "Notificar"
+    },
+    "optCtx": {
+        "message": "Menú contextual"
+    },
+    "backup": {
+        "message": "Copia de seguridad"
+    },
+    "restore": {
+        "message": "Restaurar"
+    },
+    "useSSL": {
+        "message": "El uso de SSL"
+    },
+    "path": {
+        "message": "Ruta",
+        "note": "URL path"
+    },
+    "hideSeedStatusItem": {
+        "message": "Ocultar torrentes con estatus \"Semillas\""
+    },
+    "hideFnishStatusItem": {
+        "message": "Ocultar torrentes con estatus \"Finalizado\""
+    },
+    "showSpeedGraph": {
+        "message": "Mostrar gráfico de velocidad"
+    },
+    "popupHeight": {
+        "message": "Height popup window"
+    },
+    "px": {
+        "message": "px"
+    },
+    "ms": {
+        "message": "ms"
+    },
+    "popupUpdateInterval": {
+        "message": "Intervalo de actualización de la lista de los torrentes"
+    },
+    "fixCirilicIf": {
+        "message": "Fix Cyrillic if..."
+    },
+    "fixCirilicTitle": {
+        "message": "Incorrectly displays the names of the torrents"
+    },
+    "fixCirilicTorrentPath": {
+        "message": "Incorrectly sets the directory to the newly added torrent"
+    },
+    "showNotificationOnDownloadCompleate": {
+        "message": "Mostrar notificar al completar descarga"
+    },
+    "displayActiveTorrentCountIcon": {
+        "message": "Muestra el número de la descarga de torrents en el icono de la extensión"
+    },
+    "backgroundUpdateInterval": {
+        "message": "Fondo intervalo de actualización de la lista de los torrentes"
+    },
+    "notificationTimeout": {
+        "message": "Ocultar notificación después"
+    },
+    "folderContextMenu": {
+        "message": "Mostrar lista de directorios"
+    },
+    "labelContextMenu": {
+        "message": "Mostrar lista de etiquetas"
+    },
+    "selectDownloadCategoryOnAddItemFromContextMenu": {
+        "message": "Categoría \"Descarga\" al agregar un torrente"
+    },
+    "treeViewContextMenu": {
+        "message": "Menú contextual Treeview"
+    },
+    "showDefaultFolderContextMenuItem": {
+        "message": "Mostrar directorio predeterminado"
+    },
+    "dirList": {
+        "message": "Lista de directorios"
+    },
+    "subPath": {
+        "message": "Subtrazado"
+    },
+    "labelList": {
+        "message": "Lista de etiquetas"
+    },
+    "optSaveInCloud": {
+        "message": "Salvo en la nube"
+    },
+    "toRestore": {
+        "message": "Restaurar"
+    },
+    "optGetFromCloud": {
+        "message": "Obtén la configuración de la nube"
+    },
+    "optClearCloudStorage": {
+        "message": "Retire todos los ajustes en la nube"
+    },
+    "showFileList": {
+        "message": "Lista de archivos"
+    },
+    "selectAll": {
+        "message": "Seleccionar todo"
+    },
+    "refresh": {
+        "message": "Refrescar"
+    },
+    "checkSettings": {
+        "message": "Сheck los ajustes"
+    },
+    "showFreeSpace": {
+        "message": "Mostrar el número de espacio disponible en disco"
+    },
+    "freeSpace": {
+        "message": "Espacio libre"
+    },
+    "startNow": {
+        "message": "Empezar ahora"
+    },
+    "rename": {
+        "message": "Renombrar"
+    },
+    "renameText": {
+        "message": "Introduzca el nombre del archivo"
+    },
+    "move": {
+        "message": "Movimiento"
+    },
+    "moveNewPath": {
+        "message": "Introduzca nuevo camino"
+    },
+    "fullPath": {
+        "message": "Directorio (ruta completa)"
+    },
+    "guiPath": {
+        "message": "Ruta WebUI"
+    },
+    "altSpeedEnable": {
+        "message": "Límites de velocidad temporales"
+    },
+    "torrentFileIsExists": {
+        "message": "Torrent se añadió antes"
+    },
+    "reannounce": {
+        "message": "Pregunta a más de sus compañeros"
+    },
+    "extra": {
+        "message": "Extra"
+    },
+    "queueTop": {
+        "message": "Top"
+    },
+    "queueBottom": {
+        "message": "Bottom"
+    },
+    "requireAuthentication": {
+        "message": "La autenticación es necesaria"
     }
 }

@@ -1,6 +1,15 @@
 {
+    "appDesc": {
+        "message": "扩展添加Transmission的网页图形用户界面在网页浏览器"
+    },
     "lang": {
         "message": "zh-CN"
+    },
+    "sizeList": {
+        "message": "[\"B\", \"kB\", \"MB\", \"GB\", \"TB\", \"PB\", \"EB\"]"
+    },
+    "sizePsList": {
+        "message": "[\"B/s\", \"kB/s\", \"MB/s\", \"GB/s\", \"TB/s\", \"PB/s\", \"EB/s\"]"
     },
     "timeOutList": {
         "message": "[\"周\", \"天\", \"小时\", \"分钟\", \"秒\"]"
@@ -284,5 +293,200 @@
         "message": "刷新",
         "originalKey": "DLG_RSSDOWNLOADER_22",
         "modifed": 1
+    },
+    "deleteSelected": {
+        "message": "删除所选",
+        "originalKey": "DLG_RSSDOWNLOADER_35",
+        "modifed": 1
+    },
+
+
+
+    "torrentAdded": {
+        "message": "洪流加入!"
+    },
+    "unexpectedError": {
+        "message": "Unexpected error!"
+    },
+    "fileSizeError": {
+        "message": "文件过大"
+    },
+    "addInTorrentClient": {
+        "message": "在添加Transmission的"
+    },
+    "enterNewDirPath": {
+        "message": "输入路径到新目录"
+    },
+    "torrentFileExists": {
+        "message": "也许torrent文件已经存在！"
+    },
+    "currentDirectory": {
+        "message": "目前的目錄 "
+    },
+    "openInTab": {
+        "message": "打开账单"
+    },
+    "optClient": {
+        "message": "Transmission"
+    },
+    "optMain": {
+        "message": "主要"
+    },
+    "optNotify": {
+        "message": "通知"
+    },
+    "optCtx": {
+        "message": "上下文菜单"
+    },
+    "backup": {
+        "message": "备份"
+    },
+    "restore": {
+        "message": "復原 "
+    },
+    "useSSL": {
+        "message": "Use SSL"
+    },
+    "path": {
+        "message": "路径",
+        "note": "URL path"
+    },
+    "hideSeedStatusItem": {
+        "message": "藏洪地位 \"做种中\""
+    },
+    "hideFnishStatusItem": {
+        "message": "藏洪地位 \"已完成\""
+    },
+    "showSpeedGraph": {
+        "message": "显示速度图"
+    },
+    "popupHeight": {
+        "message": "身高弹出窗口"
+    },
+    "px": {
+        "message": "像素"
+    },
+    "ms": {
+        "message": "毫秒"
+    },
+    "popupUpdateInterval": {
+        "message": "山洪更新间隔列表"
+    },
+    "fixCirilicIf": {
+        "message": "Fix Cyrillic if..."
+    },
+    "fixCirilicTitle": {
+        "message": "Incorrectly displays the names of the torrents"
+    },
+    "fixCirilicTorrentPath": {
+        "message": "Incorrectly sets the directory to the newly added torrent"
+    },
+    "showNotificationOnDownloadCompleate": {
+        "message": "完成下载时，显示通知"
+    },
+    "displayActiveTorrentCountIcon": {
+        "message": "显示扩展程序图标下载种子的数量"
+    },
+    "backgroundUpdateInterval": {
+        "message": "间隔背景更新种子名单"
+    },
+    "notificationTimeout": {
+        "message": "隐藏通知后，"
+    },
+    "folderContextMenu": {
+        "message": "目录显示列表"
+    },
+    "labelContextMenu": {
+        "message": "标签显示列表"
+    },
+    "selectDownloadCategoryOnAddItemFromContextMenu": {
+        "message": "打开“下载中”类别加入洪流时，"
+    },
+    "treeViewContextMenu": {
+        "message": "树视图上下文菜单"
+    },
+    "showDefaultFolderContextMenuItem": {
+        "message": "显示默认的目录"
+    },
+    "dirList": {
+        "message": "目录列表"
+    },
+    "subPath": {
+        "message": "子路径"
+    },
+    "labelList": {
+        "message": "标签列表"
+    },
+    "optSaveInCloud": {
+        "message": "保存在云"
+    },
+    "toRestore": {
+        "message": "恢复"
+    },
+    "optGetFromCloud": {
+        "message": "得到云设置"
+    },
+    "optClearCloudStorage": {
+        "message": "删除云中的所有设置"
+    },
+    "showFileList": {
+        "message": "文件列表"
+    },
+    "selectAll": {
+        "message": "选择所有"
+    },
+    "refresh": {
+        "message": "刷新"
+    },
+    "checkSettings": {
+        "message": "测试设置"
+    },
+    "showFreeSpace": {
+        "message": "显示的可用磁盘空间的数量"
+    },
+    "freeSpace": {
+        "message": "免费空间"
+    },
+    "startNow": {
+        "message": "现在开始"
+    },
+    "rename": {
+        "message": "重命名"
+    },
+    "renameText": {
+        "message": "输入文件名"
+    },
+    "move": {
+        "message": "打动"
+    },
+    "moveNewPath": {
+        "message": "进入新路径"
+    },
+    "fullPath": {
+        "message": "目录（完整路径）"
+    },
+    "guiPath": {
+        "message": "WebUI中路径"
+    },
+    "altSpeedEnable": {
+        "message": "临时限速"
+    },
+    "torrentFileIsExists": {
+        "message": "激流中前加入"
+    },
+    "reannounce": {
+        "message": "问多用户"
+    },
+    "extra": {
+        "message": "额外"
+    },
+    "queueTop": {
+        "message": "顶"
+    },
+    "queueBottom": {
+        "message": "底部"
+    },
+    "requireAuthentication": {
+        "message": "需要进行身份验证"
     }
 }
