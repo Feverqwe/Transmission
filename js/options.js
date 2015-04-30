@@ -378,7 +378,7 @@ var options = function() {
                     !(mono.isFF && mono.noAddon) && mono.sendMessage({action: 'resize', height: 480, width: 800}, undefined, "service");
 
                     var langSelect = document.getElementById("language");
-                    var langPos = ['ru', 'en', 'fr'].indexOf(options.language.lang);
+                    var langPos = ['ru', 'en', 'fr', 'zh-CN', 'es', 'pt-BR'].indexOf(options.language.lang);
                     if (langPos === -1) {
                         langPos = 1;
                     }
