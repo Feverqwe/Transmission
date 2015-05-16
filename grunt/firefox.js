@@ -148,6 +148,7 @@ exports.run = function (grunt) {
         }
 
         grunt.config.merge({
+            browser: 'firefox',
             vendor: 'firefox/src/',
             libFolder: 'lib/',
             dataJsFolder: 'data/js/',

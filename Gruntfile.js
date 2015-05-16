@@ -69,8 +69,6 @@ module.exports = function (grunt) {
             return;
         }
 
-        grunt.loadNpmTasks('grunt-closurecompiler');
-
         var jsList = dataJsList.concat(bgJsList);
         var copyTask = {
             copy: {}
@@ -123,8 +121,11 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-json-format');
     grunt.loadNpmTasks('grunt-exec');
     grunt.loadNpmTasks('grunt-contrib-compress');
+    grunt.loadNpmTasks('grunt-closurecompiler');
 
-    grunt.registerTask('extensionBase', ['copy:background', 'copy:dataJs', 'copy:baseData', 'copy:locales']);
+    require('./grunt/mono.js').run(grunt);
+
+    grunt.registerTask('extensionBase', ['copy:background', 'copy:dataJs', 'mono', 'copy:baseData', 'copy:locales']);
     grunt.registerTask('extensionBaseMin', ['extensionBase', 'compressJs']);
 
     require('./grunt/chrome.js').run(grunt);
