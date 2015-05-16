@@ -1,6 +1,5 @@
 /.idea/
 /output/
 /node_modules/
-/build/
-/build_firefox_sdk/
 /env.json
+_output

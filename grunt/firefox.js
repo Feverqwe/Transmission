@@ -44,6 +44,7 @@ exports.run = function (grunt) {
         });
 
         var done = this.async();
+
         var buildPath = grunt.template.process('<%= output %><%= vendor %>../<%= buildName %>.xpi');
         var unZipPath = grunt.template.process('<%= output %><%= vendor %>../unzip/');
 

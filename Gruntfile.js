@@ -69,41 +69,52 @@ module.exports = function (grunt) {
             return;
         }
 
+        grunt.loadNpmTasks('grunt-closurecompiler');
+
         var jsList = dataJsList.concat(bgJsList);
-        var taskList = [];
-        var taskListObj = {
-            exec: {},
+        var copyTask = {
             copy: {}
+        };
+
+        var ccTask = {
+            closurecompiler: {
+                minify: {
+                    files: {},
+                    options: {
+                        jscomp_warning: 'const',
+                        language_in: 'ECMASCRIPT5',
+                        max_processes: 2
+                    }
+                }
+            }
         };
 
         for (var i = 0, jsFile; jsFile = jsList[i]; i++) {
             if (jsFile.indexOf('.min.js') !== -1) continue;
 
             var jsFolderType = (bgJsList.indexOf(jsFile) !== -1) ? 'libFolder' : 'dataJsFolder';
-            var jsFolder = grunt.config(jsFolderType);
+            var cacheSubFolder = jsFolderType + '/';
 
-            var cacheDir = grunt.config('output') + 'cache/' + jsFolder;
-            if (!grunt.file.exists(cacheDir)) {
-                grunt.file.mkdir(cacheDir);
-            }
+            var cacheDir = grunt.config('output') + 'cache/' + cacheSubFolder;
+            !grunt.file.exists(cacheDir) && grunt.file.mkdir(cacheDir);
 
-            var taskName = 'compressJs_file_'+jsFile;
-            taskList.push('exec:'+taskName);
-
-            compressJsCopyTaskList.push('copy:'+taskName);
-            taskListObj.copy[taskName] = {
+            copyTask.copy['minify_file_'+jsFile] = {
                 flatten: true,
-                src: '<%= output %>cache/'+jsFolder+jsFile,
+                src: cacheDir+jsFile,
                 dest: '<%= output %><%= vendor %>'+'<%= '+jsFolderType+' %>'+jsFile
             };
 
-            var args = jsFile !== 'background.js' ? '' : '--jscomp_warning=const';
-            taskListObj.exec[taskName] = {
-                command: 'java -jar compiler.jar '+args+' --language_in ECMASCRIPT5 --js <%= output %><%= vendor %><%= '+jsFolderType+' %>'+jsFile+' --js_output_file <%= output %>cache/'+jsFolder+jsFile
-            };
+            ccTask.closurecompiler.minify.files[cacheDir+jsFile] = '<%= output %><%= vendor %><%= '+jsFolderType+' %>'+jsFile;
         }
-        grunt.config.merge(taskListObj);
-        grunt.task.run(taskList);
+
+        grunt.config.merge(copyTask);
+        for (var taskName in copyTask.copy) {
+            compressJsCopyTaskList.push('copy:' + taskName);
+        }
+
+        grunt.config.merge(ccTask);
+        grunt.task.run('closurecompiler:minify');
+
         grunt.task.run(compressJsCopyTaskList);
     });
 
