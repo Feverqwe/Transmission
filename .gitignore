@@ -1,5 +1,6 @@
-/nbproject/
 /.idea/
+/output/
+/node_modules/
 /build/
 /build_firefox_sdk/
-build_chrome.zip
+/env.json
