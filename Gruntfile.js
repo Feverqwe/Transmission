@@ -102,6 +102,32 @@ module.exports = function (grunt) {
     require('./grunt/chrome.js').run(grunt);
     require('./grunt/firefox.js').run(grunt);
 
+    grunt.registerTask('staticMono', function () {
+        grunt.loadNpmTasks('grunt-jsbeautifier');
+        grunt.config.merge({
+            jsbeautifier: {
+                monoChrome: {
+                    src: ['<%= monoChrome %>']
+                },
+                monoFirefox: {
+                    src: ['<%= monoFirefox %>']
+                }
+            },
+            monoChrome: 'src/vendor/chrome/js/' + 'mono.js',
+            monoFirefox: 'src/vendor/firefox/data/js/' + 'mono.js'
+        });
+        var monoModule = require('mono');
+        var content;
+
+        content = monoModule.get.mono('oldChrome');
+        grunt.file.write(grunt.template.process(grunt.config('monoChrome')), content);
+
+        content = monoModule.get.mono('firefox');
+        grunt.file.write(grunt.template.process(grunt.config('monoFirefox')), content);
+
+        grunt.task.run(['jsbeautifier:monoChrome', 'jsbeautifier:monoFirefox']);
+    });
+
     grunt.registerTask('default', [
         'clean:output',
         'clean:builds',

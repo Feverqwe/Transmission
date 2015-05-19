@@ -102,7 +102,6 @@ exports.run = function (grunt) {
                 expand: true,
                 src: [
                     'locale/*',
-                    'js/**',
                     'lib/*',
                     'data/**'
                 ],

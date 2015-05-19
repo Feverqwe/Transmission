@@ -4,17 +4,19 @@
   "ffMinVersion": "29.0",
   "ffMaxVersion": "41.0",
   "dependencies": {
-    "unzip": "^0.1.11",
-    "fs": "^0.0.2"
-  },
-  "devDependencies": {
+    "grunt": ">=0.4.5",
+    "fs": "^0.0.2",
     "grunt-json-format": "^1.0.0",
     "grunt-exec": "^0.4.6",
     "grunt-contrib-copy": "^0.7.0",
     "grunt-contrib-compress": "^0.13.0",
     "grunt-contrib-clean": "^0.6.0",
     "grunt-closurecompiler": "",
-    "grunt": ">=0.4.5"
+    "unzip": "^0.1.11"
+  },
+  "devDependencies": {
+    "grunt-jsbeautifier": "",
+    "mono": "git://github.com/Feverqwe/Mono.git"
   },
   "outputDir": "output/",
   "extVersion": "1.4.2"

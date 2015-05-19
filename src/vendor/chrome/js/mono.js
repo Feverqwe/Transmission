@@ -12,7 +12,7 @@
 
 var mono = (typeof mono !== 'undefined') ? mono : undefined;
 
-(function (window, factory) {
+(function(window, factory) {
     if (mono) {
         return;
     }
@@ -25,7 +25,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
     exports.isModule = true;
 
     exports.init = factory;
-}(typeof window !== "undefined" ? window : undefined, function (_addon) {
+}(typeof window !== "undefined" ? window : undefined, function(_addon) {
     var require;
 
     /**
@@ -61,7 +61,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
     mono.isChrome = true;
     mono.isChromeInject = !chrome.hasOwnProperty('tabs');
 
-    mono.cloneObj = function (obj) {
+    mono.cloneObj = function(obj) {
         return JSON.parse(JSON.stringify(obj));
     };
 
@@ -81,9 +81,8 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
          * @param {object} message - Message
          * @param {function} cb - Callback function
          */
-        addCb: function (message, cb) {
-            mono.onMessage.inited === undefined && mono.onMessage(function () {
-            });
+        addCb: function(message, cb) {
+            mono.onMessage.inited === undefined && mono.onMessage(function() {});
 
             if (msgTools.cbStack.length > mono.messageStack) {
                 msgTools.clean();
@@ -99,7 +98,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
          * Call function from callback list
          * @param {object} message
          */
-        callCb: function (message) {
+        callCb: function(message) {
             var cb = msgTools.cbObj[message.responseId];
             if (cb === undefined) return;
             delete msgTools.cbObj[message.responseId];
@@ -112,7 +111,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
          * @param {string} callbackId
          * @param {*} responseMessage
          */
-        mkResponse: function (response, callbackId, responseMessage) {
+        mkResponse: function(response, callbackId, responseMessage) {
             if (callbackId === undefined) return;
 
             responseMessage = {
@@ -124,7 +123,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
         /**
          * Clear callback stack
          */
-        clearCbStack: function () {
+        clearCbStack: function() {
             for (var item in msgTools.cbObj) {
                 delete msgTools.cbObj[item];
             }
@@ -134,7 +133,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
          * Remove item from cbObj and cbStack by cbId
          * @param {string} cbId - Callback id
          */
-        removeCb: function (cbId) {
+        removeCb: function(cbId) {
             var cb = msgTools.cbObj[cbId];
             if (cb === undefined) return;
             delete msgTools.cbObj[cbId];
@@ -144,7 +143,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
          * Remove old callback from cbObj
          * @param {number} aliveTime - Keep alive time
          */
-        clean: function (aliveTime) {
+        clean: function(aliveTime) {
             var now = Date.now();
             aliveTime = aliveTime || 120 * 1000;
             for (var item in msgTools.cbObj) {
@@ -168,7 +167,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
      * @param {string} [hook] - Hook string
      * @returns {*|string} - callback id
      */
-    mono.sendMessage = function (message, cb, hook) {
+    mono.sendMessage = function(message, cb, hook) {
         message = {
             data: message,
             hook: hook
@@ -188,7 +187,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
      * @param {string} [hook] - Hook string
      * @returns {*|string} - callback id
      */
-    mono.sendMessageToActiveTab = function (message, cb, hook) {
+    mono.sendMessageToActiveTab = function(message, cb, hook) {
         message = {
             data: message,
             hook: hook
@@ -211,10 +210,10 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
      * Listen messages and call callback function
      * @param {function} cb - Callback function
      */
-    mono.onMessage = function (cb) {
+    mono.onMessage = function(cb) {
         var _this = this;
         mono.onMessage.inited = 1;
-        mono.onMessage.on.call(_this, function (message, response) {
+        mono.onMessage.on.call(_this, function(message, response) {
             if (message.responseId !== undefined) {
                 return msgTools.callCb(message);
             }
@@ -232,34 +231,36 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
     mono.storage = undefined;
 
 
-    (function () {
+
+
+    (function() {
         if (!mono.isChrome || !(chrome.hasOwnProperty('runtime') && chrome.runtime.onMessage)) return;
 
         var lowLevelHook = {};
 
         var chromeMsg = {
             cbList: [],
-            mkResponse: function (sender) {
+            mkResponse: function(sender) {
                 if (sender.tab) {
                     // send to tab
-                    return function (message) {
+                    return function(message) {
                         chromeMsg.sendTo(message, sender.tab.id);
                     }
                 }
                 if (sender.monoDirect) {
-                    return function (message) {
+                    return function(message) {
                         sender(mono.cloneObj(message), chromeMsg.onMessage);
                     };
                 }
-                return function (message) {
+                return function(message) {
                     // send to extension
                     chromeMsg.send(message);
                 }
             },
-            sendTo: function (message, tabId) {
+            sendTo: function(message, tabId) {
                 chrome.tabs.sendMessage(tabId, message);
             },
-            onMessage: function (message, sender, _response) {
+            onMessage: function(message, sender, _response) {
                 if (mono.isChromeBgPage === 1) {
                     if (message.fromBgPage === 1) {
                         // block msg's from bg page to bg page.
@@ -282,25 +283,25 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
                     cb(message, response);
                 }
             },
-            on: function (cb) {
+            on: function(cb) {
                 chromeMsg.cbList.push(cb);
                 if (chromeMsg.cbList.length !== 1) {
                     return;
                 }
                 chrome.runtime.onMessage.addListener(chromeMsg.onMessage);
             },
-            sendToActiveTab: function (message) {
+            sendToActiveTab: function(message) {
                 chrome.tabs.query({
                     active: true,
                     currentWindow: true
-                }, function (tabs) {
+                }, function(tabs) {
                     if (tabs[0] === undefined || tabs[0].id < 0) {
                         return;
                     }
                     chromeMsg.sendTo(message, tabs[0].id);
                 });
             },
-            send: function (message) {
+            send: function(message) {
                 if (mono.isChromeBgPage) {
                     message.fromBgPage = 1;
                 } else {
@@ -312,12 +313,12 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
 
         chromeMsg.on.lowLevelHook = lowLevelHook;
 
-        (function () {
+        (function() {
             if (!chrome.runtime.hasOwnProperty('getBackgroundPage')) return;
 
             mono.isChromeBgPage = location.href.indexOf('_generated_background_page.html') !== -1;
 
-            chrome.runtime.getBackgroundPage(function (bgWin) {
+            chrome.runtime.getBackgroundPage(function(bgWin) {
                 if (bgWin !== window) {
                     delete mono.isChromeBgPage;
                 } else {
@@ -326,11 +327,12 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
 
                 if (!mono.isChromeBgPage) {
                     chromeMsg.onMessage.monoDirect = true;
-                    chromeMsg.send = mono.sendMessage.send = function (message) {
+                    chromeMsg.send = mono.sendMessage.send = function(message) {
                         bgWin.mono.chromeDirectOnMessage(mono.cloneObj(message), chromeMsg.onMessage);
                     }
-                } else if (mono.chromeDirectOnMessage === undefined) {
-                    mono.chromeDirectOnMessage = function (message, sender) {
+                } else
+                if (mono.chromeDirectOnMessage === undefined) {
+                    mono.chromeDirectOnMessage = function(message, sender) {
                         chromeMsg.onMessage(message, sender);
                     };
                 }
@@ -341,34 +343,34 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
         mono.sendMessage.send = chromeMsg.send;
         mono.sendMessage.sendToActiveTab = chromeMsg.sendToActiveTab;
     })();
-    (function () {
+    (function() {
         if (!mono.isChrome || (chrome.hasOwnProperty('runtime') && chrome.runtime.onMessage)) return;
 
         var lowLevelHook = {};
 
         var chromeMsg = {
             cbList: [],
-            mkResponse: function (sender, _response) {
+            mkResponse: function(sender, _response) {
                 if (sender.tab && sender.tab.id > -1) {
                     // send to tab
-                    return function (message) {
+                    return function(message) {
                         chromeMsg.sendTo(message, sender.tab.id);
                     }
                 }
 
-                return function (message) {
+                return function(message) {
                     // send to extension
                     _response(message);
                 }
             },
-            sendTo: function (message, tabId) {
-                chrome.tabs.sendRequest(tabId, message, function (message) {
+            sendTo: function(message, tabId) {
+                chrome.tabs.sendRequest(tabId, message, function(message) {
                     if (message && message.responseId !== undefined) {
                         return msgTools.callCb(message);
                     }
                 });
             },
-            onMessage: function (message, sender, _response) {
+            onMessage: function(message, sender, _response) {
                 if (mono.isChromeBgPage === 1) {
                     if (message.fromBgPage === 1) {
                         // block msg's from bg page to bg page.
@@ -391,31 +393,31 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
                     cb(message, response);
                 }
             },
-            on: function (cb) {
+            on: function(cb) {
                 chromeMsg.cbList.push(cb);
                 if (chromeMsg.cbList.length !== 1) {
                     return;
                 }
                 chrome.extension.onRequest.addListener(chromeMsg.onMessage);
             },
-            sendToActiveTab: function (message) {
+            sendToActiveTab: function(message) {
                 chrome.tabs.query({
                     active: true,
                     currentWindow: true
-                }, function (tabs) {
+                }, function(tabs) {
                     if (tabs[0] === undefined || tabs[0].id < 0) {
                         return;
                     }
                     chromeMsg.sendTo(message, tabs[0].id);
                 });
             },
-            send: function (message) {
+            send: function(message) {
                 if (mono.isChromeBgPage) {
                     message.fromBgPage = 1;
                 } else {
                     message.toBgPage = 1;
                 }
-                chrome.extension.sendRequest(message, function (message) {
+                chrome.extension.sendRequest(message, function(message) {
                     if (message && message.responseId !== undefined) {
                         return msgTools.callCb(message);
                     }
@@ -425,7 +427,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
 
         chromeMsg.on.lowLevelHook = lowLevelHook;
 
-        (function () {
+        (function() {
             try {
                 if (chrome.runtime.getBackgroundPage === undefined) return;
             } catch (e) {
@@ -434,7 +436,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
 
             mono.isChromeBgPage = location.href.indexOf('_generated_background_page.html') !== -1;
 
-            chrome.runtime.getBackgroundPage(function (bgWin) {
+            chrome.runtime.getBackgroundPage(function(bgWin) {
                 if (bgWin !== window) {
                     delete mono.isChromeBgPage;
                 } else {
@@ -447,7 +449,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
         mono.sendMessage.send = chromeMsg.send;
         mono.sendMessage.sendToActiveTab = chromeMsg.sendToActiveTab;
     })();
-    (function () {
+    (function() {
         if (!mono.isChrome || !chrome.hasOwnProperty('storage')) return;
 
         /**
@@ -455,7 +457,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
          * @param {string} mode - Local/Sync
          * @returns {{get: Function, set: Function, remove: Function, clear: Function}}
          */
-        var chStorage = function (mode) {
+        var chStorage = function(mode) {
             return chrome.storage[mode];
         };
 

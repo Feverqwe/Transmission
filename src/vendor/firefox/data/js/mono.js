@@ -12,7 +12,7 @@
 
 var mono = (typeof mono !== 'undefined') ? mono : undefined;
 
-(function (window, factory) {
+(function(window, factory) {
     if (mono) {
         return;
     }
@@ -25,7 +25,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
     exports.isModule = true;
 
     exports.init = factory;
-}(typeof window !== "undefined" ? window : undefined, function (_addon) {
+}(typeof window !== "undefined" ? window : undefined, function(_addon) {
     var require;
 
     /**
@@ -63,15 +63,17 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
     if (mono.isModule) {
         require = _require;
         mono.addon = _addon;
-    } else if (typeof addon !== 'undefined' && addon.hasOwnProperty('port')) {
+    } else
+    if (typeof addon !== 'undefined' && addon.hasOwnProperty('port')) {
         mono.addon = addon;
-    } else if (typeof self !== 'undefined' && self.hasOwnProperty('port')) {
+    } else
+    if (typeof self !== 'undefined' && self.hasOwnProperty('port')) {
         mono.addon = self;
     } else {
         mono.noAddon = true;
     }
 
-    mono.cloneObj = function (obj) {
+    mono.cloneObj = function(obj) {
         return JSON.parse(JSON.stringify(obj));
     };
 
@@ -91,9 +93,8 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
          * @param {object} message - Message
          * @param {function} cb - Callback function
          */
-        addCb: function (message, cb) {
-            mono.onMessage.inited === undefined && mono.onMessage(function () {
-            });
+        addCb: function(message, cb) {
+            mono.onMessage.inited === undefined && mono.onMessage(function() {});
 
             if (msgTools.cbStack.length > mono.messageStack) {
                 msgTools.clean();
@@ -109,7 +110,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
          * Call function from callback list
          * @param {object} message
          */
-        callCb: function (message) {
+        callCb: function(message) {
             var cb = msgTools.cbObj[message.responseId];
             if (cb === undefined) return;
             delete msgTools.cbObj[message.responseId];
@@ -122,7 +123,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
          * @param {string} callbackId
          * @param {*} responseMessage
          */
-        mkResponse: function (response, callbackId, responseMessage) {
+        mkResponse: function(response, callbackId, responseMessage) {
             if (callbackId === undefined) return;
 
             responseMessage = {
@@ -134,7 +135,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
         /**
          * Clear callback stack
          */
-        clearCbStack: function () {
+        clearCbStack: function() {
             for (var item in msgTools.cbObj) {
                 delete msgTools.cbObj[item];
             }
@@ -144,7 +145,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
          * Remove item from cbObj and cbStack by cbId
          * @param {string} cbId - Callback id
          */
-        removeCb: function (cbId) {
+        removeCb: function(cbId) {
             var cb = msgTools.cbObj[cbId];
             if (cb === undefined) return;
             delete msgTools.cbObj[cbId];
@@ -154,7 +155,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
          * Remove old callback from cbObj
          * @param {number} aliveTime - Keep alive time
          */
-        clean: function (aliveTime) {
+        clean: function(aliveTime) {
             var now = Date.now();
             aliveTime = aliveTime || 120 * 1000;
             for (var item in msgTools.cbObj) {
@@ -178,7 +179,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
      * @param {string} [hook] - Hook string
      * @returns {*|string} - callback id
      */
-    mono.sendMessage = function (message, cb, hook) {
+    mono.sendMessage = function(message, cb, hook) {
         message = {
             data: message,
             hook: hook
@@ -198,7 +199,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
      * @param {string} [hook] - Hook string
      * @returns {*|string} - callback id
      */
-    mono.sendMessageToActiveTab = function (message, cb, hook) {
+    mono.sendMessageToActiveTab = function(message, cb, hook) {
         message = {
             data: message,
             hook: hook
@@ -221,10 +222,10 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
      * Listen messages and call callback function
      * @param {function} cb - Callback function
      */
-    mono.onMessage = function (cb) {
+    mono.onMessage = function(cb) {
         var _this = this;
         mono.onMessage.inited = 1;
-        mono.onMessage.on.call(_this, function (message, response) {
+        mono.onMessage.on.call(_this, function(message, response) {
             if (message.responseId !== undefined) {
                 return msgTools.callCb(message);
             }
@@ -242,25 +243,27 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
     mono.storage = undefined;
 
 
-    (function () {
+
+
+    (function() {
         if (!mono.isFF) return;
 
-        (function () {
+        (function() {
             if (!mono.noAddon) return;
 
             var onCollector = [];
             mono.addon = {
                 port: {
-                    emit: function (pageId, message) {
+                    emit: function(pageId, message) {
                         var msg = '>' + JSON.stringify(message);
                         window.postMessage(msg, "*");
                     },
-                    on: function (pageId, onMessage) {
+                    on: function(pageId, onMessage) {
                         onCollector.push(onMessage);
                         if (onCollector.length > 1) {
                             return;
                         }
-                        window.addEventListener('monoMessage', function (e) {
+                        window.addEventListener('monoMessage', function(e) {
                             if (e.detail[0] !== '<') {
                                 return;
                             }
@@ -277,31 +280,31 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
 
         var firefoxMsg = {
             cbList: [],
-            mkResponse: function (pageId) {
-                return function (message) {
+            mkResponse: function(pageId) {
+                return function(message) {
                     firefoxMsg.sendTo(message, pageId);
                 }
             },
-            on: function (cb) {
+            on: function(cb) {
                 firefoxMsg.cbList.push(cb);
                 if (firefoxMsg.cbList.length !== 1) {
                     return;
                 }
-                mono.addon.port.on('mono', function (msg) {
+                mono.addon.port.on('mono', function(msg) {
                     var response = firefoxMsg.mkResponse(msg.from);
                     for (var i = 0, cb; cb = firefoxMsg.cbList[i]; i++) {
                         cb(msg, response);
                     }
                 });
             },
-            send: function (message) {
+            send: function(message) {
                 mono.addon.port.emit('mono', message);
             },
-            sendTo: function (message, to) {
+            sendTo: function(message, to) {
                 message.to = to;
                 mono.addon.port.emit('mono', message);
             },
-            sendToActiveTab: function (message) {
+            sendToActiveTab: function(message) {
                 message.hook = 'activeTab';
                 firefoxMsg.sendTo(message);
             }
@@ -311,7 +314,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
         mono.sendMessage.send = firefoxMsg.send;
         mono.sendMessage.sendToActiveTab = firefoxMsg.sendToActiveTab;
     })();
-    (function () {
+    (function() {
         if (!mono.isFF) return;
 
         if (!mono.isModule) {
@@ -325,7 +328,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
                  * @param {string|null|undefined|Array|Object} obj - Item's, null/undefined - all items
                  * @param {function} cb - Callback function
                  */
-                get: function (obj, cb) {
+                get: function(obj, cb) {
                     mono.sendMessage({
                         action: 'get',
                         data: obj
@@ -336,7 +339,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
                  * @param {Object} obj
                  * @param {function} [cb]
                  */
-                set: function (obj, cb) {
+                set: function(obj, cb) {
                     mono.sendMessage({
                         action: 'set',
                         data: obj
@@ -347,7 +350,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
                  * @param {Array|string} obj
                  * @param {function} [cb]
                  */
-                remove: function (obj, cb) {
+                remove: function(obj, cb) {
                     mono.sendMessage({
                         action: 'remove',
                         data: obj
@@ -357,7 +360,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
                  * Clear storage
                  * @param {function} [cb]
                  */
-                clear: function (cb) {
+                clear: function(cb) {
                     mono.sendMessage({
                         action: 'clear'
                     }, cb, 'monoStorage');
@@ -372,7 +375,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
          * Firefox simple storage
          * @returns {{get: Function, set: Function, remove: Function, clear: Function}}
          */
-        var ffSimpleStorage = function () {
+        var ffSimpleStorage = function() {
             var ss = require('sdk/simple-storage');
             return {
                 /**
@@ -380,7 +383,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
                  * @param {string|null|undefined|Array|Object} src - Item's, null/undefined - all items
                  * @param {function} cb - Callback function
                  */
-                get: function (src, cb) {
+                get: function(src, cb) {
                     var key, obj = {};
                     if (src === undefined || src === null) {
                         for (key in ss.storage) {
@@ -417,7 +420,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
                  * @param {Object} obj
                  * @param {function} [cb]
                  */
-                set: function (obj, cb) {
+                set: function(obj, cb) {
                     for (var key in obj) {
                         ss.storage[key] = obj[key];
                     }
@@ -428,7 +431,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
                  * @param {Array|string} obj
                  * @param {function} [cb]
                  */
-                remove: function (obj, cb) {
+                remove: function(obj, cb) {
                     if (Array.isArray(obj)) {
                         for (var i = 0, len = obj.length; i < len; i++) {
                             var key = obj[i];
@@ -443,7 +446,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
                  * Clear storage
                  * @param {function} [cb]
                  */
-                clear: function (cb) {
+                clear: function(cb) {
                     for (var key in ss.storage) {
                         delete ss.storage[key];
                     }
