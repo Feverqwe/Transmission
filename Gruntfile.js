@@ -62,17 +62,8 @@ module.exports = function (grunt) {
         output: '<%= pkg.outputDir %>'
     });
 
-    var compressJsCopyTaskList = [];
     grunt.registerTask('compressJs', function() {
-        if (compressJsCopyTaskList.length > 0) {
-            grunt.task.run(compressJsCopyTaskList);
-            return;
-        }
-
         var jsList = dataJsList.concat(bgJsList);
-        var copyTask = {
-            copy: {}
-        };
 
         var ccTask = {
             closurecompiler: {
@@ -91,29 +82,12 @@ module.exports = function (grunt) {
             if (jsFile.indexOf('.min.js') !== -1) continue;
 
             var jsFolderType = (bgJsList.indexOf(jsFile) !== -1) ? 'libFolder' : 'dataJsFolder';
-            var cacheSubFolder = jsFolderType + '/';
 
-            var cacheDir = grunt.config('output') + 'cache/' + cacheSubFolder;
-            !grunt.file.exists(cacheDir) && grunt.file.mkdir(cacheDir);
-
-            copyTask.copy['minify_file_'+jsFile] = {
-                flatten: true,
-                src: cacheDir+jsFile,
-                dest: '<%= output %><%= vendor %>'+'<%= '+jsFolderType+' %>'+jsFile
-            };
-
-            ccTask.closurecompiler.minify.files[cacheDir+jsFile] = '<%= output %><%= vendor %><%= '+jsFolderType+' %>'+jsFile;
-        }
-
-        grunt.config.merge(copyTask);
-        for (var taskName in copyTask.copy) {
-            compressJsCopyTaskList.push('copy:' + taskName);
+            ccTask.closurecompiler.minify.files['<%= output %><%= vendor %><%= '+jsFolderType+' %>'+jsFile] = '<%= output %><%= vendor %><%= '+jsFolderType+' %>'+jsFile;
         }
 
         grunt.config.merge(ccTask);
         grunt.task.run('closurecompiler:minify');
-
-        grunt.task.run(compressJsCopyTaskList);
     });
 
     grunt.loadNpmTasks('grunt-contrib-clean');
@@ -123,10 +97,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-compress');
     grunt.loadNpmTasks('grunt-closurecompiler');
 
-    require('./grunt/mono.js').run(grunt);
-
-    grunt.registerTask('extensionBase', ['copy:background', 'copy:dataJs', 'mono', 'copy:baseData', 'copy:locales']);
-    grunt.registerTask('extensionBaseMin', ['extensionBase', 'compressJs']);
+    grunt.registerTask('extensionBase', ['copy:background', 'copy:dataJs', 'copy:baseData', 'copy:locales']);
 
     require('./grunt/chrome.js').run(grunt);
     require('./grunt/firefox.js').run(grunt);

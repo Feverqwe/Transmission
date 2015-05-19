@@ -5,8 +5,7 @@
   "ffMaxVersion": "41.0",
   "dependencies": {
     "unzip": "^0.1.11",
-    "fs": "^0.0.2",
-    "mono": "git://github.com/Feverqwe/Mono.git"
+    "fs": "^0.0.2"
   },
   "devDependencies": {
     "grunt-json-format": "^1.0.0",

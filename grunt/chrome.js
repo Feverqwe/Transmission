@@ -29,6 +29,16 @@ exports.run = function (grunt) {
                     }
                 }]
             }
+        },
+        copy: {
+            chromeBase: {
+                cwd: 'src/vendor/chrome/',
+                expand: true,
+                src: [
+                    'js/**'
+                ],
+                dest: '<%= output %><%= vendor %>'
+            }
         }
     });
 
@@ -51,8 +61,10 @@ exports.run = function (grunt) {
         });
 
         grunt.task.run([
-            'extensionBaseMin',
+            'extensionBase',
+            'copy:chromeBase',
             'chromeManifest',
+            'compressJs',
             'json-format:chromeManifestFormat',
             'compress:chrome'
         ]);
@@ -70,8 +82,10 @@ exports.run = function (grunt) {
         });
 
         grunt.task.run([
-            'extensionBaseMin',
+            'extensionBase',
+            'copy:chromeBase',
             'chromeManifest',
+            'compressJs',
             'json-format:chromeManifestFormat',
             'compress:chrome'
         ]);
