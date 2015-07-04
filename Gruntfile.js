@@ -11,7 +11,8 @@ module.exports = function (grunt) {
         'selectBox.js',
         'jquery-2.1.3.min.js',
         'jquery.contextMenu.js',
-        'd3.min.js'
+        'd3.min.js',
+        'bootstrap-colorpicker.js'
     ];
     grunt.initConfig({
         env: grunt.file.exists('env.json') ? grunt.file.readJSON('env.json') : {},
@@ -48,8 +49,8 @@ module.exports = function (grunt) {
                 cwd: 'src/',
                 expand: true,
                 src: [
-                    'css/*',
-                    'images/*',
+                    'css/**',
+                    'images/**',
                     'manager.html',
                     'options.html'
                 ],

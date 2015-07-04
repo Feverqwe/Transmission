@@ -5,6 +5,7 @@
         <title>Transmission easy client</title>
         <link rel="shortcut icon" href="images/settings.png">
         <link rel="stylesheet" type="text/css" href="css/options.css">
+        <link rel="stylesheet" type="text/css" href="css/bootstrap-colorpicker.css">
         <script src="js/mono.js"></script>
     </head>
     <body class="loading">
@@ -54,6 +55,7 @@
                         <h2 data-lang="optNotify">Уведомления</h2>
                         <label><span data-lang="showNotificationOnDownloadCompleate">Уведомлять при завершении загрузки раздачи</span><input type="checkbox" data-option="showNotificationOnDownloadCompleate"/></label>
                         <label><span data-lang="displayActiveTorrentCountIcon">Отображать количество активных раздач на иконке расширения</span><input type="checkbox" data-option="displayActiveTorrentCountIcon"/></label>
+                        <label><span data-lang="badgeColor">Цвет уведомления</span><input type="text" data-option="badgeColor"/><span class="selectColor"></span></label>
                         <label><span data-lang="backgroundUpdateInterval">Интервал фонового обновления списка раздач</span><input type="number" data-option="backgroundUpdateInterval" min="1000"/> <span data-lang="ms">миллисекунда</span></label>
                         <label><span data-lang="notificationTimeout">Время отображения уведомлений</span><input type="number" data-option="notificationTimeout"/> <span data-lang="ms">миллисекунда</span></label>
                     </div>
@@ -97,6 +99,7 @@
             </div>
         </div>
         <script src="js/jquery-2.1.3.min.js"></script>
+        <script src="js/bootstrap-colorpicker.js"></script>
         <script src="js/options.js"></script>
     </body>
 </html>

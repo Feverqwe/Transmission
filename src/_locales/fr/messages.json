@@ -496,5 +496,8 @@
     },
     "requireAuthentication": {
         "message": "Authentification requise"
+    },
+    "badgeColor": {
+        "message": "La Notification de la couleur"
     }
 }

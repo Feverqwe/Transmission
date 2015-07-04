@@ -513,5 +513,8 @@
     },
     "requireAuthentication": {
         "message": "Требуется аутентификация"
+    },
+    "badgeColor": {
+        "message": "Цвет уведомления"
     }
 }

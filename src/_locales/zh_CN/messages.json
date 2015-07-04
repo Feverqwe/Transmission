@@ -488,5 +488,8 @@
     },
     "requireAuthentication": {
         "message": "需要进行身份验证"
+    },
+    "badgeColor": {
+        "message": "通知的颜色"
     }
 }

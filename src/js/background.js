@@ -54,6 +54,8 @@ var engine = {
         treeViewContextMenu: 0,
         showDefaultFolderContextMenuItem: 0,
 
+        badgeColor: '0,0,0,0.40',
+
         showFreeSpace: 1,
 
         guiPath: '',
@@ -802,10 +804,19 @@ var engine = {
         }
     },
     setBadgeText: mono.isChrome ? function(text) {
+        engine.setBadgeText.lastText = text;
+        var color = engine.settings.badgeColor.split(',').map(function(i){return parseFloat(i);});
+        if (color.length === 4) {
+            color.push(parseInt(255 * color.splice(-1)[0]));
+        }
+        chrome.browserAction.setBadgeBackgroundColor({
+            color: color
+        });
         chrome.browserAction.setBadgeText({
             text: text
         });
     } : function(text) {
+        engine.setBadgeText.lastText = text;
         mono.setBadgeText(16, text, function(url16) {
             mono.setBadgeText(32, text, function(url32) {
                 mono.setBadgeText(64, text, function(url64) {
@@ -1468,6 +1479,10 @@ var engine = {
                 }
                 response(data.ut);
             });
+        },
+        changeBadgeColor: function(message) {
+            engine.settings.badgeColor = message.color;
+            engine.setBadgeText(engine.setBadgeText.lastText || '0');
         }
     }
 };
@@ -1526,10 +1541,10 @@ var engine = {
                             +'<image x="0" y="0" width="'+size+'" height="'+size+'" xlink:href="'+base64data+'" />'
                             +'<rect rx="4" ry="4" x="'+left_p+'" y="'+(size-box_h)+'" '
                             +'width="'+box_w+'" height="'+box_h+'" '
-                            +'style="fill:rgba(60,60,60,0.8);stroke:black;stroke-width:1;opacity:0.6;"/>'
+                            +'style="fill:rgba('+engine.settings.badgeColor+');stroke:black;stroke-width:1;"/>'
                             +'<text fill="white" x="'+(left_p+parseInt( text_p / 2 ))+'" y="'+(size-text_p)+'" style="' +
                             'font-family: Arial;' +
-                            'font-weight: bolder;' +
+                            'font-weight: bold;' +
                             'font-size: '+fSize+'px;' +
                             'background-color: black;'+
                             '">'+text+'</text>'+'</svg>';
@@ -1554,9 +1569,6 @@ var engine = {
             engine.ajax.xhr = require('sdk/net/xhr').XMLHttpRequest;
         } else {
             engine.ajax.xhr = XMLHttpRequest;
-            chrome.browserAction.setBadgeBackgroundColor({
-                color: [0, 0, 0, 40]
-            });
             chrome.browserAction.setBadgeText({
                 text: ''
             });

@@ -352,6 +352,51 @@ var options = function() {
         window[type+'SaveList']();
     };
 
+    var setColorPicker = function() {
+        var isFocus = false;
+        var input = document.querySelector('input[data-option="badgeColor"]');
+        var $btn = $(input.parentNode.querySelector('.selectColor'));
+
+        var lastColor = options.settings.badgeColor;
+        $btn.data('color', 'rgba('+lastColor+')');
+        $btn.css('backgroundColor', 'rgba('+lastColor+')');
+
+        var onColorSelect = function(e){
+            var color = e.color.toRGB();
+
+            var iconColor = color.r + ',' + color.g + ',' + color.b + ',' + color.a;
+            lastColor = iconColor;
+
+            $btn.css('backgroundColor', 'rgba('+iconColor+')');
+            mono.sendMessage({action: 'changeBadgeColor', color: iconColor});
+
+            if (!isFocus) {
+                input.value = lastColor;
+            }
+        };
+
+        var onHidePicker = function() {
+            input.dispatchEvent(new CustomEvent('keyup'));
+        };
+
+        input.addEventListener('keyup', function() {
+            $btn.colorpicker('setValue', 'rgba('+input.value+')');
+        });
+
+        input.addEventListener('focus', function() {
+            isFocus = true;
+        });
+
+        input.addEventListener('blur', function() {
+            isFocus = false;
+        });
+
+        $btn.colorpicker();
+
+        $btn.on('changeColor.colorpicker', onColorSelect);
+        $btn.on('hidePicker.colorpicker', onHidePicker);
+    };
+
     return {
         start: function() {
             mono.onMessage(function(message) {
@@ -441,6 +486,8 @@ var options = function() {
                     domCache.restoreInp = $('#restoreInp');
 
                     set_place_holder();
+
+                    setColorPicker();
 
                     if (!mono.isChrome) {
                         domCache.saveInCloudBtn.hide();
