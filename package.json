@@ -15,8 +15,7 @@
     "unzip": "^0.1.11"
   },
   "devDependencies": {
-    "grunt-jsbeautifier": "",
-    "mono": "git://github.com/Feverqwe/Mono.git"
+    "grunt-jsbeautifier": ""
   },
   "outputDir": "output/",
   "extVersion": "1.4.3"
