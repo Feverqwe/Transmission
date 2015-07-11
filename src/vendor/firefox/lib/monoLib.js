@@ -74,6 +74,17 @@
                         subscribClientList[to] = [];
                     }
                     subscribClientList[to].push(cb);
+                },
+                removeListener: function(to, cb) {
+                    var cbList;
+                    if ((cbList = subscribClientList[to]) === undefined) {
+                        return;
+                    }
+                    var pos = cbList.indexOf(cb);
+                    if (pos === -1) {
+                        return;
+                    }
+                    cbList.splice(pos, 1);
                 }
             },
             lib: {
@@ -101,6 +112,17 @@
                         subscribServerList[to] = [];
                     }
                     subscribServerList[to].push(cb);
+                },
+                removeListener: function(to, cb) {
+                    var cbList;
+                    if ((cbList = subscribServerList[to]) === undefined) {
+                        return;
+                    }
+                    var pos = cbList.indexOf(cb);
+                    if (pos === -1) {
+                        return;
+                    }
+                    cbList.splice(pos, 1);
                 }
             },
             isVirtual: true
@@ -264,46 +286,43 @@
                     }
                     return cb(obj);
                 }
-                if (typeof src === 'string') {
+                if (Array.isArray(src) === false) {
                     src = [src];
                 }
-                if (Array.isArray(src) === true) {
-                    for (var i = 0, len = src.length; i < len; i++) {
-                        key = src[i];
-                        if (!ss.storage.hasOwnProperty(key)) {
-                            continue;
-                        }
-                        obj[key] = ss.storage[key];
+                for (var i = 0, len = src.length; i < len; i++) {
+                    key = src[i];
+                    if (!ss.storage.hasOwnProperty(key)) {
+                        continue;
                     }
-                } else {
-                    for (key in src) {
-                        if (!ss.storage.hasOwnProperty(key)) {
-                            continue;
-                        }
-                        obj[key] = ss.storage[key];
-                    }
+                    obj[key] = ss.storage[key];
                 }
                 cb(obj);
             },
             set: function(obj, cb) {
                 for (var key in obj) {
-                    ss.storage[key] = obj[key];
+                    if (obj[key] === undefined) {
+                        delete ss.storage[key];
+                    } else {
+                        ss.storage[key] = obj[key];
+                    }
                 }
                 cb && cb();
             },
-            remove: function(obj, cb) {
-                if (Array.isArray(obj)) {
-                    for (var i = 0, len = obj.length; i < len; i++) {
-                        var key = obj[i];
-                        delete ss.storage[key];
-                    }
-                } else {
-                    delete ss.storage[obj];
+            remove: function(arr, cb) {
+                if (Array.isArray(arr) === false) {
+                    arr = [arr];
+                }
+                for (var i = 0, len = arr.length; i < len; i++) {
+                    var key = arr[i];
+                    delete ss.storage[key];
                 }
                 cb && cb();
             },
             clear: function(cb) {
                 for (var key in ss.storage) {
+                    if (!ss.storage.hasOwnProperty(key)) {
+                        continue;
+                    }
                     delete ss.storage[key];
                 }
                 cb && cb();
@@ -326,6 +345,14 @@
         };
         var func = ffSimpleStorage[msg.action];
         if (func === undefined) return;
+        if (msg.action === 'set') {
+            for (var i = 0, len = msg.keys.length; i < len; i++) {
+                var key = msg.keys[i];
+                if (!msg.data.hasOwnProperty(key)) {
+                    msg.data[key] = undefined;
+                }
+            }
+        }
         if (msg.action === 'clear') {
             func(response);
         } else {
