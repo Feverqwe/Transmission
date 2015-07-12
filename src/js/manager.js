@@ -3233,6 +3233,10 @@ var manager = {
         };
         var folderTemplate = showNotification.selectFolderTemplate();
         if (folderTemplate[1].select.append.length === 0) {
+            manager.options.noSleep = false;
+            if (mono.isFF && !mono.noAddon) {
+                mono.addon.postMessage('isShow');
+            }
             return onClickYes();
         }
         showNotification([
@@ -3252,7 +3256,7 @@ var manager = {
                     }]
                 ]}}
             ]
-        ], function onClise() {
+        ], function onClose() {
             manager.options.noSleep = false;
         });
     },
