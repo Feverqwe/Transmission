@@ -18,5 +18,5 @@
     "grunt-jsbeautifier": ""
   },
   "outputDir": "output/",
-  "extVersion": "1.4.3"
+  "extVersion": "1.4.4"
 }
