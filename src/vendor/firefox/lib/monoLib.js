@@ -20,11 +20,9 @@
      * @returns {number}
      */
     var getPageId = function() {
-        if (getPageId.value === undefined) {
-            getPageId.value = -1;
-        }
-        return ++getPageId.value;
+        return getPageId.value++;
     };
+    getPageId.value = 0;
 
     /**
      * Get mono page from map
@@ -152,32 +150,41 @@
     };
 
     var bindPage = function(mPage) {
-        var page = mPage.page;
-        if (page.isVirtual) return;
+        if (mPage.page.isVirtual) {
+            mPage.active = true;
+            map[mPage.id] = mPage;
+            return;
+        }
 
         var onPageShow = function() {
             mPage.active = true;
         };
+
         var onPageHide = function() {
             mPage.active = false;
         };
+
         var onAttach = function() {
             mPage.active = true;
             map[mPage.id] = mPage;
 
-            page.on('pageshow', onPageShow);
-            page.on('pagehide', onPageHide);
+            mPage.page.removeListener('detach', onDetach);
+            mPage.page.on('detach', onDetach);
+            mPage.page.on('pageshow', onPageShow);
+            mPage.page.on('pagehide', onPageHide);
         };
+
         var onDetach = function() {
             delete map[mPage.id];
             mPage.active = false;
 
-            page.off('pageshow', onPageShow);
-            page.off('pagehide', onPageHide);
+            mPage.page.removeListener('pagehide', onPageHide);
+            mPage.page.removeListener('pageshow', onPageShow);
+            mPage.page.removeListener('attach', onAttach);
+            mPage.page.on('attach', onAttach);
         };
 
-        page.on('attach', onAttach);
-        page.on('detach', onDetach);
+        onAttach();
     };
 
     var sendHook = {
@@ -258,10 +265,8 @@
         mPage = {
             page: page,
             id: getPageId(),
-            active: true,
             isLocal: page.isVirtual === undefined && page.url && page.url.indexOf(localUrl) === 0
         };
-        map[mPage.id] = mPage;
 
         bindPage(mPage);
 

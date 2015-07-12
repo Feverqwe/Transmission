@@ -48,7 +48,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
                 return;
             }
 
-            if (window.hasOwnProperty('chrome')) {
+            if (window.chrome) {
                 mono.isChrome = true;
                 mono.isChromeInject = !chrome.hasOwnProperty('tabs');
                 mono.msgType = 'chrome';
