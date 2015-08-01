@@ -3889,7 +3889,7 @@ var manager = {
                     }
                 });
 
-                manager.varCache.webUiUrl = (manager.settings.useSSL ? 'https://' : 'http://') + manager.settings.login + ':' + manager.settings.password + '@' + manager.settings.ip + ':' + manager.settings.port + '/';
+                manager.varCache.webUiUrl = (manager.settings.useSSL ? 'https://' : 'http://') + encodeURIComponent(manager.settings.login) + ':' + encodeURIComponent(manager.settings.password) + '@' + manager.settings.ip + ':' + manager.settings.port + '/';
                 mono.create(document.querySelector('a.btn.wui'), {
                     href: manager.varCache.webUiUrl + manager.settings.guiPath
                 });
