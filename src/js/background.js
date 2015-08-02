@@ -817,17 +817,7 @@ var engine = {
         });
     } : function(text) {
         engine.setBadgeText.lastText = text;
-        mono.setBadgeText(16, text, function(url16) {
-            mono.setBadgeText(32, text, function(url32) {
-                mono.setBadgeText(64, text, function(url64) {
-                    mono.ffButton.icon = {
-                        16: url16,
-                        32: url32,
-                        64: url64
-                    };
-                });
-            });
-        });
+        mono.setBadgeText(text);
     },
     displayActiveItemsCountIcon: function(newTorrentList) {
         var activeCount = 0;
@@ -1509,7 +1499,7 @@ var engine = {
                 return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
             };
 
-            mono.setBadgeText = function(size, text, cb) {
+            mono.setBadgeText = function(text) {
                 button.badge = text;
 
                 var color = engine.settings.badgeColor;
