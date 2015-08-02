@@ -2,7 +2,7 @@
   "name": "TransmissionEasyClient",
   "version": "1.0.0",
   "ffMinVersion": "29.0",
-  "ffMaxVersion": "41.0",
+  "ffMaxVersion": "43.0",
   "dependencies": {
     "grunt": ">=0.4.5",
     "fs": "^0.0.2",
