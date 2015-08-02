@@ -1492,67 +1492,29 @@ var engine = {
         if (addon) {
             mono = mono.init(addon);
 
-            mono.setBadgeText = function(size, text, cb) {
-                var self = require('sdk/self');
-                var xhr = new engine.ajax.xhr();
-                var url = self.data.url('./icons/icon-'+size+'.png');
-                if (!text) {
-                    return cb(url);
+            mono.rgba2hex = function(r, g, b, a) {
+                if (a > 1) {
+                    a = a / 100;
                 }
-                xhr.open('GET', url);
-                xhr.responseType = 'blob';
-                xhr.onload = function() {
-                    var reader = new window.FileReader();
-                    reader.onloadend = function() {
-                        var base64data = reader.result;
-                        var pos = base64data.indexOf(';');
-                        base64data = base64data.substr(pos);
-                        base64data = 'data:image/png'+base64data;
+                a = parseFloat(a);
+                r = parseInt(r * a);
+                g = parseInt(g * a);
+                b = parseInt(b * a);
 
-                        var box_w = 14;
-                        var box_h = 10;
-                        var text_p = 2;
-                        var fSize = 10;
-                        if (text < 10) {
-                            box_w = 8;
-                        }
-                        if (size === 32) {
-                            box_w = 20;
-                            box_h = 16;
-                            text_p = 2;
-                            fSize = 16;
-                            if (text < 10) {
-                                box_w = 12;
-                            }
-                        }
-                        if (size === 64) {
-                            box_w = 38;
-                            box_h = 30;
-                            text_p = 4;
-                            fSize = 30;
-                            if (text < 10) {
-                                box_w = 21;
-                            }
-                        }
-                        var left_p = size - box_w;
-
-                        var img = 'data:image/svg+xml;utf8,'+'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" ' +
-                            'width="'+size+'" height="'+size+'">'
-                            +'<image x="0" y="0" width="'+size+'" height="'+size+'" xlink:href="'+base64data+'" />'
-                            +'<rect rx="4" ry="4" x="'+left_p+'" y="'+(size-box_h)+'" '
-                            +'width="'+box_w+'" height="'+box_h+'" '
-                            +'style="fill:rgba('+engine.settings.badgeColor+');stroke:black;stroke-width:1;"/>'
-                            +'<text fill="white" x="'+(left_p+parseInt( text_p / 2 ))+'" y="'+(size-text_p)+'" style="' +
-                            'font-family: Arial;' +
-                            'font-weight: bold;' +
-                            'font-size: '+fSize+'px;' +
-                            'background-color: black;'+
-                            '">'+text+'</text>'+'</svg>';
-                        cb(img);
-                    };
-                    reader.readAsDataURL(xhr.response);
+                var componentToHex = function(c) {
+                    var hex = c.toString(16);
+                    return hex.length == 1 ? "0" + hex : hex;
                 };
-                xhr.send();
+
+                return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+            };
+
+            mono.setBadgeText = function(size, text, cb) {
+                button.badge = text;
+
+                var color = engine.settings.badgeColor;
+                var hexColor = mono.rgba2hex.apply(mono, color.split(','));
+                button.badgeColor = hexColor;
             };
 
             mono.ffButton = button;
