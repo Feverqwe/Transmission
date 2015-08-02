@@ -18,7 +18,10 @@ module.exports = function (grunt) {
         env: grunt.file.exists('env.json') ? grunt.file.readJSON('env.json') : {},
         pkg: grunt.file.readJSON('package.json'),
         clean: {
-            output: '<%= output %>',
+            output: [
+                '<%= output %>/*',
+                '!<%= output %>/hash'
+            ],
             builds: [
                 'build_firefox.xpi'
             ]
@@ -64,12 +67,27 @@ module.exports = function (grunt) {
     });
 
     grunt.registerTask('compressJs', function() {
-        var jsList = dataJsList.concat(bgJsList);
+        var getHash = function(path, cb) {
+            var fs = require('fs');
+            var crypto = require('crypto');
 
+            var fd = fs.createReadStream(path);
+            var hash = crypto.createHash('sha256');
+            hash.setEncoding('hex');
+
+            fd.on('end', function () {
+                hash.end();
+                cb(hash.read());
+            });
+
+            fd.pipe(hash);
+        };
+
+        var done = this.async();
         var ccTask = {
             closurecompiler: {
                 minify: {
-                    files: {},
+                    files: 'empty',
                     options: {
                         jscomp_warning: 'const',
                         language_in: 'ECMASCRIPT5',
@@ -78,17 +96,68 @@ module.exports = function (grunt) {
                 }
             }
         };
-
-        for (var i = 0, jsFile; jsFile = jsList[i]; i++) {
-            if (jsFile.indexOf('.min.js') !== -1) continue;
-
-            var jsFolderType = (bgJsList.indexOf(jsFile) !== -1) ? 'libFolder' : 'dataJsFolder';
-
-            ccTask.closurecompiler.minify.files['<%= output %><%= vendor %><%= '+jsFolderType+' %>'+jsFile] = '<%= output %><%= vendor %><%= '+jsFolderType+' %>'+jsFile;
-        }
-
         grunt.config.merge(ccTask);
-        grunt.task.run('closurecompiler:minify');
+        ccTask.closurecompiler.minify.files = {};
+
+        var wait = 0;
+        var ready = 0;
+        var hashList = {};
+
+        var fs = require('fs');
+        var ddblFolderList = [];
+        ['dataJsFolder', 'libFolder'].forEach(function(folder) {
+            if (ddblFolderList.indexOf(grunt.config(folder)) !== -1) {
+                return;
+            }
+            ddblFolderList.push(grunt.config(folder));
+
+            var jsFolder = grunt.template.process('<%= output %><%= vendor %><%= ' + folder + ' %>');
+
+            var files = fs.readdirSync(jsFolder);
+            var jsList = grunt.file.match('*.js', files);
+            files = null;
+
+            var copyList = [];
+            var onReady = function() {
+                ready++;
+                if (wait !== ready) {
+                    return;
+                }
+
+                var hashFolder = grunt.template.process('<%= output %>hash/');
+                for (var hash in hashList) {
+                    var item = hashList[hash];
+                    var jsFolder = grunt.template.process('<%= output %><%= vendor %><%= ' + item[0] + ' %>');
+                    var hashName = hashFolder + hash + '.js';
+                    if (!grunt.file.exists(hashName)) {
+                        ccTask.closurecompiler.minify.files[hashName] = '<%= output %><%= vendor %><%= ' + item[0] + ' %>'+item[1];
+                    }
+                    copyList.push([hashName, jsFolder + item[1]]);
+                }
+
+                grunt.config.merge(ccTask);
+                grunt.registerTask('copyFromCache', function() {
+                    copyList.forEach(function(item) {
+                        grunt.file.copy(item[0], item[1]);
+                    });
+                });
+
+                grunt.task.run(['closurecompiler:minify', 'copyFromCache']);
+
+                done();
+            };
+
+            jsList.forEach(function(jsFile) {
+                if (jsFile.indexOf('.min.js') !== -1) {
+                    return;
+                }
+                wait++;
+                getHash(jsFolder + jsFile, function(hash) {
+                    hashList[hash] = [folder, jsFile];
+                    onReady();
+                });
+            });
+        });
     });
 
     grunt.loadNpmTasks('grunt-contrib-clean');
