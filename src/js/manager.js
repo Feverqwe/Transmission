@@ -2601,6 +2601,7 @@ var manager = {
                     }  else {
                         api = manager.varCache.trListItems[hash].api;
                         availActions = manager.trReadStatus(api);
+                        availActions.extra = 1;
                     }
                     for (var action in trigger.items) {
                         var item = trigger.items[action];
