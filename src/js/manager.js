@@ -2586,8 +2586,8 @@ var manager = {
                     if (manager.varCache.trSelectedHashList.length > 1) {
                         isMany = true;
                         availActions = {
-                            extra: 0,
-                            order: 0,
+                            extra: 1,
+                            order: 1,
                             torrent_files: 0
                         };
                         for (var n = 0, hash; hash = manager.varCache.trSelectedHashList[n]; n++) {
@@ -2606,7 +2606,7 @@ var manager = {
                         var item = trigger.items[action];
                         var state = availActions[action];
 
-                        if (action === 'remove_with') {
+                        if (action === 'order') {
                             if (isMany) {
                                 item.$node[0].classList.add('last');
                             } else {
@@ -2623,6 +2623,26 @@ var manager = {
                                 el.style.display = 'block';
                             }
                             continue;
+                        }
+
+                        if (action === 'extra') {
+                            var reanmeItem = item.items.rename;
+                            var el = reanmeItem.$node[0];
+                            if (isMany) {
+                                if (reanmeItem.display !== 0) {
+                                    el.classList.add('hidden');
+                                    el.classList.add('not-selectable');
+                                    el.style.display = 'none';
+                                    reanmeItem.display = 0;
+                                }
+                            } else {
+                                if (reanmeItem.display !== 1) {
+                                    el.classList.remove('hidden');
+                                    el.classList.remove('not-selectable');
+                                    el.style.display = 'block';
+                                    reanmeItem.display = 1;
+                                }
+                            }
                         }
 
                         if (state !== item.display) {
@@ -2818,6 +2838,7 @@ var manager = {
                                 var hash = this[0].id;
                                 var _this = this;
                                 this.addClass('force');
+                                var list = manager.varCache.trSelectedHashList.slice(0);
                                 var currentLocation = manager.varCache.trListItems[hash].api[26];
                                 var folderTemplate = showNotification.selectFolderTemplate(1);
                                 if (folderTemplate[1].select.append.length === 0) {
@@ -2847,7 +2868,7 @@ var manager = {
                                                 mono.sendMessage({action: 'api', data: {
                                                     method: "torrent-set-location",
                                                     arguments: {
-                                                        ids: [parseInt(hash.substr(4))],
+                                                        ids: list,
                                                         location: location,
                                                         move: true
                                                     }
