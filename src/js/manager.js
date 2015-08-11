@@ -2897,6 +2897,7 @@ var manager = {
                                         ids: manager.varCache.trSelectedHashList
                                     }
                                 }});
+                                manager.unCheckAll('tr', 1);
                             }
                         }
                     }
