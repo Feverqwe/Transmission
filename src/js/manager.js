@@ -2914,6 +2914,7 @@ var manager = {
                                         ids: manager.varCache.trSelectedHashList
                                     }
                                 });
+                                manager.unCheckAll('tr', 1);
                             }
                         },
                         up: {
@@ -2925,6 +2926,7 @@ var manager = {
                                         ids: manager.varCache.trSelectedHashList
                                     }
                                 });
+                                manager.unCheckAll('tr', 1);
                             }
                         },
                         down: {
@@ -2936,6 +2938,7 @@ var manager = {
                                         ids: manager.varCache.trSelectedHashList
                                     }
                                 });
+                                manager.unCheckAll('tr', 1);
                             }
                         },
                         bottom: {
@@ -2947,6 +2950,7 @@ var manager = {
                                         ids: manager.varCache.trSelectedHashList
                                     }
                                 });
+                                manager.unCheckAll('tr', 1);
                             }
                         }
                     }
