@@ -2864,7 +2864,7 @@ var manager = {
                                         {input: {type: 'text', name: 'link', value: magnetLink, focus: true}}
                                     ],
                                     [
-                                        !mono.isChrome && !mono.isFF ? undefined : {input: {type: "button", value: manager.language.copy, on: [
+                                        !mono.isChrome && !mono.isFF ? undefined : {input: {type: "button", value: manager.language.copy, focus: true, on: [
                                             ['click', function() {
                                                 var dataForm = this.getFormData();
                                                 mono.sendMessage({
