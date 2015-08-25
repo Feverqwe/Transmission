@@ -2854,6 +2854,18 @@ var manager = {
                                 });
                             }
                         },
+                        getMagnet: {
+                            name: manager.language.magnetUri,
+                            callback: function (key, trigger) {
+                                var magnetLink = manager.varCache.trListItems[this[0].id].api[29];
+                                showNotification([
+                                    [
+                                        {label: {text: manager.language.magnetUri}},
+                                        {input: {type: 'text', value: magnetLink, focus: true}}
+                                    ]
+                                ]);
+                            }
+                        },
                         move: {
                             name: manager.language.move,
                             callback: function (key, trigger) {
@@ -2919,18 +2931,6 @@ var manager = {
                                     }
                                 }});
                                 manager.unCheckAll('tr', 1);
-                            }
-                        },
-                        getMagnet: {
-                            name: manager.language.magnetUri,
-                            callback: function (key, trigger) {
-                                var magnetLink = manager.varCache.trListItems[this[0].id].api[29];
-                                showNotification([
-                                    [
-                                        {label: {text: manager.language.magnetUri}},
-                                        {input: {type: 'text', value: magnetLink, focus: true}}
-                                    ]
-                                ]);
                             }
                         }
                     }
