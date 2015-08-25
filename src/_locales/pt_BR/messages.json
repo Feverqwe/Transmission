@@ -503,5 +503,8 @@
     },
     "badgeColor": {
         "message": "Notificação de cor"
+    },
+    "magnetUri": {
+        "message": "Magnet-URI"
     }
 }

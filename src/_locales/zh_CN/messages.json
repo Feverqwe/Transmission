@@ -491,5 +491,8 @@
     },
     "badgeColor": {
         "message": "通知的颜色"
+    },
+    "magnetUri": {
+        "message": "Magnet-URI"
     }
 }

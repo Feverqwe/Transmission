@@ -127,7 +127,7 @@ var engine = {
                 fields: ["id", "name", "totalSize", "percentDone", 'downloadedEver', 'uploadedEver',
                     'rateUpload', 'rateDownload', 'eta', 'peersSendingToUs', 'peersGettingFromUs',
                     'queuePosition', 'addedDate', 'doneDate', 'downloadDir', 'recheckProgress',
-                    'status', 'error', 'errorString', 'trackerStats'],
+                    'status', 'error', 'errorString', 'trackerStats', 'magnetLink'],
                 ids: undefined
             }
         },
@@ -142,7 +142,7 @@ var engine = {
             , 'shared', 'rateUpload', 'rateDownload', 'eta', '_label', 'peersGettingFromUs'
             , 'peers', 'peersSendingToUs', 'seeds', 'n_unk', 'queuePosition', 'n_uploaded'
             , 't_unk1', 't_unk2', 'statusText', 'n_sid', 'addedDate', 'doneDate', 't_unk3'
-            , 'downloadDir', 't_unk4', 'n_unk5'],
+            , 'downloadDir', 't_unk4', 'n_unk5', 'magnetLink'],
         flUtColumnList: ['name', 'length', 'bytesCompleted', 'priority', 'origName', 'folderName']
     },
     param: function(params) {

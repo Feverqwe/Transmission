@@ -99,6 +99,25 @@ mono.isVisibleElement = function(el) {
 mono.spaceToUnderline = function(string) {
     return string.replace(/\s/, '_');
 };
+mono.param = function(params) {
+    if (typeof params === 'string') return params;
+
+    var args = [];
+    for (var key in params) {
+        var value = params[key];
+        if (value === null || value === undefined) {
+            continue;
+        }
+        if (!Array.isArray(value)) {
+            value = [value];
+        }
+        for (var i = 0, len = value.length; i < len; i++) {
+            args.push(encodeURIComponent(key) + '=' + encodeURIComponent(value[i]));
+        }
+    }
+    return args.join('&');
+};
+
 
 var debug = false;
 
@@ -2627,23 +2646,25 @@ var manager = {
                         }
 
                         if (action === 'extra') {
-                            var reanmeItem = item.items.rename;
-                            var el = reanmeItem.$node[0];
-                            if (isMany) {
-                                if (reanmeItem.display !== 0) {
-                                    el.classList.add('hidden');
-                                    el.classList.add('not-selectable');
-                                    el.style.display = 'none';
-                                    reanmeItem.display = 0;
+                            ['rename', 'getMagnet'].forEach(function(type) {
+                                var subItem = item.items[type];
+                                var el = subItem.$node[0];
+                                if (isMany) {
+                                    if (subItem.display !== 0) {
+                                        el.classList.add('hidden');
+                                        el.classList.add('not-selectable');
+                                        el.style.display = 'none';
+                                        subItem.display = 0;
+                                    }
+                                } else {
+                                    if (subItem.display !== 1) {
+                                        el.classList.remove('hidden');
+                                        el.classList.remove('not-selectable');
+                                        el.style.display = 'block';
+                                        subItem.display = 1;
+                                    }
                                 }
-                            } else {
-                                if (reanmeItem.display !== 1) {
-                                    el.classList.remove('hidden');
-                                    el.classList.remove('not-selectable');
-                                    el.style.display = 'block';
-                                    reanmeItem.display = 1;
-                                }
-                            }
+                            });
                         }
 
                         if (state !== item.display) {
@@ -2898,6 +2919,18 @@ var manager = {
                                     }
                                 }});
                                 manager.unCheckAll('tr', 1);
+                            }
+                        },
+                        getMagnet: {
+                            name: manager.language.magnetUri,
+                            callback: function (key, trigger) {
+                                var magnetLink = manager.varCache.trListItems[this[0].id].api[29];
+                                showNotification([
+                                    [
+                                        {label: {text: manager.language.magnetUri}},
+                                        {input: {type: 'text', value: magnetLink, focus: true}}
+                                    ]
+                                ]);
                             }
                         }
                     }

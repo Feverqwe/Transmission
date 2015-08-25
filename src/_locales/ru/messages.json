@@ -516,5 +516,8 @@
     },
     "badgeColor": {
         "message": "Цвет уведомления"
+    },
+    "magnetUri": {
+        "message": "Magnet-URI"
     }
 }
