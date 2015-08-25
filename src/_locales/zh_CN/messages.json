@@ -494,5 +494,8 @@
     },
     "magnetUri": {
         "message": "Magnet-URI"
+    },
+    "copy": {
+        "message": "复制(C)"
     }
 }

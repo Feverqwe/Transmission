@@ -1473,6 +1473,19 @@ var engine = {
         changeBadgeColor: function(message) {
             engine.settings.badgeColor = message.color;
             engine.setBadgeText(engine.setBadgeText.lastText || '0');
+        },
+        copy: mono.isModule ? function(message) {
+            var clipboard = require("sdk/clipboard");
+            clipboard.set(message.text);
+        } : function(message) {
+            var textArea = document.createElement('textarea');
+            textArea.textContent = message.text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            setTimeout(function() {
+                document.execCommand("copy", false, null);
+                textArea.parentNode.removeChild(textArea);
+            });
         }
     }
 };

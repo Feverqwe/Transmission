@@ -2861,7 +2861,25 @@ var manager = {
                                 showNotification([
                                     [
                                         {label: {text: manager.language.magnetUri}},
-                                        {input: {type: 'text', value: magnetLink, focus: true}}
+                                        {input: {type: 'text', name: 'link', value: magnetLink, focus: true}}
+                                    ],
+                                    [
+                                        !mono.isChrome && !mono.isFF ? undefined : {input: {type: "button", value: manager.language.copy, on: [
+                                            ['click', function() {
+                                                var dataForm = this.getFormData();
+                                                mono.sendMessage({
+                                                    action: 'copy',
+                                                    text: dataForm.link
+                                                });
+
+                                                this.close();
+                                            }]
+                                        ]}},
+                                        {input: {type: "button", value: manager.language.DLG_BTN_CLOSE, on: [
+                                            ['click', function() {
+                                                this.close();
+                                            }]
+                                        ]}}
                                     ]
                                 ]);
                             }

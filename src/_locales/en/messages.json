@@ -506,5 +506,8 @@
     },
     "magnetUri": {
         "message": "Magnet-URI"
+    },
+    "copy": {
+        "message": "Copy"
     }
 }
