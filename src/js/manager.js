@@ -3850,7 +3850,7 @@ var manager = {
                     if (el.tagName === 'INPUT') {
                         var trLastSelectedHash = manager.varCache.trLastSelectedHash;
                         if (e.shiftKey) {
-                            var lastId = trLastSelectedHash.slice(-1);
+                            var lastId = trLastSelectedHash.slice(-1)[0];
                             trLastSelectedHash.splice(1);
                             trLastSelectedHash.push(lastId);
                             manager.selectRangeCheckBox('tr', trLastSelectedHash, 1);
@@ -3946,7 +3946,7 @@ var manager = {
                     if (el.tagName === 'INPUT') {
                         var flLastSelectedHash = manager.varCache.flLastSelectedHash;
                         if (e.shiftKey) {
-                            var lastId = flLastSelectedHash.slice(-1);
+                            var lastId = flLastSelectedHash.slice(-1)[0];
                             flLastSelectedHash.splice(1);
                             flLastSelectedHash.push(lastId);
                             manager.selectRangeCheckBox('fl', flLastSelectedHash, 1);
@@ -3970,10 +3970,7 @@ var manager = {
 
                     var torrentItem = el.parentNode.parentNode;
 
-                    var trLastSelectedHash = manager.varCache.trLastSelectedHash;
-                    if (trLastSelectedHash.indexOf(torrentItem.id) === -1) {
-                        trLastSelectedHash.unshift(torrentItem.id);
-                    }
+                    manager.varCache.trLastSelectedHash.unshift(torrentItem.id);
 
                     if (el.checked) {
                         torrentItem.classList.add("selected");
@@ -3990,10 +3987,7 @@ var manager = {
 
                     var fileItem = el.parentNode.parentNode;
 
-                    var flLastSelectedHash = manager.varCache.flLastSelectedHash;
-                    if (flLastSelectedHash.indexOf(fileItem.dataset.index) === -1) {
-                        flLastSelectedHash.unshift(fileItem.dataset.index);
-                    }
+                    manager.varCache.flLastSelectedHash.unshift(fileItem.dataset.index);
 
                     if (el.checked) {
                         fileItem.classList.add("selected");
