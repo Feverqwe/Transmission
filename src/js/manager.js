@@ -2405,6 +2405,8 @@ var manager = {
             el.checked = true;
             node.classList.add('selected');
         }
+
+        manager.selectAllCheckBox(type);
     },
     selectAllCheckBox: function(type) {
         if (!manager.options[type+'HasSelectCell']) return;
