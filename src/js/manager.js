@@ -180,7 +180,10 @@ var manager = {
         cid: undefined,
         settings: {},
 
-        freeSpace: undefined
+        freeSpace: undefined,
+
+        trLastSelectedHash: [],
+        flLastSelectedHash: []
     },
     options: {
         scrollWidth: 17,
@@ -2368,6 +2371,41 @@ var manager = {
         }
         return visibleCheckBoxList;
     },
+    selectRangeCheckBox: function(type, idList, isVisible) {
+        if (!manager.options[type+'HasSelectCell']) {
+            return;
+        }
+
+        var listItem = manager.varCache[type + 'ListItems'];
+        var sortList = manager.varCache[type + 'SortList'];
+
+        var posList = idList.map(function(id) {
+            return sortList.indexOf(listItem[id]);
+        });
+
+        if (posList[0] > posList[1]) {
+            posList.reverse();
+        }
+
+        manager.unCheckAll(type, 1);
+
+        for (var i = posList[0]; i <= posList[1]; i++) {
+            var item = sortList[i];
+            if (!item) {
+                continue;
+            }
+            var node = item.node;
+            var el = node.getElementsByTagName('input')[0];
+            if (!el) {
+                continue;
+            }
+            if (isVisible && !mono.isVisibleElement(el)) {
+                continue;
+            }
+            el.checked = true;
+            node.classList.add('selected');
+        }
+    },
     selectAllCheckBox: function(type) {
         if (!manager.options[type+'HasSelectCell']) return;
 
@@ -3809,6 +3847,18 @@ var manager = {
 
                 manager.domCache.trBody.addEventListener('click', function(e) {
                     var el = e.target;
+                    if (el.tagName === 'INPUT') {
+                        var trLastSelectedHash = manager.varCache.trLastSelectedHash;
+                        if (e.shiftKey) {
+                            var lastId = trLastSelectedHash.slice(-1);
+                            trLastSelectedHash.splice(1);
+                            trLastSelectedHash.push(lastId);
+                            manager.selectRangeCheckBox('tr', trLastSelectedHash, 1);
+                        } else {
+                            trLastSelectedHash.splice(1);
+                        }
+                        return;
+                    }
                     if (el.tagName !== 'A') return;
 
                     if (el.classList.contains('start')) {
@@ -3893,6 +3943,18 @@ var manager = {
 
                 manager.domCache.flBody.addEventListener('click', function(e) {
                     var el = e.target;
+                    if (el.tagName === 'INPUT') {
+                        var flLastSelectedHash = manager.varCache.flLastSelectedHash;
+                        if (e.shiftKey) {
+                            var lastId = flLastSelectedHash.slice(-1);
+                            flLastSelectedHash.splice(1);
+                            flLastSelectedHash.push(lastId);
+                            manager.selectRangeCheckBox('fl', flLastSelectedHash, 1);
+                        } else {
+                            flLastSelectedHash.splice(1);
+                        }
+                        return;
+                    }
                     if (el.tagName !== 'A') return;
 
                     if (!el.classList.contains('folder')) {
@@ -3906,11 +3968,19 @@ var manager = {
                     var el = e.target;
                     if (el.tagName !== 'INPUT') return;
 
-                    if (el.checked) {
-                        el.parentNode.parentNode.classList.add("selected");
-                    } else {
-                        el.parentNode.parentNode.classList.remove("selected");
+                    var torrentItem = el.parentNode.parentNode;
+
+                    var trLastSelectedHash = manager.varCache.trLastSelectedHash;
+                    if (trLastSelectedHash.indexOf(torrentItem.id) === -1) {
+                        trLastSelectedHash.unshift(torrentItem.id);
                     }
+
+                    if (el.checked) {
+                        torrentItem.classList.add("selected");
+                    } else {
+                        torrentItem.classList.remove("selected");
+                    }
+
                     manager.selectAllCheckBox('tr');
                 });
 
@@ -3918,11 +3988,19 @@ var manager = {
                     var el = e.target;
                     if (el.tagName !== 'INPUT') return;
 
-                    if (el.checked) {
-                        el.parentNode.parentNode.classList.add("selected");
-                    } else {
-                        el.parentNode.parentNode.classList.remove("selected");
+                    var fileItem = el.parentNode.parentNode;
+
+                    var flLastSelectedHash = manager.varCache.flLastSelectedHash;
+                    if (flLastSelectedHash.indexOf(fileItem.dataset.index) === -1) {
+                        flLastSelectedHash.unshift(fileItem.dataset.index);
                     }
+
+                    if (el.checked) {
+                        fileItem.classList.add("selected");
+                    } else {
+                        fileItem.classList.remove("selected");
+                    }
+
                     manager.selectAllCheckBox('fl');
                 });
 
