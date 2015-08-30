@@ -500,5 +500,8 @@
     },
     "addItem": {
         "message": "添加项目"
+    },
+    "title": {
+        "message": "称号"
     }
 }

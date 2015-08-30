@@ -512,5 +512,8 @@
     },
     "addItem": {
         "message": "Adicionar Item"
+    },
+    "title": {
+        "message": "Título"
     }
 }
