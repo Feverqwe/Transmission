@@ -509,5 +509,8 @@
     },
     "copy": {
         "message": "Copy"
+    },
+    "addItem": {
+        "message": "Add item"
     }
 }

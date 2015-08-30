@@ -497,5 +497,8 @@
     },
     "copy": {
         "message": "复制(C)"
+    },
+    "addItem": {
+        "message": "添加项目"
     }
 }

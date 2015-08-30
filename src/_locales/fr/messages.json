@@ -217,10 +217,10 @@
         "message": "Fermer"
     },
     "OV_CONFIRM_DELETE_ONE": {
-        "message": "Souhaitez-vous vraiment annuler le torrent sélectionné?"
+        "message": "Souhaitez-vous vraiment annuler le torrent sélectionné ?"
     },
     "OV_CONFIRM_DELETE_MULTIPLE": {
-        "message": "Souhaitez-vous vraiment annuler les %d torrents sélectionnés?"
+        "message": "Souhaitez-vous vraiment annuler les %d torrents sélectionnés ?"
     },
     "DLG_BTN_YES": {
         "message": "Oui"
@@ -311,10 +311,10 @@
 
 
     "torrentAdded": {
-        "message": "Le torrent a été ajouté!"
+        "message": "Le torrent a été ajouté !"
     },
     "unexpectedError": {
-        "message": "Erreur inattendue!"
+        "message": "Erreur inattendue !"
     },
     "fileSizeError": {
         "message": "Le fichier est trop gros"
@@ -326,7 +326,7 @@
         "message": "Entrez le chemin d'accès vers le nouveau répertoire"
     },
     "torrentFileExists": {
-        "message": "Probablement le fichier torrent existe déjà!"
+        "message": "Probablement le fichier torrent existe déjà !"
     },
     "currentDirectory": {
         "message": "Répertoire courant"
@@ -505,5 +505,8 @@
     },
     "copy": {
         "message": "Copier"
+    },
+    "addItem": {
+        "message": "Ajouter un item"
     }
 }
