@@ -66,7 +66,11 @@
                         <div>
                             <label><span data-lang="treeViewContextMenu">Древовидное контекстноме меню</span><input type="checkbox" data-option="treeViewContextMenu"/></label>
                             <label><span data-lang="showDefaultFolderContextMenuItem">Отображать директорию по умолчанию</span><input type="checkbox" data-option="showDefaultFolderContextMenuItem"/></label>
-                            <div class="optionItem"><span data-lang="fullPath">Подкаталог</span> <input type="text" id="subPath"/> <button id="addSubPath" data-lang="add">Добавить</button></div>
+                            <div class="optionItem">
+                                <span data-lang="addItem"></span>:
+                                <div class="optionItem"><span data-lang="fullPath">Подкаталог</span> <input type="text" id="subPath"/></div>
+                                <div class="optionItem"><span data-lang="OV_COL_LABEL">Метка</span> <input type="text" id="pathLabel"/> <button id="addSubPath" data-lang="add">Добавить</button></div>
+                            </div>
                             <div class="optionItem"><select id="folderList" multiple></select></div>
                             <div class="optionItem">
                                 <button id="folderDeleteSelected" data-lang="deleteSelected">Удалить выбранное</button>

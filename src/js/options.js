@@ -286,10 +286,11 @@ var options = function() {
     var folderLoadList = function(folderList) {
         for (var i = 0, item; item = folderList[i]; i++) {
             domCache.folderList.appendChild(mono.create('option', {
-                text: item[1],
+                text: (item[2] ? '[' + item[2] + '] ' : '') + item[1],
                 data: {
                     dir: item[0],
-                    subPath: item[1]
+                    subPath: item[1],
+                    label: item[2] || ''
                 }
             }));
         }
@@ -299,7 +300,7 @@ var options = function() {
         var optionList = [];
         var optionNodeList = domCache.folderList.childNodes;
         for (var i = 0, item; item = optionNodeList[i]; i++) {
-            optionList.push([item.dataset.dir, item.dataset.subPath]);
+            optionList.push([item.dataset.dir, item.dataset.subPath, item.dataset.label]);
         }
         mono.storage.set({folderList: optionList}, function() {
             mono.sendMessage({action: 'reloadSettings'});
@@ -446,6 +447,7 @@ var options = function() {
                     domCache.folderList = document.getElementById('folderList');
                     folderLoadList(storage.folderList || []);
                     domCache.subPath = document.getElementById('subPath');
+                    domCache.pathLabel = document.getElementById('pathLabel');
                     domCache.addSubPath = document.getElementById('addSubPath');
                     domCache.addSubPath.addEventListener('click', function() {
                         var dir = '0';
@@ -453,18 +455,26 @@ var options = function() {
                         if (!subPath) {
                             return;
                         }
+                        var label = domCache.pathLabel.value;
                         domCache.folderList.appendChild(mono.create('option', {
-                            text: subPath,
+                            text: (label ? '[' + label + '] ' : '') + subPath,
                             data: {
                                 dir: dir,
-                                subPath: subPath
+                                subPath: subPath,
+                                label: label
                             }
                         }));
 
                         domCache.subPath.value = '';
+                        domCache.pathLabel.value = '';
                         folderSaveList();
                     });
                     domCache.subPath.addEventListener('keydown', function(e) {
+                        if (e.keyCode === 13) {
+                            domCache.addSubPath.dispatchEvent(new CustomEvent('click'));
+                        }
+                    });
+                    domCache.pathLabel.addEventListener('keydown', function(e) {
                         if (e.keyCode === 13) {
                             domCache.addSubPath.dispatchEvent(new CustomEvent('click'));
                         }

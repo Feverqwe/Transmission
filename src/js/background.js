@@ -929,7 +929,7 @@ var engine = {
         var id = e.menuItemId;
         var updateMenu = false;
         var contextMenu = engine.createFolderCtxMenu.contextMenu;
-        var defaultItem = contextMenu[0] ? contextMenu[0] : ['0', ''];
+        var defaultItem = contextMenu[0] ? contextMenu[0] : ['0', '', ''];
         if (id === 'newFolder') {
             var path = window.prompt(engine.language.enterNewDirPath, defaultItem[1]);
             if (!path) {
@@ -945,8 +945,8 @@ var engine = {
             }
             if (id === -1) {
                 id = contextMenu.length;
-                contextMenu.push([download_dir, path]);
-                engine.varCache.folderList.push([download_dir, path]);
+                contextMenu.push([download_dir, path, '']);
+                engine.varCache.folderList.push([download_dir, path, '']);
                 updateMenu = true;
             }
         }
@@ -1214,7 +1214,7 @@ var engine = {
                 } else {
                     for (var i = 0, item; item = folderList[i]; i++) {
                         items.push(cm.Item({
-                            label: item[1],
+                            label: item[2] || item[1],
                             data: String(i),
                             context: cm.SelectorContext("a"),
                             onMessage: onSubMenuMessage,
@@ -1283,7 +1283,7 @@ var engine = {
                             chrome.contextMenus.create({
                                 id: String(i),
                                 parentId: 'main',
-                                title: item[1],
+                                title: item[2] || item[1],
                                 contexts: ["link"],
                                 onclick: engine.onCtxMenuCall
                             });
