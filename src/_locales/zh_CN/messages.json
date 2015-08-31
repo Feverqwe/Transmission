@@ -501,7 +501,7 @@
     "addItem": {
         "message": "添加项目"
     },
-    "title": {
-        "message": "称号"
+    "shortName": {
+        "message": "简称"
     }
 }

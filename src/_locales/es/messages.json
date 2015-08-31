@@ -513,7 +513,7 @@
     "addItem": {
         "message": "Añadir artículo"
     },
-    "title": {
-        "message": "Título"
+    "shortName": {
+        "message": "Nombre corto"
     }
 }

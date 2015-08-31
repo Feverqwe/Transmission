@@ -509,7 +509,7 @@
     "addItem": {
         "message": "Ajouter un item"
     },
-    "title": {
-        "message": "Titre"
+    "shortName": {
+        "message": "Nom court"
     }
 }
