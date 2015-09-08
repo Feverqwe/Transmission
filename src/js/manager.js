@@ -3851,6 +3851,8 @@ var manager = {
                     var el = e.target;
                     if (el.tagName === 'INPUT') {
                         var trLastSelectedHash = manager.varCache.trLastSelectedHash;
+                        var torrentItem = el.parentNode.parentNode;
+                        trLastSelectedHash.unshift(torrentItem.id);
                         if (e.shiftKey) {
                             var lastId = trLastSelectedHash.slice(-1)[0];
                             trLastSelectedHash.splice(1);
@@ -3947,6 +3949,8 @@ var manager = {
                     var el = e.target;
                     if (el.tagName === 'INPUT') {
                         var flLastSelectedHash = manager.varCache.flLastSelectedHash;
+                        var fileItem = el.parentNode.parentNode;
+                        flLastSelectedHash.unshift(fileItem.dataset.index);
                         if (e.shiftKey) {
                             var lastId = flLastSelectedHash.slice(-1)[0];
                             flLastSelectedHash.splice(1);
@@ -3972,8 +3976,6 @@ var manager = {
 
                     var torrentItem = el.parentNode.parentNode;
 
-                    manager.varCache.trLastSelectedHash.unshift(torrentItem.id);
-
                     if (el.checked) {
                         torrentItem.classList.add("selected");
                     } else {
@@ -3988,8 +3990,6 @@ var manager = {
                     if (el.tagName !== 'INPUT') return;
 
                     var fileItem = el.parentNode.parentNode;
-
-                    manager.varCache.flLastSelectedHash.unshift(fileItem.dataset.index);
 
                     if (el.checked) {
                         fileItem.classList.add("selected");
