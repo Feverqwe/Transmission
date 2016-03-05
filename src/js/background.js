@@ -1287,7 +1287,7 @@ var engine = {
     })(),
     createFolderCtxMenu: function() {
         if (mono.isModule) {
-            return engine.ffCreateFolderCtxMenu.apply(this, arguments);
+            return engine.ffCreateFolderCtxMenu.apply(engine, arguments);
         }
 
         var chromeFunc = function() {
