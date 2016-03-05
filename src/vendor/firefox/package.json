@@ -1,23 +1,26 @@
 {
     "name": "transmission_easy_client",
     "title": "Transmission easy client",
-    "id": "jid1-0GMKQAI8A9x5jg",
+    "id": "jid1-0GMKQAI8A9x5jg@jetpack",
     "description": "Transmission webUi",
+    "main": "lib/main.js",
     "preferences": [
         {
             "type": "control",
             "label": "Settings",
             "name": "settingsBtn",
-            "title": ""
+            "title": "Settings"
         }
     ],
     "author": "Anton V.",
     "license": "MPL 2.0",
     "version": "1.3.9",
-    "permissions": {
-        "cross-domain-content": ["http://*", "https://*"],
-        "private-browsing": true
+    "icon": {
+        "48": "icon.png",
+        "64": "icon64.png"
     },
-    "icon": "data/icons/icon-48.png",
-    "icon64": "data/icons/icon-64.png"
+    "engines": {
+        "firefox": ">=28 <=47",
+        "fennec": ">= 28 <= 47"
+    }
 }

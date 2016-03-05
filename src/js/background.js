@@ -1,10 +1,6 @@
-var mono = (typeof mono !== 'undefined') ? mono : undefined;
-
-(function() {
-    if (typeof window !== 'undefined') return;
+typeof window === 'undefined' && (function() {
     var self = require('sdk/self');
     window = require('sdk/window/utils').getMostRecentBrowserWindow();
-    window.isModule = true;
     mono = require('toolkit/loader').main(require('toolkit/loader').Loader({
         paths: {
             'data/': self.data.url('js/')
@@ -17,10 +13,6 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
                 switch (path) {
                     case 'sdk/simple-storage':
                         return require('sdk/simple-storage');
-                    case 'sdk/window/utils':
-                        return require('sdk/window/utils');
-                    case 'sdk/self':
-                        return require('sdk/self');
                     default:
                         console.log('Module not found!', path);
                 }
@@ -639,12 +631,16 @@ var engine = {
             return engine.getLocale.locale;
         }
 
-        var getLang = mono.isFF ? function() {
-            var window = require('sdk/window/utils').getMostRecentBrowserWindow();
-            return String(window.navigator && window.navigator.language).toLowerCase();
-        } : function() {
+        var getLang = function() {
             return String(navigator.language).toLowerCase();
         };
+
+        if (mono.isModule) {
+            getLang = function() {
+                var window = require('sdk/window/utils').getMostRecentBrowserWindow();
+                return String(window.navigator && window.navigator.language).toLowerCase();
+            };
+        }
 
         var lang = getLang();
         var match = lang.match(/\(([^)]+)\)/);
@@ -664,15 +660,19 @@ var engine = {
         }
         return engine.getLocale.locale = lang;
     },
-    detectLanguage: mono.isChrome ? function() {
-        return chrome.i18n.getMessage('lang');
-    } : window.isModule ? function() {
-        var lang = require("sdk/l10n").get('lang');
-        if (lang !== 'lang') {
-            return lang;
+    detectLanguage: function() {
+        "use strict";
+        if (mono.isChrome) {
+            return chrome.i18n.getMessage('lang');
         }
-        return engine.getLocale();
-    } : function() {
+
+        if (mono.isModule) {
+            var lang = require("sdk/l10n").get('lang');
+            if (lang !== 'lang') {
+                return lang;
+            }
+        }
+
         return engine.getLocale();
     },
     readChromeLocale: function(lang) {
@@ -699,16 +699,17 @@ var engine = {
         }
 
         var url = '_locales/' + lang.replace('-', '_') + '/messages.json';
-        if (mono.isFF) {
+
+        if (mono.isModule) {
             try {
                 engine.setLanguage(engine.readChromeLocale(JSON.parse(require('sdk/self').data.load(url))));
-                cb();
+                return cb();
             } catch (e) {
                 console.error('Can\'t load language!', lang);
-                cb();
+                return cb();
             }
-            return;
         }
+
         engine.ajax({
             url: url,
             dataType: 'JSON',
@@ -746,45 +747,57 @@ var engine = {
             upSpeedList.shift();
         }
     },
-    showNotification: window.isModule ? function(icon, title, desc) {
-        var notification = require("sdk/notifications");
-        notification.notify({title: String(title), text: String(desc), iconURL: icon});
-    } : function(icon, title, desc, id) {
-        var notifyId = 'notify';
-        if (id !== undefined) {
-            notifyId += id;
-        } else {
-            notifyId += Date.now();
-        }
-        var timerId = notifyId + 'Timer';
+    showNotification: function() {
+        var moduleFunc = function(icon, title, desc) {
+            var notification = require("sdk/notifications");
+            notification.notify({title: String(title), text: String(desc), iconURL: icon});
+        };
 
-        var notifyList = engine.varCache.notifyList;
-
-        if (id !== undefined && notifyList[notifyId] !== undefined) {
-            clearTimeout(notifyList[timerId]);
-            delete notifyList[notifyId];
-            chrome.notifications.clear(notifyId, function(){});
-        }
-        /**
-         * @namespace chrome.notifications
-         */
-        chrome.notifications.create(
-            notifyId,
-            {
-                type: 'basic',
-                iconUrl: icon,
-                title: String(title),
-                message: String(desc)
-            },
-            function(id) {
-                notifyList[notifyId] = id;
+        var chromeFunc = function(icon, title, desc, id) {
+            var notifyId = 'notify';
+            if (id !== undefined) {
+                notifyId += id;
+            } else {
+                notifyId += Date.now();
             }
-        );
-        if (engine.settings.notificationTimeout > 0) {
-            notifyList[timerId] = setTimeout(function () {
-                notifyList[notifyId] = undefined;
+            var timerId = notifyId + 'Timer';
+
+            var notifyList = engine.varCache.notifyList;
+
+            if (id !== undefined && notifyList[notifyId] !== undefined) {
+                clearTimeout(notifyList[timerId]);
+                delete notifyList[notifyId];
                 chrome.notifications.clear(notifyId, function(){});
-            }, engine.settings.notificationTimeout);
+            }
+            /**
+             * @namespace chrome.notifications
+             */
+            chrome.notifications.create(
+                notifyId,
+                {
+                    type: 'basic',
+                    iconUrl: icon,
+                    title: String(title),
+                    message: String(desc)
+                },
+                function(id) {
+                    notifyList[notifyId] = id;
+                }
+            );
+            if (engine.settings.notificationTimeout > 0) {
+                notifyList[timerId] = setTimeout(function () {
+                    notifyList[notifyId] = undefined;
+                    chrome.notifications.clear(notifyId, function(){});
+                }, engine.settings.notificationTimeout);
+            }
+        };
+
+        if (mono.isModule) {
+            return moduleFunc.apply(this, arguments);
+        }
+
+        if (mono.isChrome) {
+            return chromeFunc.apply(this, arguments);
         }
     },
     onCompleteNotification: function(oldTorrentList, newTorrentList) {
@@ -803,28 +816,41 @@ var engine = {
             }
         }
     },
-    setBadgeText: mono.isChrome ? function(text) {
-        engine.setBadgeText.lastText = text;
+    setBadgeText: function() {
+        "use strict";
+        var chromeFunc = function(text) {
+            engine.setBadgeText.lastText = text;
 
-        chrome.browserAction.setBadgeText({
-            text: text
-        });
+            chrome.browserAction.setBadgeText({
+                text: text
+            });
 
-        var color = engine.settings.badgeColor.split(',').map(function(i){return parseFloat(i);});
-        if (color.length === 4) {
-            color.push(parseInt(255 * color.splice(-1)[0]));
+            var color = engine.settings.badgeColor.split(',').map(function(i){return parseFloat(i);});
+            if (color.length === 4) {
+                color.push(parseInt(255 * color.splice(-1)[0]));
+            }
+            chrome.browserAction.setBadgeBackgroundColor({
+                color: color
+            });
+        };
+
+        var moduleFunc = function(text) {
+            engine.setBadgeText.lastText = text;
+
+            mono.ffButton.badge = text;
+
+            var color = engine.settings.badgeColor;
+            var hexColor = mono.rgba2hex.apply(mono, color.split(','));
+            mono.ffButton.badgeColor = hexColor;
+        };
+
+        if (mono.isModule) {
+            return moduleFunc.apply(this, arguments);
         }
-        chrome.browserAction.setBadgeBackgroundColor({
-            color: color
-        });
-    } : function(text) {
-        engine.setBadgeText.lastText = text;
 
-        mono.ffButton.badge = text;
-
-        var color = engine.settings.badgeColor;
-        var hexColor = mono.rgba2hex.apply(mono, color.split(','));
-        mono.ffButton.badgeColor = hexColor;
+        if (mono.isChrome) {
+            return chromeFunc.apply(this, arguments);
+        }
     },
     displayActiveItemsCountIcon: function(newTorrentList) {
         var activeCount = 0;
@@ -1111,212 +1137,224 @@ var engine = {
 
         return {tree: smartTree, list: tmp_folders_array};
     },
-    createFolderCtxMenu: window.isModule ? (function() {
-        var contentScript = (function() {
-            var onClick = function() {
-                self.on("click", function(node) {
-                    var href = node.href;
-                    if (!href) {
-                        return self.postMessage({error: -1});
-                    }
-                    if (href.substr(0, 7).toLowerCase() === 'magnet:') {
-                        return self.postMessage({href: href});
-                    }
-                    self.postMessage({href: href, referer: window.location.href});
-                });
-            };
-            var minifi = function(str) {
-                var list = str.split('\n');
-                var newList = [];
-                list.forEach(function(line) {
-                    newList.push(line.trim());
-                });
-                return newList.join('');
-            };
-            var onClickString = onClick.toString();
-            var n_pos =  onClickString.indexOf('\n')+1;
-            onClickString = onClickString.substr(n_pos, onClickString.length - 1 - n_pos).trim();
-            return minifi(onClickString);
-        })();
-
-        var topLevel = undefined;
-
-        var readData = function(data, cb) {
-            if (typeof data !== 'object' || data.error === -1) {
-                return engine.showNotification(engine.icons.error, engine.language.OV_FL_ERROR, engine.language.unexpectedError);
-            }
-            if (data.href) {
-                return cb(data.href, data.referer);
-            }
-        };
-
-        var createSingleTopMenu = function(self, cm) {
-            return topLevel = cm.Item({
-                label: engine.language.addInTorrentClient,
-                context: cm.SelectorContext("a"),
-                image: self.data.url('./icons/icon-16.png'),
-                contentScript: contentScript,
-                onMessage: function (data) {
-                    readData(data, function(href, referer) {
-                        engine.sendFile(href, undefined, undefined, referer);
+    createFolderCtxMenu: function() {
+        var moduleFunc = function() {
+            var contentScript = (function() {
+                var onClick = function() {
+                    self.on("click", function(node) {
+                        var href = node.href;
+                        if (!href) {
+                            return self.postMessage({error: -1});
+                        }
+                        if (href.substr(0, 7).toLowerCase() === 'magnet:') {
+                            return self.postMessage({href: href});
+                        }
+                        self.postMessage({href: href, referer: window.location.href});
                     });
-                }
-            });
-        };
+                };
+                var minifi = function(str) {
+                    var list = str.split('\n');
+                    var newList = [];
+                    list.forEach(function(line) {
+                        newList.push(line.trim());
+                    });
+                    return newList.join('');
+                };
+                var onClickString = onClick.toString();
+                var n_pos =  onClickString.indexOf('\n')+1;
+                onClickString = onClickString.substr(n_pos, onClickString.length - 1 - n_pos).trim();
+                return minifi(onClickString);
+            })();
 
-        var onSubMenuMessage = function(data) {
-            var _this = this;
-            readData(data, function(href, referer) {
-                engine.onCtxMenuCall({
-                    linkUrl: href,
-                    menuItemId: _this.data,
-                    referer: referer
+            var topLevel = undefined;
+
+            var readData = function(data, cb) {
+                if (typeof data !== 'object' || data.error === -1) {
+                    return engine.showNotification(engine.icons.error, engine.language.OV_FL_ERROR, engine.language.unexpectedError);
+                }
+                if (data.href) {
+                    return cb(data.href, data.referer);
+                }
+            };
+
+            var createSingleTopMenu = function(self, cm) {
+                return topLevel = cm.Item({
+                    label: engine.language.addInTorrentClient,
+                    context: cm.SelectorContext("a"),
+                    image: self.data.url('./icons/icon-16.png'),
+                    contentScript: contentScript,
+                    onMessage: function (data) {
+                        readData(data, function(href, referer) {
+                            engine.sendFile(href, undefined, undefined, referer);
+                        });
+                    }
                 });
-            });
-        };
+            };
 
-        var createTreeItems = function(cm, parentId, itemList) {
-            var menuItemList = [];
-            for (var i = 0, item; item = itemList[i]; i++) {
-                if (item.parentId !== parentId) {
-                    continue;
-                }
-                var itemOpt = { label: item.title, context: cm.SelectorContext("a") };
-                var subItems = createTreeItems(cm, item.id, itemList );
-                if (subItems.length !== 0) {
-                    itemOpt.items = subItems;
-                    menuItemList.push(cm.Menu(itemOpt));
-                } else {
-                    itemOpt.onMessage = onSubMenuMessage;
-                    itemOpt.contentScript = contentScript;
-                    itemOpt.data = item.id;
-                    menuItemList.push(cm.Item(itemOpt));
-                }
-            }
-            return menuItemList;
-        };
+            var onSubMenuMessage = function(data) {
+                var _this = this;
+                readData(data, function(href, referer) {
+                    engine.onCtxMenuCall({
+                        linkUrl: href,
+                        menuItemId: _this.data,
+                        referer: referer
+                    });
+                });
+            };
 
-        return function() {
-            var self = require('sdk/self');
-            var cm = require("sdk/context-menu");
-
-            try {
-                topLevel && topLevel.parentMenu && topLevel.parentMenu.removeItem(topLevel);
-            } catch (e) {}
-            topLevel = undefined;
-
-            var contextMenu = engine.createFolderCtxMenu.contextMenu = [];
-
-            var folderList = engine.varCache.folderList;
-
-            var items = [];
-
-            Array.prototype.push.apply(contextMenu, folderList);
-            if (folderList.length > 0) {
-                if (engine.settings.treeViewContextMenu) {
-                    var treeList = engine.listToTreeList(folderList.slice(0));
-                    Array.prototype.push.apply(items, createTreeItems(cm, 'main', treeList.tree));
-                    contextMenu.splice(0);
-                    Array.prototype.push.apply(contextMenu, treeList.list);
-                } else {
-                    for (var i = 0, item; item = folderList[i]; i++) {
-                        items.push(cm.Item({
-                            label: item[2] || item[1],
-                            data: String(i),
-                            context: cm.SelectorContext("a"),
-                            onMessage: onSubMenuMessage,
-                            contentScript: contentScript
-                        }));
+            var createTreeItems = function(cm, parentId, itemList) {
+                var menuItemList = [];
+                for (var i = 0, item; item = itemList[i]; i++) {
+                    if (item.parentId !== parentId) {
+                        continue;
+                    }
+                    var itemOpt = { label: item.title, context: cm.SelectorContext("a") };
+                    var subItems = createTreeItems(cm, item.id, itemList );
+                    if (subItems.length !== 0) {
+                        itemOpt.items = subItems;
+                        menuItemList.push(cm.Menu(itemOpt));
+                    } else {
+                        itemOpt.onMessage = onSubMenuMessage;
+                        itemOpt.contentScript = contentScript;
+                        itemOpt.data = item.id;
+                        menuItemList.push(cm.Item(itemOpt));
                     }
                 }
-            }
-            if (engine.settings.showDefaultFolderContextMenuItem) {
-                items.push(cm.Item({
-                    label: engine.language.defaultPath,
-                    data: 'default',
-                    context: cm.SelectorContext("a"),
-                    onMessage: onSubMenuMessage,
-                    contentScript: contentScript
-                }));
-            }
-            if (folderList.length > 0 || engine.settings.showDefaultFolderContextMenuItem) {
-                items.push(cm.Item({
-                    label: engine.language.add+'...',
-                    data: 'newFolder',
-                    context: cm.SelectorContext("a"),
-                    onMessage: onSubMenuMessage,
-                    contentScript: contentScript
-                }));
-            }
-            if (items.length === 0) {
-                return createSingleTopMenu(self, cm);
-            }
-            topLevel = cm.Menu({
-                label: engine.language.addInTorrentClient,
-                context: cm.SelectorContext("a"),
-                image: self.data.url('./icons/icon-16.png'),
-                items: items
-            });
-        }
-    })() : function() {
-        chrome.contextMenus.removeAll(function () {
-            var contextMenu = engine.createFolderCtxMenu.contextMenu = [];
+                return menuItemList;
+            };
 
-            var folderList = engine.varCache.folderList;
+            (function() {
+                var self = require('sdk/self');
+                var cm = require("sdk/context-menu");
 
-            chrome.contextMenus.create({
-                id: 'main',
-                title: engine.language.addInTorrentClient,
-                contexts: ["link"],
-                onclick: engine.onCtxMenuCall
-            }, function () {
+                try {
+                    topLevel && topLevel.parentMenu && topLevel.parentMenu.removeItem(topLevel);
+                } catch (e) {}
+                topLevel = undefined;
+
+                var contextMenu = engine.createFolderCtxMenu.contextMenu = [];
+
+                var folderList = engine.varCache.folderList;
+
+                var items = [];
+
                 Array.prototype.push.apply(contextMenu, folderList);
                 if (folderList.length > 0) {
                     if (engine.settings.treeViewContextMenu) {
                         var treeList = engine.listToTreeList(folderList.slice(0));
-                        for (var i = 0, item; item = treeList.tree[i]; i++) {
-                            chrome.contextMenus.create({
-                                id: item.id,
-                                parentId: item.parentId,
-                                title: item.title,
-                                contexts: ["link"],
-                                onclick: engine.onCtxMenuCall
-                            });
-                        }
+                        Array.prototype.push.apply(items, createTreeItems(cm, 'main', treeList.tree));
                         contextMenu.splice(0);
                         Array.prototype.push.apply(contextMenu, treeList.list);
                     } else {
                         for (var i = 0, item; item = folderList[i]; i++) {
-                            chrome.contextMenus.create({
-                                id: String(i),
-                                parentId: 'main',
-                                title: item[2] || item[1],
-                                contexts: ["link"],
-                                onclick: engine.onCtxMenuCall
-                            });
+                            items.push(cm.Item({
+                                label: item[2] || item[1],
+                                data: String(i),
+                                context: cm.SelectorContext("a"),
+                                onMessage: onSubMenuMessage,
+                                contentScript: contentScript
+                            }));
                         }
                     }
                 }
                 if (engine.settings.showDefaultFolderContextMenuItem) {
-                    chrome.contextMenus.create({
-                        id: 'default',
-                        parentId: 'main',
-                        title: engine.language.defaultPath,
-                        contexts: ["link"],
-                        onclick: engine.onCtxMenuCall
-                    });
+                    items.push(cm.Item({
+                        label: engine.language.defaultPath,
+                        data: 'default',
+                        context: cm.SelectorContext("a"),
+                        onMessage: onSubMenuMessage,
+                        contentScript: contentScript
+                    }));
                 }
                 if (folderList.length > 0 || engine.settings.showDefaultFolderContextMenuItem) {
-                    chrome.contextMenus.create({
-                        id: 'newFolder',
-                        parentId: 'main',
-                        title: engine.language.add+'...',
-                        contexts: ["link"],
-                        onclick: engine.onCtxMenuCall
-                    });
+                    items.push(cm.Item({
+                        label: engine.language.add+'...',
+                        data: 'newFolder',
+                        context: cm.SelectorContext("a"),
+                        onMessage: onSubMenuMessage,
+                        contentScript: contentScript
+                    }));
                 }
+                if (items.length === 0) {
+                    return createSingleTopMenu(self, cm);
+                }
+                topLevel = cm.Menu({
+                    label: engine.language.addInTorrentClient,
+                    context: cm.SelectorContext("a"),
+                    image: self.data.url('./icons/icon-16.png'),
+                    items: items
+                });
+            })();
+        };
+
+        var chromeFunc = function() {
+            chrome.contextMenus.removeAll(function () {
+                var contextMenu = engine.createFolderCtxMenu.contextMenu = [];
+
+                var folderList = engine.varCache.folderList;
+
+                chrome.contextMenus.create({
+                    id: 'main',
+                    title: engine.language.addInTorrentClient,
+                    contexts: ["link"],
+                    onclick: engine.onCtxMenuCall
+                }, function () {
+                    Array.prototype.push.apply(contextMenu, folderList);
+                    if (folderList.length > 0) {
+                        if (engine.settings.treeViewContextMenu) {
+                            var treeList = engine.listToTreeList(folderList.slice(0));
+                            for (var i = 0, item; item = treeList.tree[i]; i++) {
+                                chrome.contextMenus.create({
+                                    id: item.id,
+                                    parentId: item.parentId,
+                                    title: item.title,
+                                    contexts: ["link"],
+                                    onclick: engine.onCtxMenuCall
+                                });
+                            }
+                            contextMenu.splice(0);
+                            Array.prototype.push.apply(contextMenu, treeList.list);
+                        } else {
+                            for (var i = 0, item; item = folderList[i]; i++) {
+                                chrome.contextMenus.create({
+                                    id: String(i),
+                                    parentId: 'main',
+                                    title: item[2] || item[1],
+                                    contexts: ["link"],
+                                    onclick: engine.onCtxMenuCall
+                                });
+                            }
+                        }
+                    }
+                    if (engine.settings.showDefaultFolderContextMenuItem) {
+                        chrome.contextMenus.create({
+                            id: 'default',
+                            parentId: 'main',
+                            title: engine.language.defaultPath,
+                            contexts: ["link"],
+                            onclick: engine.onCtxMenuCall
+                        });
+                    }
+                    if (folderList.length > 0 || engine.settings.showDefaultFolderContextMenuItem) {
+                        chrome.contextMenus.create({
+                            id: 'newFolder',
+                            parentId: 'main',
+                            title: engine.language.add+'...',
+                            contexts: ["link"],
+                            onclick: engine.onCtxMenuCall
+                        });
+                    }
+                });
             });
-        });
+        };
+
+        if (mono.isModule) {
+            return moduleFunc.apply(this, arguments);
+        }
+
+        if (mono.isChrome) {
+            return chromeFunc.apply(this, arguments);
+        }
     },
     run: function() {
         engine.loadSettings(function() {
@@ -1429,6 +1467,15 @@ var engine = {
             mono.storage.set({fileListColumnList: message.data}, response);
         },
         onSendFile: function(message, response) {
+            if (message.base64) {
+                var b64Data = message.base64;
+                var type = message.type;
+                delete message.base64;
+                delete message.type;
+
+                message.url = mono.base64ToUrl(b64Data, type);
+            }
+
             engine.sendFile(message.url, message.folder, message.label);
         },
         getTraffic: function(message, response) {
@@ -1481,59 +1528,43 @@ var engine = {
             engine.settings.badgeColor = message.color;
             engine.setBadgeText(engine.setBadgeText.lastText || '0');
         },
-        copy: mono.isModule ? function(message) {
-            var clipboard = require("sdk/clipboard");
-            clipboard.set(message.text);
-        } : function(message) {
-            var textArea = document.createElement('textarea');
-            textArea.textContent = message.text;
-            document.body.appendChild(textArea);
-            textArea.select();
-            setTimeout(function() {
-                document.execCommand("copy", false, null);
-                textArea.parentNode.removeChild(textArea);
-            });
-        }
-    }
-};
-
-(function() {
-    var init = function(addon, button) {
-        if (addon) {
-            mono = mono.init(addon);
-
-            mono.rgba2hex = function(r, g, b, a) {
-                if (a > 1) {
-                    a = a / 100;
-                }
-                a = parseFloat(a);
-                r = parseInt(r * a);
-                g = parseInt(g * a);
-                b = parseInt(b * a);
-
-                var componentToHex = function(c) {
-                    var hex = c.toString(16);
-                    return hex.length == 1 ? "0" + hex : hex;
-                };
-
-                return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+        copy: function() {
+            "use strict";
+            var moduleFunc = function(message) {
+                var clipboard = require("sdk/clipboard");
+                clipboard.set(message.text);
             };
 
-            mono.ffButton = button;
+            var chromeFunc = function(message) {
+                var textArea = document.createElement('textarea');
+                textArea.textContent = message.text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                setTimeout(function() {
+                    document.execCommand("copy", false, null);
+                    textArea.parentNode.removeChild(textArea);
+                });
+            };
 
-            var sdkTimers = require("sdk/timers");
-            engine.timer.setInterval = sdkTimers.setInterval;
-            engine.timer.clearInterval = sdkTimers.clearInterval;
+            if (mono.isModule) {
+                return moduleFunc.apply(this, arguments);
+            }
 
-            var self = require('sdk/self');
-            engine.icons.complete = self.data.url(engine.icons.complete);
-            engine.icons.add = self.data.url(engine.icons.add);
-            engine.icons.error = self.data.url(engine.icons.error);
+            if (mono.isChrome) {
+                return chromeFunc.apply(this, arguments);
+            }
+        }
+    },
+    init: function() {
+        engine.setBadgeText.lastText = '';
 
+        if (mono.isModule) {
             engine.ajax.xhr = require('sdk/net/xhr').XMLHttpRequest;
         } else {
             engine.ajax.xhr = XMLHttpRequest;
-            engine.setBadgeText.lastText = '';
+        }
+
+        if (mono.isChrome) {
             chrome.browserAction.setBadgeText({
                 text: ''
             });
@@ -1544,10 +1575,76 @@ var engine = {
         mono.onMessage(engine.onMessage);
 
         engine.run();
-    };
-    if (window.isModule) {
-        exports.init = init;
-    } else {
-        init();
     }
-})();
+};
+
+mono.isModule && (function(origFunc){
+    engine.init = function(addon, button) {
+        mono = mono.init(addon);
+
+        mono.rgba2hex = function(r, g, b, a) {
+            if (a > 1) {
+                a = a / 100;
+            }
+            a = parseFloat(a);
+            r = parseInt(r * a);
+            g = parseInt(g * a);
+            b = parseInt(b * a);
+
+            var componentToHex = function(c) {
+                var hex = c.toString(16);
+                return hex.length == 1 ? "0" + hex : hex;
+            };
+
+            return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+        };
+
+        mono.base64ToUrl = function(b64Data, contentType) {
+            "use strict";
+            var sliceSize = 256;
+            contentType = contentType || '';
+            var byteCharacters = window.atob(b64Data);
+
+            var byteCharacters_len = byteCharacters.length;
+            var byteArrays = new Array(Math.ceil(byteCharacters_len / sliceSize));
+            var n = 0;
+            for (var offset = 0; offset < byteCharacters_len; offset += sliceSize) {
+                var slice = byteCharacters.slice(offset, offset + sliceSize);
+                var slice_len = slice.length;
+                var byteNumbers = new Array(slice_len);
+                for (var i = 0; i < slice_len; i++) {
+                    byteNumbers[i] = slice.charCodeAt(i) & 0xff;
+                }
+
+                byteArrays[n] = new Uint8Array(byteNumbers);
+                n++;
+            }
+
+            var blob = new window.Blob(byteArrays, {type: contentType});
+
+            var blobUrl = window.URL.createObjectURL(blob);
+
+            return blobUrl;
+        };
+
+        mono.ffButton = button;
+
+        var sdkTimers = require("sdk/timers");
+        engine.timer.setInterval = sdkTimers.setInterval;
+        engine.timer.clearInterval = sdkTimers.clearInterval;
+
+        var self = require('sdk/self');
+        engine.icons.complete = self.data.url(engine.icons.complete);
+        engine.icons.add = self.data.url(engine.icons.add);
+        engine.icons.error = self.data.url(engine.icons.error);
+
+        origFunc();
+    };
+})(engine.init.bind(engine));
+
+if (mono.isModule) {
+    exports.init = engine.init;
+} else
+mono.onReady(function() {
+    engine.init();
+});

@@ -1,4 +1,10 @@
 exports.run = function (grunt) {
+    var monoParams = {
+        useChrome: 1,
+        oldChromeSupport: 1,
+        oneMode: 1
+    };
+
     grunt.config.merge({
         'json-format': {
             chromeManifestFormat: {
@@ -29,16 +35,6 @@ exports.run = function (grunt) {
                     }
                 }]
             }
-        },
-        copy: {
-            chromeBase: {
-                cwd: 'src/vendor/chrome/',
-                expand: true,
-                src: [
-                    'js/**'
-                ],
-                dest: '<%= output %><%= vendor %>'
-            }
         }
     });
 
@@ -50,6 +46,8 @@ exports.run = function (grunt) {
     });
 
     grunt.registerTask('chrome', function () {
+        grunt.config('monoParams', monoParams);
+
         grunt.config.merge({
             browser: 'chrome',
             vendor: 'chrome/src/',
@@ -62,7 +60,7 @@ exports.run = function (grunt) {
 
         grunt.task.run([
             'extensionBase',
-            'copy:chromeBase',
+            'buildJs',
             'chromeManifest',
             'compressJs',
             'json-format:chromeManifestFormat',
@@ -71,6 +69,8 @@ exports.run = function (grunt) {
     });
 
     grunt.registerTask('opera', function () {
+        grunt.config('monoParams', monoParams);
+
         grunt.config.merge({
             browser: 'opera',
             vendor: 'opera/src/',
@@ -83,7 +83,7 @@ exports.run = function (grunt) {
 
         grunt.task.run([
             'extensionBase',
-            'copy:chromeBase',
+            'buildJs',
             'chromeManifest',
             'compressJs',
             'json-format:chromeManifestFormat',

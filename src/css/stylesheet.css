@@ -648,7 +648,6 @@ li.select div[data-image=INACTIVE] .image,
 .nf-notifi input[type="button"],
 .nf-notifi button {
     width: 87px;
-    height: 22px;
 }
 .nf-notifi .nf-subItem input[type="button"]:first-child,
 .nf-notifi .nf-subItem button:first-child {

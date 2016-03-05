@@ -190,7 +190,6 @@ var manager = {
         trWordWrap: false,
         flWordWrap: true,
         windowMode: false,
-        noSleep: false,
         trHasSelectCell: false,
         flHasSelectCell: false
     },
@@ -3332,6 +3331,44 @@ var manager = {
         });
     },
     onGotFiles: function(files) {
+        var sendFileToBg = function(file, folderRequest) {
+            mono.sendMessage({
+                action: 'onSendFile',
+                url: URL.createObjectURL(file),
+                folder: folderRequest
+            });
+        };
+
+        if (mono.isFF) {
+            sendFileToBg = function(file, folderRequest) {
+                if (file.size > 5 * 1024 * 1024) {
+                    return console.error('File size more 5mb');
+                }
+
+                var type = file.type;
+                var reader = new FileReader();
+                reader.onloadend = function() {
+                    var fileBase64 = reader.result;
+
+                    var pos = fileBase64.indexOf('base64,') + 7;
+                    var m = fileBase64.substr(0, pos).match(/data:([^;]+);/);
+                    if (m) {
+                        type = type || m[1];
+                    }
+
+                    fileBase64 = fileBase64.substr(pos);
+
+                    mono.sendMessage({
+                        action: 'onSendFile',
+                        base64: fileBase64,
+                        type: type,
+                        folder: folderRequest
+                    });
+                };
+                reader.readAsDataURL(file);
+            };
+        }
+
         var onClickYes = function(dataForm) {
             if (!dataForm) {
                 dataForm = {};
@@ -3342,19 +3379,11 @@ var manager = {
                 folderRequest = {download_dir: folder[0], path: folder[1]}
             }
             for (var i = 0, file; file = files[i]; i++) {
-                mono.sendMessage({
-                    action: 'onSendFile',
-                    url: URL.createObjectURL(file),
-                    folder: folderRequest
-                });
+                sendFileToBg(file, folderRequest);
             }
         };
         var folderTemplate = showNotification.selectFolderTemplate();
         if (folderTemplate[1].select.append.length === 0) {
-            manager.options.noSleep = false;
-            if (mono.isFF && !mono.noAddon) {
-                mono.addon.postMessage('isShow');
-            }
             return onClickYes();
         }
         showNotification([
@@ -3374,9 +3403,7 @@ var manager = {
                     }]
                 ]}}
             ]
-        ], function onClose() {
-            manager.options.noSleep = false;
-        });
+        ]);
     },
     onLoadQuickNotification: function() {
         showNotification.selectFolderTemplate = function(noDefailtFolder) {
@@ -3495,24 +3522,11 @@ var manager = {
         debug && console.time('remote data');
 
         mono.onMessage(function(message) {
-            if (!message) return;
-
-            if (message === 'sleep') {
-                if (manager.options.noSleep) {
-                    setTimeout(function(){
-                        if (manager.options.noSleep) {
-                            manager.options.noSleep = false;
-                            if (!mono.noAddon) {
-                                mono.addon.postMessage('isShow');
-                            }
-                        }
-                    }, 60*1000);
-                    return;
-                }
-                window.location = 'sleep.html';
+            if (!message) {
+                return;
             }
 
-            if (message.hasOwnProperty('setStatus')) {
+            if (message.setStatus) {
                 manager.setStatus(message.setStatus);
             }
         });
@@ -3521,7 +3535,7 @@ var manager = {
             'trSortOptions',
             'flSortOptions',
             'selectedLabel',
-            'folderList',
+            'folderList'
         ], function(storage) {
             mono.sendMessage([
                 {action: 'getLanguage'},
@@ -3547,7 +3561,8 @@ var manager = {
 
                 if (mono.isChrome) {
                     manager.options.windowMode = window !== chrome.extension.getViews({type: 'popup'})[0];
-                } else {
+                } else
+                if (mono.isFF) {
                     manager.options.windowMode = mono.isFF && mono.noAddon;
                     if (!manager.options.windowMode) {
                         var popupHeight = manager.settings.popupHeight;
@@ -3708,7 +3723,9 @@ var manager = {
                     }
                     if (el.classList.contains('add_file')) {
                         e.preventDefault();
-                        manager.options.noSleep = true;
+                        if (mono.isFF && !mono.noAddon) {
+                            mono.addon.postMessage('sleepTimeout');
+                        }
                         if (manager.varCache.selectFileInput !== undefined) {
                             document.body.removeChild(manager.varCache.selectFileInput);
                             delete manager.varCache.selectFileInput;
@@ -4053,8 +4070,12 @@ var manager = {
                     on: ['click', function(e) {
                         if (mono.isChrome) {
                             chrome.tabs.create({url: window.location.href});
-                        } else {
+                        } else
+                        if (mono.isFF) {
                             mono.sendMessage({action: 'openTab', url: window.location.href}, undefined, 'service');
+                            if (!mono.noAddon) {
+                                mono.addon.postMessage('hidePopup');
+                            }
                         }
                     }]
                 }));
@@ -4120,4 +4141,6 @@ var define = function(name) {
 };
 define.amd = {};
 
-manager.run();
+mono.onReady(function() {
+    manager.run();
+});

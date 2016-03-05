@@ -168,6 +168,8 @@
             mPage.active = true;
             map[mPage.id] = mPage;
 
+            mPage.page.removeListener('pagehide', onPageHide);
+            mPage.page.removeListener('pageshow', onPageShow);
             mPage.page.removeListener('detach', onDetach);
             mPage.page.on('detach', onDetach);
             mPage.page.on('pageshow', onPageShow);
@@ -184,6 +186,8 @@
             mPage.page.on('attach', onAttach);
         };
 
+        mPage.detach = onDetach;
+
         onAttach();
     };
 
@@ -193,7 +197,7 @@
             var currentTab = tabs.activeTab;
             var pageIdList = [];
             for (var index in map) {
-                if (map[index].page.tab === currentTab && map[index].page.url === currentTab.url) {
+                if (map[index].page.tab === currentTab && map[index].page.tab && map[index].page.tab.url === currentTab.url) {
                     pageIdList.push(map[index].id);
                 }
             }
@@ -275,6 +279,12 @@
             message.from = mPage.id;
             monoOnMessage(message);
         });
+
+        return {
+            detach: function() {
+                mPage.detach();
+            }
+        };
     };
 
     var ffSimpleStorage = (function() {

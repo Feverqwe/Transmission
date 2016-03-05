@@ -400,12 +400,6 @@ var options = function() {
 
     return {
         start: function() {
-            mono.onMessage(function(message) {
-                if (message === 'sleep') {
-                    window.location = 'sleep.html';
-                }
-            });
-
             mono.storage.get([
                 'folderList'/*,
                 'labelList'*/
@@ -604,4 +598,6 @@ var options = function() {
     }
 }();
 
-options.start();
+mono.onReady(function() {
+    options.start();
+});

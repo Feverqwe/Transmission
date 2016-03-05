@@ -1,102 +1,46 @@
 exports.run = function (grunt) {
-    var replaceContent = function (content, sha1) {
-        content = content.replace('%extVersion%', grunt.config('pkg.extVersion'));
-
-        content = content.replace('%ffMinVersion%', grunt.config('pkg.ffMinVersion'));
-        content = content.replace('%ffMaxVersion%', grunt.config('pkg.ffMaxVersion'));
-
-        content = content.replace('%ffMMinVersion%', grunt.config('pkg.ffMinVersion'));
-        content = content.replace('%ffMMaxVersion%', grunt.config('pkg.ffMaxVersion'));
-
-        return content;
+    var monoParams = {
+        useFf: 1,
+        oneMode: 1
     };
 
-    grunt.registerTask('fixFfJsJs', function () {
-        grunt.config.merge({
-            compress: {
-                ffZipBuild: {
-                    options: {
-                        mode: 'zip',
-                        archive: '<%= output %><%= vendor %>../<%= buildName %>.xpi'
-                    },
-                    files: [
-                        {
-                            cwd: '<%= output %><%= vendor %>../unzip/',
-                            expand: true,
-                            filter: 'isFile',
-                            src: '**',
-                            dest: './'
-                        }
-                    ]
-                }
-            },
-            'json-format': {
-                ffHarnessOptions: {
-                    expand: true,
-                    cwd: '<%= output %><%= vendor %>../unzip/',
-                    src: 'harness-options.json',
-                    dest: '<%= output %><%= vendor %>../unzip/',
-                    options: {
-                        indent: 2
-                    }
-                }
-            }
-        });
-
-        var done = this.async();
-
-        var buildPath = grunt.template.process('<%= output %><%= vendor %>../<%= buildName %>.xpi');
-        var unZipPath = grunt.template.process('<%= output %><%= vendor %>../unzip/');
-
-        var fs = require('fs');
-        var unzip = require('unzip');
-
-        fs.createReadStream(buildPath).pipe(unzip.Extract({
-            path: unZipPath
-        })).on('close', function () {
-            var harnessOptionsPath = unZipPath + 'harness-options.json';
-            var content = grunt.file.readJSON(harnessOptionsPath);
-            for (var modulePath in content.manifest) {
-                var module = content.manifest[modulePath];
-                if (!module.moduleName || module.moduleName.slice(-3) !== '.js') continue;
-                module.moduleName = module.moduleName.slice(0, -3);
-            }
-            grunt.file.write(harnessOptionsPath, JSON.stringify(content));
-
-            grunt.task.run('json-format:ffHarnessOptions');
-
-            grunt.task.run('compress:ffZipBuild');
-
-            done();
-        });
-    });
-
-    grunt.registerTask('ffRenameBuild', function () {
-        var vendor = grunt.template.process('<%= output %><%= vendor %>../');
-        var path = vendor + 'transmission_easy_client.xpi';
-        grunt.file.copy(path, vendor + grunt.config('buildName') + '.xpi');
-        grunt.file.delete(path);
-    });
-
     grunt.registerTask('ffPackage', function() {
-        var packagePath = grunt.template.process('<%= output %><%= vendor %>package.json');
-        var content = grunt.file.readJSON('src/vendor/firefox/package.json');
+        var src = 'src/vendor/firefox/package.json';
+        var content = grunt.file.readJSON(src);
+
         content.version = grunt.config('pkg.extVersion');
-        grunt.file.write(packagePath, JSON.stringify(content));
+
+        var dest = grunt.template.process('<%= output %><%= vendor %>package.json');
+        grunt.file.write(dest, JSON.stringify(content));
+    });
+
+    grunt.registerTask('ffJpmPackage', function () {
+        "use strict";
+        var vendor = grunt.template.process('<%= output %><%= vendor %>');
+
+        var content = grunt.file.readJSON(vendor + 'package.json');
+
+        grunt.file.copy(vendor + 'data/icons/icon-48.png', vendor + 'icon.png');
+        grunt.file.copy(vendor + 'data/icons/icon-64.png', vendor + 'icon64.png');
+
+        var engines = {};
+        engines.firefox = '>=' + grunt.config('pkg.ffMinVersion') + ' <=' + grunt.config('pkg.ffMaxVersion');
+
+        content.engines = engines;
+
+        grunt.file.write(vendor + 'package.json', JSON.stringify(content));
+    });
+
+    grunt.registerTask('ffJpmRenameBuild', function() {
+        var vendor = grunt.template.process('<%= output %><%= vendor %>');
+        var fileList = grunt.file.expand(vendor + '*.xpi');
+        var path = fileList[0];
+        grunt.file.copy(path, vendor + '../' + grunt.config('buildName') + '.xpi');
+        grunt.file.delete(path);
     });
 
     grunt.config.merge({
         copy: {
-            ffSleep: {
-                cwd: 'src/',
-                expand: true,
-                src: [
-                    'js/sleep.js',
-                    'sleep.html'
-                ],
-                dest: '<%= output %><%= vendor %><%= dataFolder %>'
-            },
-
             ffBase: {
                 cwd: 'src/vendor/firefox/',
                 expand: true,
@@ -106,21 +50,6 @@ exports.run = function (grunt) {
                     'data/**'
                 ],
                 dest: '<%= output %><%= vendor %>'
-            },
-
-            ffTemplateDir: {
-                cwd: 'src/vendor/firefox_tools/template/',
-                expand: true,
-                src: '**',
-                dest: '<%= output %><%= vendor %>/../template/',
-                options: {
-                    process: function (content, src) {
-                        if (src.indexOf('install.rdf') !== -1) {
-                            content = replaceContent(content);
-                        }
-                        return content;
-                    }
-                }
             }
         },
         'json-format': {
@@ -135,13 +64,15 @@ exports.run = function (grunt) {
             }
         },
         exec: {
-            buildFF: {
-                command: 'cd <%= output %><%= vendor %> && call <%= env.addonSdkPath %>activate && cfx xpi --templatedir=../template --update-url "<%= ffUpdateUrl %>" && move *.xpi ../'
+            buildJpmFF: {
+                command: 'cd <%= output %><%= vendor %> && jpm xpi'
             }
         }
     });
 
     grunt.registerTask('firefox', function () {
+        grunt.config('monoParams', monoParams);
+
         if (!grunt.config('env.addonSdkPath')) {
             console.error("Add-on SDK is not found!");
             return;
@@ -159,14 +90,13 @@ exports.run = function (grunt) {
         });
         grunt.task.run([
             'extensionBase',
+            'buildJs',
             'copy:ffBase',
-            'copy:ffSleep',
             'ffPackage',
+            'ffJpmPackage',
             'json-format:ffPackage',
-            'copy:ffTemplateDir',
-            'exec:buildFF',
-            'ffRenameBuild',
-            'fixFfJsJs'
+            'exec:buildJpmFF',
+            'ffJpmRenameBuild'
         ]);
     });
 };
