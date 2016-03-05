@@ -543,7 +543,7 @@ var options = function() {
                             var span;
                             if (response.error) {
                                 span = mono.create('span', {
-                                    text: response.error.statusText+' (code: '+response.error.status+')',
+                                    text: response.error,
                                     style: {
                                         color: 'red'
                                     }
