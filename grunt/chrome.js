@@ -9,11 +9,9 @@ exports.run = function (grunt) {
         'json-format': {
             chromeManifestFormat: {
                 expand: true,
-                src: '<%= output %><%= vendor %>manifest.json',
+                cwd: '<%= output %><%= vendor %>',
+                src: 'manifest.json',
                 dest: '<%= output %><%= vendor %>',
-                rename: function () {
-                    return arguments[0] + arguments[1].substr((grunt.config('output') + grunt.config('vendor')).length);
-                },
                 options: {
                     indent: 4
                 }
@@ -26,13 +24,11 @@ exports.run = function (grunt) {
                     archive: '<%= output %><%= vendor %>../<%= buildName %>.zip'
                 },
                 files: [{
+                    cwd: '<%= output %><%= vendor %>',
                     expand: true,
                     filter: 'isFile',
-                    src: '<%= output %><%= vendor %>/**',
-                    dest: './',
-                    rename: function () {
-                        return arguments[0] + arguments[1].substr((grunt.config('output') + grunt.config('vendor')).length);
-                    }
+                    src: '**',
+                    dest: ''
                 }]
             }
         }
