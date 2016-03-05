@@ -3526,7 +3526,7 @@ var manager = {
                 return;
             }
 
-            if (message.setStatus) {
+            if (message.hasOwnProperty('setStatus')) {
                 manager.setStatus(message.setStatus);
             }
         });
