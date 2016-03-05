@@ -1006,7 +1006,7 @@ var engine = {
             xhr.setRequestHeader('Referer', referer);
         }
         xhr.onprogress = function (e) {
-            if (e.total > 1048576 * 10 || e.loaded > 1048576 * 10) {
+            if (e.total > 1024 * 1024 * 10 || e.loaded > 1024 * 1024 * 10) {
                 xhr.abort();
                 engine.showNotification(engine.icons.error, engine.language.OV_FL_ERROR, engine.language.fileSizeError);
             }
