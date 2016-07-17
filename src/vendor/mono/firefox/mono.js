@@ -288,7 +288,6 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
     var api = {
       isFF: true,
       addon: browserAddon,
-      noAddon: browserAddon.isVirtual,
       isModule: typeof _addon !== 'undefined',
       /**
        * @param {*} msg

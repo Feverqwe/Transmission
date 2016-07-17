@@ -3594,7 +3594,7 @@ var manager = {
                     }
                     if (el.classList.contains('add_file')) {
                         e.preventDefault();
-                        if (mono.isFF && !mono.noAddon) {
+                        if (mono.isFF && !mono.isTab()) {
                             mono.addon.postMessage('sleepTimeout');
                         }
                         if (manager.varCache.selectFileInput !== undefined) {
@@ -3940,7 +3940,7 @@ var manager = {
                     title: manager.language.openInTab,
                     on: ['click', function(e) {
                         mono.openTab(location.href);
-                        if (mono.isFF && !mono.noAddon) {
+                        if (mono.isFF && !mono.isTab()) {
                             mono.addon.postMessage('hidePopup');
                         }
                     }]
