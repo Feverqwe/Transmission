@@ -746,7 +746,11 @@ var engine = {
     loadLanguage: function(cb) {
         var langList = ['en', 'ru', 'fr', 'es', 'pt', 'zh'];
         var defaultLocale = langList[0];
-        var locale = engine.settings.lang || mono.getLoadedLocale();
+        var customLang = engine.settings.lang;
+        if (typeof customLang === 'string') {
+            customLang = customLang.substr(0, 2);
+        }
+        var locale = customLang || mono.getLoadedLocale();
         if (!locale) {
             var navLanguage = engine.getNavLanguage().substr(0, 2).toLowerCase();
             if (langList.indexOf(navLanguage) !== -1) {
