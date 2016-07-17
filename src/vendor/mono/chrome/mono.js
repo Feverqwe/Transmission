@@ -525,7 +525,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
       return !chrome.extension.getViews({
         type: 'popup'
       }).some(function (_window) {
-        return _window === _window;
+        return window === _window;
       });
     };
 
