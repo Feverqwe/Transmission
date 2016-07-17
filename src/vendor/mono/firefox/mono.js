@@ -461,6 +461,41 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
       }
     };
 
+    /**
+     * @param {String} locale
+     * @param {Function} cb
+     */
+    api.getLanguage = function (locale, cb) {
+      var convert = function(messages) {
+        var language = {};
+        for (var key in messages) {
+          if (messages.hasOwnProperty(key)) {
+            language[key] = messages[key].message;
+          }
+        }
+        return language;
+      };
+
+      var self = require('sdk/self');
+      var url = '_locales/{locale}/messages.json';
+
+      var messages = null;
+      try {
+        messages = JSON.parse(self.data.load(url.replace('{locale}', locale)));
+        cb(null, convert(messages));
+      } catch (e) {
+        cb(e);
+      }
+    };
+
+    api.getLoadedLocale = function () {
+      var locale = require("sdk/l10n").get('lang');
+      if (locale === 'lang') {
+        locale = '';
+      }
+      return locale;
+    };
+
     api.createBlob = function (byteArrays, details) {
       var _window = null;
       if (api.isModule) {
@@ -539,6 +574,11 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
         _window = window;
       }
       return _window.prompt(message, def);
+    };
+
+    api.showNotification = function(icon, title, desc) {
+      var notification = require("sdk/notifications");
+      notification.notify({title: String(title), text: String(desc), iconURL: icon});
     };
 
     return {

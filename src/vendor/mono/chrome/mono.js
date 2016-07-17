@@ -377,6 +377,49 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
       return clearInterval(timeout);
     };
 
+    /**
+     * @param {String} locale
+     * @param {Function} cb
+     */
+    api.getLanguage = function (locale, cb) {
+      var convert = function(messages) {
+        var language = {};
+        for (var key in messages) {
+          if (messages.hasOwnProperty(key)) {
+            language[key] = messages[key].message;
+          }
+        }
+        return language;
+      };
+
+      var url = '_locales/{locale}/messages.json';
+
+      var xhr = new XMLHttpRequest();
+      try {
+        xhr.open('GET', url.replace('{locale}', locale));
+      } catch (e) {
+        return cb(e);
+      }
+      xhr.onload = function () {
+        var err = null;
+        var obj = null;
+        try {
+          obj = convert(JSON.parse(xhr.responseText));
+        } catch (e) {
+          err = e;
+        }
+        return cb(err, obj);
+      };
+      xhr.onerror = function () {
+        return cb(new Error(xhr.status + ' ' + xhr.statusText));
+      };
+      xhr.send();
+    };
+
+    api.getLoadedLocale = function () {
+      return chrome.i18n.getMessage('lang');
+    };
+
     api.createBlob = function (byteArrays, details) {
       return new Blob(byteArrays, details);
     };
@@ -403,6 +446,48 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
 
     api.prompt = function (message, def) {
       return prompt(message, def);
+    };
+
+    api.showNotification = function(icon, title, desc, details) {
+      details = details || {};
+      var id = details.id;
+      var notifyList = details.notifyList;
+      var notificationTimeout = details.notificationTimeout;
+
+      var notifyId = 'notify';
+      if (id !== undefined) {
+        notifyId += id;
+      } else {
+        notifyId += Date.now();
+      }
+      var timerId = notifyId + 'Timer';
+
+      if (id !== undefined && notifyList[notifyId] !== undefined) {
+        clearTimeout(notifyList[timerId]);
+        delete notifyList[notifyId];
+        chrome.notifications.clear(notifyId, function(){});
+      }
+      /**
+       * @namespace chrome.notifications
+       */
+      chrome.notifications.create(
+          notifyId,
+          {
+            type: 'basic',
+            iconUrl: icon,
+            title: String(title),
+            message: String(desc)
+          },
+          function(id) {
+            notifyList[notifyId] = id;
+          }
+      );
+      if (notificationTimeout > 0) {
+        notifyList[timerId] = setTimeout(function () {
+          notifyList[notifyId] = undefined;
+          chrome.notifications.clear(notifyId, function(){});
+        }, notificationTimeout);
+      }
     };
 
     return {

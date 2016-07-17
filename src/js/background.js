@@ -727,109 +727,50 @@ var engine = {
             return cb();
         });
     },
-    checkAvailableLanguage: function(lang) {
-        var dblList = ['pt-BR', 'zh-CN'];
-        if (dblList.indexOf(lang) === -1) {
-            lang = lang.substr(0, 2);
+    setLanguage: function(_language) {
+        var language = engine.language;
+        for (var key in _language) {
+            language[key] = _language[key];
         }
-        return ['ru', 'fr', 'en', 'es'].concat(dblList).indexOf(lang) !== -1 ? lang : 'en';
     },
-    getLocale: function() {
-        if (engine.getLocale.locale !== undefined) {
-            return engine.getLocale.locale;
-        }
-
-        var getLang = function() {
-            return String(navigator.language).toLowerCase();
-        };
-
-        if (mono.isModule) {
-            getLang = function() {
-                return mono.getNavigator().language.toLowerCase();
-            };
-        }
-
-        var lang = getLang();
-        var match = lang.match(/\(([^)]+)\)/);
-        if (match !== null) {
-            lang = match[1];
-        }
-
-        var tPos = lang.indexOf('-');
-        if (tPos !== -1) {
-            var left = lang.substr(0, tPos);
-            var right = lang.substr(tPos + 1);
-            if (left === right) {
-                lang = left;
-            } else {
-                lang = left + '-' + right.toUpperCase();
-            }
-        }
-        return engine.getLocale.locale = lang;
-    },
-    detectLanguage: function() {
-        "use strict";
-        if (mono.isChrome) {
-            return chrome.i18n.getMessage('lang');
-        }
-
-        if (mono.isModule) {
-            var lang = require("sdk/l10n").get('lang');
-            if (lang !== 'lang') {
-                return lang;
-            }
-        }
-
-        return engine.getLocale();
-    },
-    readChromeLocale: function(lang) {
-        var language = {};
-        for (var key in lang) {
-            language[key] = lang[key].message;
+    /**
+     * @returns {string}
+     */
+    getNavLanguage: function () {
+        var language = '';
+        var navLanguage = mono.getNavigator().language;
+        if (/^\w{2}-|^\w{2}$/.test(navLanguage)) {
+            language = navLanguage;
         }
         return language;
     },
-    setLanguage: function(languageWordList) {
-        for (var key in languageWordList) {
-            engine.language[key] = languageWordList[key];
-        }
-    },
-    loadLanguage: function(cb, force) {
-        var lang = force || engine.checkAvailableLanguage((engine.settings.lang || engine.detectLanguage()));
-
-        if (!force) {
-            engine.settings.lang = engine.settings.lang || lang;
-        }
-
-        if (engine.language.lang === lang) {
-            return cb();
-        }
-
-        var url = '_locales/' + lang.replace('-', '_') + '/messages.json';
-
-        if (mono.isModule) {
-            try {
-                engine.setLanguage(engine.readChromeLocale(JSON.parse(require('sdk/self').data.load(url))));
-                return cb();
-            } catch (e) {
-                console.error('Can\'t load language!', lang);
-                return cb();
+    loadLanguage: function(cb) {
+        var langList = ['en', 'ru', 'fr', 'es', 'pt', 'zh'];
+        var defaultLocale = langList[0];
+        var locale = engine.settings.lang || mono.getLoadedLocale();
+        if (!locale) {
+            var navLanguage = engine.getNavLanguage().substr(0, 2).toLowerCase();
+            if (langList.indexOf(navLanguage) !== -1) {
+                locale = navLanguage;
+            } else {
+                locale = defaultLocale;
             }
         }
 
-        engine.request({
-            url: url,
-            json: true
-        }, function(err, resp, json) {
-            "use strict";
-            if (err || !json) {
-                console.error('Can\'t load language!', lang);
-                return cb();
-            }
-
-            engine.setLanguage(engine.readChromeLocale(json));
-            return cb();
-        });
+        (function getLanguage(locale, cb) {
+            mono.getLanguage(locale, function (err, _language) {
+                if (err) {
+                    if (locale !== defaultLocale) {
+                        getLanguage(defaultLocale, cb);
+                    } else {
+                        cb();
+                    }
+                } else {
+                    engine.setLanguage(_language);
+                    cb();
+                }
+            });
+        })(locale, cb);
     },
     getLanguage: function(cb) {
         engine.language = {};
@@ -855,58 +796,11 @@ var engine = {
             upSpeedList.shift();
         }
     },
-    showNotification: function() {
-        var moduleFunc = function(icon, title, desc) {
-            var notification = require("sdk/notifications");
-            notification.notify({title: String(title), text: String(desc), iconURL: icon});
-        };
-
-        var chromeFunc = function(icon, title, desc, id) {
-            var notifyId = 'notify';
-            if (id !== undefined) {
-                notifyId += id;
-            } else {
-                notifyId += Date.now();
-            }
-            var timerId = notifyId + 'Timer';
-
-            var notifyList = engine.varCache.notifyList;
-
-            if (id !== undefined && notifyList[notifyId] !== undefined) {
-                clearTimeout(notifyList[timerId]);
-                delete notifyList[notifyId];
-                chrome.notifications.clear(notifyId, function(){});
-            }
-            /**
-             * @namespace chrome.notifications
-             */
-            chrome.notifications.create(
-                notifyId,
-                {
-                    type: 'basic',
-                    iconUrl: icon,
-                    title: String(title),
-                    message: String(desc)
-                },
-                function(id) {
-                    notifyList[notifyId] = id;
-                }
-            );
-            if (engine.settings.notificationTimeout > 0) {
-                notifyList[timerId] = setTimeout(function () {
-                    notifyList[notifyId] = undefined;
-                    chrome.notifications.clear(notifyId, function(){});
-                }, engine.settings.notificationTimeout);
-            }
-        };
-
-        if (mono.isModule) {
-            return moduleFunc.apply(this, arguments);
-        }
-
-        if (mono.isChrome) {
-            return chromeFunc.apply(this, arguments);
-        }
+    showNotification: function(icon, title, desc, details) {
+        details = details || {};
+        details.notifyList = engine.varCache.notifyList;
+        details.notificationTimeout = engine.settings.notificationTimeout;
+        mono.showNotification(icon, title, desc, details);
     },
     onCompleteNotification: function(oldTorrentList, newTorrentList) {
         if (oldTorrentList.length === 0) {
@@ -920,7 +814,12 @@ var engine = {
                 if (oldItem[0] !== newItem[0] || oldItem[4] === 1000 || oldItem[24]) {
                     continue;
                 }
-                engine.showNotification(engine.icons.complete, newItem[2], (newItem[21] !== undefined) ? engine.language.OV_COL_STATUS + ': ' + newItem[21] : '');
+                var desc = (newItem[21] !== undefined) ? engine.language.OV_COL_STATUS + ': ' + newItem[21] : '';
+                engine.showNotification(
+                    engine.icons.complete,
+                    newItem[2],
+                    desc
+                );
             }
         }
     },
@@ -983,7 +882,11 @@ var engine = {
         try {
             xhr.open('GET', url, true);
         } catch (e) {
-            engine.showNotification(engine.icons.error, xhr.status, engine.language.unexpectedError);
+            engine.showNotification(
+                engine.icons.error,
+                xhr.status,
+                engine.language.unexpectedError
+            );
             return;
         }
         xhr.responseType = 'blob';
@@ -993,7 +896,11 @@ var engine = {
         xhr.onprogress = function (e) {
             if (e.total > 1024 * 1024 * 10 || e.loaded > 1024 * 1024 * 10) {
                 xhr.abort();
-                engine.showNotification(engine.icons.error, engine.language.OV_FL_ERROR, engine.language.fileSizeError);
+                engine.showNotification(
+                    engine.icons.error,
+                    engine.language.OV_FL_ERROR,
+                    engine.language.fileSizeError
+                );
             }
         };
         xhr.onload = function () {
@@ -1001,9 +908,17 @@ var engine = {
         };
         xhr.onerror = function () {
             if (xhr.status === 0) {
-                engine.showNotification(engine.icons.error, xhr.status, engine.language.unexpectedError);
+                engine.showNotification(
+                    engine.icons.error,
+                    xhr.status,
+                    engine.language.unexpectedError
+                );
             } else {
-                engine.showNotification(engine.icons.error, xhr.status, xhr.statusText);
+                engine.showNotification(
+                    engine.icons.error,
+                    xhr.status,
+                    xhr.statusText
+                );
             }
         };
         xhr.send();
@@ -1036,7 +951,11 @@ var engine = {
         var onRequestReady = function() {
             engine.sendAction(args, function(data) {
                 if (data.result && data.result !== 'success') {
-                    engine.showNotification(engine.icons.error, engine.language.OV_FL_ERROR, data.result);
+                    engine.showNotification(
+                        engine.icons.error,
+                        engine.language.OV_FL_ERROR,
+                        data.result
+                    );
                     return;
                 }
 
@@ -1045,11 +964,19 @@ var engine = {
                     if (engine.settings.selectDownloadCategoryOnAddItemFromContextMenu) {
                         mono.storage.set({selectedLabel: {label: 'DL', custom: 1}});
                     }
-                    engine.showNotification(engine.icons.add, name, engine.language.torrentAdded);
+                    engine.showNotification(
+                        engine.icons.add,
+                        name,
+                        engine.language.torrentAdded
+                    );
                 } else
                 if (data.arguments['torrent-duplicate']) {
                     var name = data.arguments['torrent-duplicate'].name;
-                    engine.showNotification(engine.icons.error, name, engine.language.torrentFileIsExists);
+                    engine.showNotification(
+                        engine.icons.error,
+                        name,
+                        engine.language.torrentFileIsExists
+                    );
                 }
 
                 engine.updateTrackerList();
@@ -1282,7 +1209,11 @@ var engine = {
 
         var readData = function(data, cb) {
             if (typeof data !== 'object' || data.error === -1) {
-                return engine.showNotification(engine.icons.error, engine.language.OV_FL_ERROR, engine.language.unexpectedError);
+                return engine.showNotification(
+                    engine.icons.error,
+                    engine.language.OV_FL_ERROR,
+                    engine.language.unexpectedError
+                );
             }
             if (data.href) {
                 return cb(data.href, data.referer);
