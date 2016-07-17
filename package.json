@@ -2,21 +2,19 @@
   "name": "TransmissionEasyClient",
   "version": "1.0.0",
   "ffMinVersion": "38.0",
-  "ffMaxVersion": "48.0",
+  "ffMaxVersion": "50.0",
   "dependencies": {
-    "grunt": "^0.4.5",
-    "grunt-json-format": "^1.0.1",
-    "grunt-exec": "^0.4.6",
+    "grunt": "^1.0.1",
+    "unzip": "^0.1.11",
     "grunt-contrib-copy": "^1.0.0",
-    "grunt-contrib-compress": "^1.1.0",
     "grunt-contrib-clean": "^1.0.0",
-    "grunt-closurecompiler": "",
-    "unzip": "^0.1.11"
+    "grunt-contrib-compress": "^1.3.0",
+    "google-closure-compiler": ""
   },
   "globalDep": {
     "grunt-cli": "",
     "jpm": ""
   },
   "outputDir": "output/",
-  "extVersion": "1.6.3"
+  "extVersion": "1.6.4"
 }

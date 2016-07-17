@@ -1,124 +1,3 @@
-/**
- * Create new element
- * @param {string} tagName
- * @param {object} obj
- * @returns {Element}
- */
-mono.create = function(tagName, obj) {
-    var el;
-    if ( typeof tagName === 'string') {
-        el = document.createElement(tagName);
-    } else {
-        el = tagName;
-    }
-    if (obj !== undefined) {
-        for (var attr in obj) {
-            var value = obj[attr];
-            if (mono.create.hookList[attr]) {
-                mono.create.hookList[attr](el, value);
-                continue;
-            }
-            if (value === undefined || value === null) {
-                continue;
-            }
-            el[attr] = value;
-        }
-    }
-    return el;
-};
-mono.create.hookList = {
-    text: function(el, value) {
-        el.textContent = value;
-    },
-    data: function(el, value) {
-        if (!value) return;
-
-        for (var item in value) {
-            var val = value[item];
-            if (val !== null && val !== undefined) {
-                el.dataset[item] = val;
-            }
-        }
-    },
-    class: function(el, value) {
-        if (typeof value !== 'string') {
-            for (var i = 0, len = value.length; i < len; i++) {
-                var className = value[i];
-                if (!className) {
-                    continue;
-                }
-                el.classList.add(className);
-            }
-            return;
-        }
-        el.setAttribute('class', value);
-    },
-    style: function(el, value) {
-        if (typeof value !== 'string') {
-            for (var item in value) {
-                el.style[item] = value[item];
-            }
-            return;
-        }
-        el.setAttribute('style', value);
-    },
-    append: function(el, value) {
-        if (Array.isArray(value)) {
-            for (var i = 0, len = value.length; i < len; i++) {
-                var subEl = value[i];
-                if (!subEl) {
-                    continue;
-                }
-                if (typeof (subEl) === 'string') {
-                    subEl = document.createTextNode(subEl);
-                }
-                el.appendChild(subEl);
-            }
-            return;
-        }
-        el.appendChild(value);
-    },
-    on: function(el, args) {
-        if (typeof args[0] !== 'string') {
-            for (var i = 0, len = args.length; i < len; i++) {
-                var subArgs = args[i];
-                el.addEventListener(subArgs[0], subArgs[1], subArgs[2]);
-            }
-            return;
-        }
-        //type, onEvent, useCapture
-        el.addEventListener(args[0], args[1], args[2]);
-    },
-    onCreate: function(el, value) {
-        value(el);
-    }
-};
-mono.isVisibleElement = function(el) {
-    return el.offsetWidth > 0 && el.offsetHeight > 0;
-};
-mono.spaceToUnderline = function(string) {
-    return string.replace(/\s/, '_');
-};
-mono.param = function(params) {
-    if (typeof params === 'string') return params;
-
-    var args = [];
-    for (var key in params) {
-        var value = params[key];
-        if (value === null || value === undefined) {
-            continue;
-        }
-        if (!Array.isArray(value)) {
-            value = [value];
-        }
-        for (var i = 0, len = value.length; i < len; i++) {
-            args.push(encodeURIComponent(key) + '=' + encodeURIComponent(value[i]));
-        }
-    }
-    return args.join('&');
-};
-
-
 var debug = false;
 
 var manager = {
@@ -376,7 +255,7 @@ var manager = {
                 width = 723;
             }
             document.body.style.width = width + 'px';
-            mono.isFF && mono.sendMessage({action: 'resize', width: width}, undefined, 'service');
+            mono.isFF && mono.sendMessage({action: 'resize', width: width}, null, 'service');
 
             mono.isChrome && setTimeout(function() {
                 var innerWidth = window.innerWidth;
@@ -3521,12 +3400,8 @@ var manager = {
         debug && console.time('manager');
         debug && console.time('remote data');
 
-        mono.onMessage(function(message) {
-            if (!message) {
-                return;
-            }
-
-            if (message.hasOwnProperty('setStatus')) {
+        mono.onMessage.addListener(function(message) {
+            if (message && message.setStatus !== undefined) {
                 manager.setStatus(message.setStatus);
             }
         });
@@ -3570,7 +3445,7 @@ var manager = {
                             popupHeight = document.body.clientHeight;
                         }
                         document.body.style.overflow = 'hidden';
-                        mono.sendMessage({action: 'resize', height: popupHeight}, undefined, "service");
+                        mono.sendMessage({action: 'resize', height: popupHeight}, null, "service");
                     }
                 }
 
@@ -4072,7 +3947,7 @@ var manager = {
                             chrome.tabs.create({url: window.location.href});
                         } else
                         if (mono.isFF) {
-                            mono.sendMessage({action: 'openTab', url: window.location.href}, undefined, 'service');
+                            mono.sendMessage({action: 'openTab', url: window.location.href}, null, 'service');
                             if (!mono.noAddon) {
                                 mono.addon.postMessage('hidePopup');
                             }

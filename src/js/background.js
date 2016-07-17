@@ -1,24 +1,5 @@
 typeof window === 'undefined' && (function() {
-    var self = require('sdk/self');
-    window = require('sdk/window/utils').getMostRecentBrowserWindow();
-    mono = require('toolkit/loader').main(require('toolkit/loader').Loader({
-        paths: {
-            'data/': self.data.url('js/')
-        },
-        name: self.name,
-        prefixURI: self.data.url().match(/([^:]+:\/\/[^/]+\/)/)[1],
-        globals: {
-            console: console,
-            _require: function(path) {
-                switch (path) {
-                    case 'sdk/simple-storage':
-                        return require('sdk/simple-storage');
-                    default:
-                        console.log('Module not found!', path);
-                }
-            }
-        }
-    }), "data/mono");
+    mono = require('./../data/js/mono.js');
 })();
 
 var engine = {
@@ -570,7 +551,7 @@ var engine = {
 
 
         if (engine.settings.requireAuthentication && engine.settings.login !== null && engine.settings.password !== null) {
-            headers.Authorization = 'Basic ' + window.btoa(engine.settings.login + ":" + engine.settings.password);
+            headers.Authorization = 'Basic ' + mono.btoa(engine.settings.login + ":" + engine.settings.password);
         }
         if (engine.varCache.token !== null) {
             headers['X-Transmission-Session-Id'] = engine.varCache.token;
@@ -764,8 +745,7 @@ var engine = {
 
         if (mono.isModule) {
             getLang = function() {
-                var window = require('sdk/window/utils').getMostRecentBrowserWindow();
-                return String(window.navigator && window.navigator.language).toLowerCase();
+                return mono.getNavigator().language.toLowerCase();
             };
         }
 
@@ -1000,7 +980,12 @@ var engine = {
     },
     downloadFile: function (url, cb, referer) {
         var xhr = engine.getTransport();
-        xhr.open('GET', url, true);
+        try {
+            xhr.open('GET', url, true);
+        } catch (e) {
+            engine.showNotification(engine.icons.error, xhr.status, engine.language.unexpectedError);
+            return;
+        }
         xhr.responseType = 'blob';
         if (referer) {
             xhr.setRequestHeader('Referer', referer);
@@ -1029,7 +1014,7 @@ var engine = {
             if (url.substr(0, 7).toLowerCase() !== 'magnet:') {
                 engine.downloadFile(url, function (file) {
                     if (url.substr(0,5).toLowerCase() === 'blob:') {
-                        window.URL.revokeObjectURL(url);
+                        mono.urlRevokeObjectURL(url);
                     }
                     engine.sendFile(file, folder, label, referer);
                 }, referer);
@@ -1073,7 +1058,7 @@ var engine = {
         if (args.arguments.filename !== undefined) {
             return onRequestReady();
         }
-        var reader = new window.FileReader();
+        var reader = mono.getFileReader();
         reader.readAsDataURL(args.arguments.metainfo);
         reader.onloadend = function() {
             var fileDataPos = reader.result.indexOf(',');
@@ -1092,7 +1077,7 @@ var engine = {
         var contextMenu = engine.createFolderCtxMenu.contextMenu;
         var defaultItem = contextMenu[0] ? contextMenu[0] : ['0', '', ''];
         if (id === 'newFolder') {
-            var path = window.prompt(engine.language.enterNewDirPath, defaultItem[1]);
+            var path = mono.prompt(engine.language.enterNewDirPath, defaultItem[1]);
             if (!path) {
                 return;
             }
@@ -1276,7 +1261,7 @@ var engine = {
                     if (href.substr(0, 7).toLowerCase() === 'magnet:') {
                         return self.postMessage({href: href});
                     }
-                    self.postMessage({href: href, referer: window.location.href});
+                    self.postMessage({href: href, referer: location.href});
                 });
             };
             var minifi = function(str) {
@@ -1636,7 +1621,6 @@ var engine = {
             });
         },
         managerIsOpen: function(message, response) {
-            mono.msgClean();
             if (engine.timer.state !== 1) {
                 engine.timer.start();
             }
@@ -1685,42 +1669,6 @@ var engine = {
     init: function() {
         engine.setBadgeText.lastText = '';
 
-        mono.setTimeout = function(cb, delay) {
-            "use strict";
-            if (mono.isModule) {
-                return require("sdk/timers").setTimeout(cb, delay);
-            } else {
-                return setTimeout(cb, delay);
-            }
-        };
-
-        mono.clearTimeout = function(timeout) {
-            "use strict";
-            if (mono.isModule) {
-                return require("sdk/timers").clearTimeout(timeout);
-            } else {
-                return clearTimeout(timeout);
-            }
-        };
-
-        mono.setInterval = function(cb, delay) {
-            "use strict";
-            if (mono.isModule) {
-                return require("sdk/timers").setInterval(cb, delay);
-            } else {
-                return setInterval(cb, delay);
-            }
-        };
-
-        mono.clearInterval = function(timeout) {
-            "use strict";
-            if (mono.isModule) {
-                return require("sdk/timers").clearInterval(timeout);
-            } else {
-                return clearInterval(timeout);
-            }
-        };
-
         if (mono.isChrome) {
             chrome.browserAction.setBadgeText({
                 text: ''
@@ -1729,74 +1677,27 @@ var engine = {
 
         engine.varCache.msgStack = [];
 
-        mono.onMessage(engine.onMessage);
+        mono.onMessage.addListener(engine.onMessage);
 
         engine.run();
     }
 };
 
-mono.isModule && (function(origFunc){
-    engine.init = function(addon, button) {
-        mono = mono.init(addon);
+engine.initModule = function(addon, button) {
+    mono = mono.init(addon);
 
-        mono.rgba2hex = function(r, g, b, a) {
-            if (a > 1) {
-                a = a / 100;
-            }
-            a = parseFloat(a);
-            r = parseInt(r * a);
-            g = parseInt(g * a);
-            b = parseInt(b * a);
+    mono.ffButton = button;
 
-            var componentToHex = function(c) {
-                var hex = c.toString(16);
-                return hex.length == 1 ? "0" + hex : hex;
-            };
+    var self = require('sdk/self');
+    engine.icons.complete = self.data.url(engine.icons.complete);
+    engine.icons.add = self.data.url(engine.icons.add);
+    engine.icons.error = self.data.url(engine.icons.error);
 
-            return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
-        };
-
-        mono.base64ToUrl = function(b64Data, contentType) {
-            "use strict";
-            var sliceSize = 256;
-            contentType = contentType || '';
-            var byteCharacters = window.atob(b64Data);
-
-            var byteCharacters_len = byteCharacters.length;
-            var byteArrays = new Array(Math.ceil(byteCharacters_len / sliceSize));
-            var n = 0;
-            for (var offset = 0; offset < byteCharacters_len; offset += sliceSize) {
-                var slice = byteCharacters.slice(offset, offset + sliceSize);
-                var slice_len = slice.length;
-                var byteNumbers = new Array(slice_len);
-                for (var i = 0; i < slice_len; i++) {
-                    byteNumbers[i] = slice.charCodeAt(i) & 0xff;
-                }
-
-                byteArrays[n] = new Uint8Array(byteNumbers);
-                n++;
-            }
-
-            var blob = new window.Blob(byteArrays, {type: contentType});
-
-            var blobUrl = window.URL.createObjectURL(blob);
-
-            return blobUrl;
-        };
-
-        mono.ffButton = button;
-
-        var self = require('sdk/self');
-        engine.icons.complete = self.data.url(engine.icons.complete);
-        engine.icons.add = self.data.url(engine.icons.add);
-        engine.icons.error = self.data.url(engine.icons.error);
-
-        origFunc();
-    };
-})(engine.init.bind(engine));
+    engine.init();
+};
 
 if (mono.isModule) {
-    exports.init = engine.init;
+    exports.init = engine.initModule;
 } else
 mono.onReady(function() {
     engine.init();

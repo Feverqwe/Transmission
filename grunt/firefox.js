@@ -1,8 +1,40 @@
 exports.run = function (grunt) {
     var monoParams = {
-        useFf: 1,
-        oneMode: 1
+        browser: 'firefox'
     };
+
+    grunt.registerTask('buildJpmFF', function() {
+        "use strict";
+        var Path = require('path');
+        var async = this.async();
+        var src = grunt.template.process('<%= output %><%= vendor %>');
+        var cwd = Path.join(process.cwd(), src);
+
+        return grunt.util.spawn({
+            cmd: 'jpm',
+            args: ['xpi'],
+            opts: {
+                cwd: cwd
+            }
+        }, function done(error, result, code) {
+            console.log('Exit code:', code);
+            result.stdout && console.log(result.stdout);
+            result.stderr && console.log(result.stderr);
+
+            if (error) {
+                throw grunt.util.error('buildJpmFF error!');
+            }
+
+            return async();
+        });
+    });
+
+    grunt.registerTask('ffPackageFormat', function() {
+        "use strict";
+        var src = grunt.template.process('<%= output %><%= vendor %>package.json');
+        var json = grunt.file.readJSON(src);
+        grunt.file.write(src, JSON.stringify(json, null, 4));
+    });
 
     grunt.registerTask('ffPackage', function() {
         var src = 'src/vendor/firefox/package.json';
@@ -39,6 +71,64 @@ exports.run = function (grunt) {
         grunt.file.delete(path);
     });
 
+    grunt.registerTask('ffJpmModInstallRdf', function() {
+        "use strict";
+        grunt.config.merge({
+            compress: {
+                ffZipBuild: {
+                    options: {
+                        mode: 'zip',
+                        archive: '<%= output %><%= vendor %>../<%= buildName %>.xpi'
+                    },
+                    files: [{
+                        expand: true,
+                        filter: 'isFile',
+                        cwd: '<%= output %><%= vendor %>../unzip/',
+                        src: '**',
+                        dest: ''
+                    }]
+                }
+            }
+        });
+
+        var done = this.async();
+        var vendor = grunt.template.process('<%= output %><%= vendor %>../');
+        var buildPath = vendor + grunt.config('buildName') + '.xpi';
+        var unZipPath = vendor + 'unzip/';
+
+        var fs = require('fs');
+        var unzip = require('unzip');
+
+        fs.createReadStream(buildPath).pipe(unzip.Extract({
+            path: unZipPath
+        })).on('close', function() {
+            var installRdfPath = unZipPath + 'install.rdf';
+            var content = grunt.file.read(installRdfPath);
+
+            var insert = function(text, target) {
+                var insertPos = content.lastIndexOf(target) + target.length;
+
+                var parts = [];
+                parts.push(content.substr(0, insertPos));
+                parts.push(text);
+                parts.push(content.substr(insertPos));
+
+                content = parts.join('');
+            };
+
+            insert([
+                '\n', '<em:multiprocessCompatible>true</em:multiprocessCompatible>'
+            ].join(''), '</em:optionsType>');
+
+
+            grunt.file.write(installRdfPath, content);
+
+            grunt.task.run('compress:ffZipBuild');
+
+            done();
+        });
+    });
+
     grunt.config.merge({
         copy: {
             ffBase: {
@@ -51,32 +141,11 @@ exports.run = function (grunt) {
                 ],
                 dest: '<%= output %><%= vendor %>'
             }
-        },
-        'json-format': {
-            ffPackage: {
-                cwd: '<%= output %><%= vendor %>',
-                expand: true,
-                src: 'package.json',
-                dest: '<%= output %><%= vendor %>',
-                options: {
-                    indent: 4
-                }
-            }
-        },
-        exec: {
-            buildJpmFF: {
-                command: 'cd <%= output %><%= vendor %> && jpm xpi'
-            }
         }
     });
 
     grunt.registerTask('firefox', function () {
         grunt.config('monoParams', monoParams);
-
-        if (!grunt.config('env.addonSdkPath')) {
-            console.error("Add-on SDK is not found!");
-            return;
-        }
 
         grunt.config.merge({
             browser: 'firefox',
@@ -94,9 +163,10 @@ exports.run = function (grunt) {
             'copy:ffBase',
             'ffPackage',
             'ffJpmPackage',
-            'json-format:ffPackage',
-            'exec:buildJpmFF',
-            'ffJpmRenameBuild'
+            'ffPackageFormat',
+            'buildJpmFF',
+            'ffJpmRenameBuild',
+            'ffJpmModInstallRdf'
         ]);
     });
 };

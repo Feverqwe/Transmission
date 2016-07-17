@@ -1,103 +1,3 @@
-mono.create = function(tagName, obj) {
-    var el;
-    if ( typeof tagName === 'string') {
-        el = document.createElement(tagName);
-    } else {
-        el = tagName;
-    }
-    if (obj !== undefined) {
-        for (var attr in obj) {
-            var value = obj[attr];
-            if (mono.create.hookList[attr]) {
-                mono.create.hookList[attr](el, value);
-                continue;
-            }
-            if (value === undefined || value === null) {
-                continue;
-            }
-            el[attr] = value;
-        }
-    }
-    return el;
-};
-mono.create.hookList = {
-    text: function(el, value) {
-        el.textContent = value;
-    },
-    data: function(el, value) {
-        if (!value) return;
-
-        for (var item in value) {
-            var val = value[item];
-            if (val !== null && val !== undefined) {
-                el.dataset[item] = val;
-            }
-        }
-    },
-    class: function(el, value) {
-        if (typeof value !== 'string') {
-            for (var i = 0, len = value.length; i < len; i++) {
-                var className = value[i];
-                if (!className) {
-                    continue;
-                }
-                el.classList.add(className);
-            }
-            return;
-        }
-        el.setAttribute('class', value);
-    },
-    style: function(el, value) {
-        if (typeof value !== 'string') {
-            for (var item in value) {
-                el.style[item] = value[item];
-            }
-            return;
-        }
-        el.setAttribute('style', value);
-    },
-    append: function(el, value) {
-        if (Array.isArray(value)) {
-            for (var i = 0, len = value.length; i < len; i++) {
-                var subEl = value[i];
-                if (!subEl) {
-                    continue;
-                }
-                if (typeof (subEl) === 'string') {
-                    subEl = document.createTextNode(subEl);
-                }
-                el.appendChild(subEl);
-            }
-            return;
-        }
-        el.appendChild(value);
-    },
-    on: function(el, args) {
-        if (typeof args[0] !== 'string') {
-            for (var i = 0, len = args.length; i < len; i++) {
-                var subArgs = args[i];
-                el.addEventListener(subArgs[0], subArgs[1], subArgs[2]);
-            }
-            return;
-        }
-        //type, onEvent, useCapture
-        el.addEventListener(args[0], args[1], args[2]);
-    },
-    onCreate: function(el, value) {
-        value(el);
-    }
-};
-mono.debounce = function(fn, delay) {
-    var timer = null;
-    return function () {
-        var context = this, args = arguments;
-        clearTimeout(timer);
-        timer = setTimeout(function () {
-            fn.apply(context, args);
-        }, delay);
-    };
-};
-
 var options = function() {
     "use strict";
     var activePage = null;
@@ -415,7 +315,7 @@ var options = function() {
                     options.defaultSettings = data.getDefaultSettings;
                     options.language = data.getLanguage;
 
-                    !(mono.isFF && mono.noAddon) && mono.sendMessage({action: 'resize', height: 480, width: 800}, undefined, "service");
+                    !(mono.isFF && mono.noAddon) && mono.sendMessage({action: 'resize', height: 480, width: 800}, null, "service");
 
                     var langSelect = document.getElementById("language");
                     var langPos = ['ru', 'en', 'fr', 'zh-CN', 'es', 'pt-BR'].indexOf(options.language.lang);

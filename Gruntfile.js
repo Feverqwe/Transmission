@@ -3,7 +3,6 @@ module.exports = function (grunt) {
         'background.js'
     ];
     var dataJsList = [
-        'mono.js',
         'manager.js',
         'notifer.js',
         'graph.js',
@@ -15,7 +14,6 @@ module.exports = function (grunt) {
         'bootstrap-colorpicker.js'
     ];
     grunt.initConfig({
-        env: grunt.file.exists('env.json') ? grunt.file.readJSON('env.json') : {},
         pkg: grunt.file.readJSON('package.json'),
         clean: {
             output: [
@@ -57,13 +55,14 @@ module.exports = function (grunt) {
                 dest: '<%= output %><%= vendor %><%= dataFolder %>'
             }
         },
-
-        // vars
-        root: process.cwd().replace(/\\/g, '/') + '/',
         output: '<%= pkg.outputDir %>'
     });
 
     grunt.registerTask('compressJs', function() {
+        // todo fix me!
+        return;
+
+        grunt.loadNpmTasks('google-closure-compiler');
         var getHash = function(path, cb) {
             var fs = require('fs');
             var crypto = require('crypto');
@@ -158,21 +157,22 @@ module.exports = function (grunt) {
 
     grunt.registerTask('monoPrepare', function() {
         "use strict";
+        var config = grunt.config('monoParams') || {};
+        var monoPath = './src/vendor/mono/' + config.browser + '/mono.js';
+
+        var content = grunt.file.read(monoPath);
+        var utils = grunt.file.read('./src/js/monoUtils.js');
+
+        content = content.replace(/\/\/@insert/, utils);
+
         var path = grunt.template.process('<%= output %><%= vendor %><%= dataJsFolder %>');
         var fileName = 'mono.js';
-        var content = grunt.file.read(path + fileName);
-        var ifStrip = require('./grunt/ifStrip.js').ifStrip;
-        content = ifStrip(content, grunt.config('monoParams') || {});
-        content = content.replace(/\n[\t\s]*\n/g, '\n\n');
         grunt.file.write(path + fileName, content);
     });
 
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-copy');
-    grunt.loadNpmTasks('grunt-json-format');
-    grunt.loadNpmTasks('grunt-exec');
     grunt.loadNpmTasks('grunt-contrib-compress');
-    grunt.loadNpmTasks('grunt-closurecompiler');
 
     grunt.registerTask('extensionBase', ['copy:background', 'copy:dataJs', 'copy:baseData', 'copy:locales']);
     grunt.registerTask('buildJs', ['monoPrepare']);
