@@ -448,11 +448,11 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
       return prompt(message, def);
     };
 
+    var notificationIdList = {};
     api.showNotification = function(icon, title, desc, details) {
       details = details || {};
       var id = details.id;
-      var notifyList = details.notifyList;
-      var notificationTimeout = details.notificationTimeout;
+      var timeout = details.notificationTimeout;
 
       var notifyId = 'notify';
       if (id !== undefined) {
@@ -462,9 +462,9 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
       }
       var timerId = notifyId + 'Timer';
 
-      if (id !== undefined && notifyList[notifyId] !== undefined) {
-        clearTimeout(notifyList[timerId]);
-        delete notifyList[notifyId];
+      if (id !== undefined && notificationIdList[notifyId] !== undefined) {
+        clearTimeout(notificationIdList[timerId]);
+        delete notificationIdList[notifyId];
         chrome.notifications.clear(notifyId, function(){});
       }
       /**
@@ -479,14 +479,14 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
             message: String(desc)
           },
           function(id) {
-            notifyList[notifyId] = id;
+            notificationIdList[notifyId] = id;
           }
       );
-      if (notificationTimeout > 0) {
-        notifyList[timerId] = mono.setTimeout(function () {
-          notifyList[notifyId] = undefined;
+      if (timeout > 0) {
+        notificationIdList[timerId] = mono.setTimeout(function () {
+          notificationIdList[notifyId] = undefined;
           chrome.notifications.clear(notifyId, function(){});
-        }, notificationTimeout);
+        }, timeout);
       }
     };
 

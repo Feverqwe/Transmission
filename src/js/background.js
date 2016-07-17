@@ -87,7 +87,6 @@ var engine = {
         trafficList: [{name:'download', values: []}, {name:'upload', values: []}],
         startTime: parseInt(Date.now() / 1000),
         activeCount: 0,
-        notifyList: {},
 
         folderList: [],
 
@@ -798,7 +797,6 @@ var engine = {
     },
     showNotification: function(icon, title, desc, details) {
         details = details || {};
-        details.notifyList = engine.varCache.notifyList;
         details.notificationTimeout = engine.settings.notificationTimeout;
         mono.showNotification(icon, title, desc, details);
     },
