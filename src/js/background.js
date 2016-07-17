@@ -829,7 +829,9 @@ var engine = {
 
         mono.setBadgeText(text);
 
-        mono.setBadgeBackgroundColor(engine.settings.badgeColor);
+        if (engine.settings.badgeColor) {
+            mono.setBadgeBackgroundColor(engine.settings.badgeColor);
+        }
     },
     displayActiveItemsCountIcon: function(newTorrentList) {
         var activeCount = 0;
@@ -1548,13 +1550,7 @@ var engine = {
         }
     },
     init: function() {
-        engine.setBadgeText.lastText = '';
-
-        if (mono.isChrome) {
-            chrome.browserAction.setBadgeText({
-                text: ''
-            });
-        }
+        engine.setBadgeText('');
 
         engine.varCache.msgStack = [];
 
