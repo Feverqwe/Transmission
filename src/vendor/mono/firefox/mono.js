@@ -581,6 +581,20 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
       notification.notify({title: String(title), text: String(desc), iconURL: icon});
     };
 
+    api.addInClipboard = function (text) {
+      var clipboard = require("sdk/clipboard");
+      clipboard.set(text);
+    };
+
+    api.setBadgeText = function (text) {
+      mono.ffButton.badge = text;
+    };
+
+    api.setBadgeBackgroundColor = function (color) {
+      var hexColor = mono.rgba2hex.apply(mono, color.split(','));
+      mono.ffButton.badgeColor = hexColor;
+    };
+
     return {
       api: api
     };

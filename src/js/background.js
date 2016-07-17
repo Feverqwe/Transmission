@@ -823,41 +823,13 @@ var engine = {
             }
         }
     },
-    setBadgeText: function() {
+    setBadgeText: function(text) {
         "use strict";
-        var chromeFunc = function(text) {
-            engine.setBadgeText.lastText = text;
+        engine.setBadgeText.lastText = text;
 
-            chrome.browserAction.setBadgeText({
-                text: text
-            });
+        mono.setBadgeText(text);
 
-            var color = engine.settings.badgeColor.split(',').map(function(i){return parseFloat(i);});
-            if (color.length === 4) {
-                color.push(parseInt(255 * color.splice(-1)[0]));
-            }
-            chrome.browserAction.setBadgeBackgroundColor({
-                color: color
-            });
-        };
-
-        var moduleFunc = function(text) {
-            engine.setBadgeText.lastText = text;
-
-            mono.ffButton.badge = text;
-
-            var color = engine.settings.badgeColor;
-            var hexColor = mono.rgba2hex.apply(mono, color.split(','));
-            mono.ffButton.badgeColor = hexColor;
-        };
-
-        if (mono.isModule) {
-            return moduleFunc.apply(this, arguments);
-        }
-
-        if (mono.isChrome) {
-            return chromeFunc.apply(this, arguments);
-        }
+        mono.setBadgeBackgroundColor(engine.settings.badgeColor);
     },
     displayActiveItemsCountIcon: function(newTorrentList) {
         var activeCount = 0;
@@ -1570,31 +1542,9 @@ var engine = {
             engine.settings.badgeColor = message.color;
             engine.setBadgeText(engine.setBadgeText.lastText || '0');
         },
-        copy: function() {
+        copy: function(message) {
             "use strict";
-            var moduleFunc = function(message) {
-                var clipboard = require("sdk/clipboard");
-                clipboard.set(message.text);
-            };
-
-            var chromeFunc = function(message) {
-                var textArea = document.createElement('textarea');
-                textArea.textContent = message.text;
-                document.body.appendChild(textArea);
-                textArea.select();
-                setTimeout(function() {
-                    document.execCommand("copy", false, null);
-                    textArea.parentNode.removeChild(textArea);
-                });
-            };
-
-            if (mono.isModule) {
-                return moduleFunc.apply(this, arguments);
-            }
-
-            if (mono.isChrome) {
-                return chromeFunc.apply(this, arguments);
-            }
+            mono.addInClipboard(message.text);
         }
     },
     init: function() {

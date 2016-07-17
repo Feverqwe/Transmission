@@ -483,11 +483,38 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
           }
       );
       if (notificationTimeout > 0) {
-        notifyList[timerId] = setTimeout(function () {
+        notifyList[timerId] = mono.setTimeout(function () {
           notifyList[notifyId] = undefined;
           chrome.notifications.clear(notifyId, function(){});
         }, notificationTimeout);
       }
+    };
+
+    api.addInClipboard = function (text) {
+      var textArea = document.createElement('textarea');
+      textArea.textContent = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      mono.setTimeout(function() {
+        document.execCommand("copy", false, null);
+        textArea.parentNode.removeChild(textArea);
+      });
+    };
+
+    api.setBadgeText = function (text) {
+      chrome.browserAction.setBadgeText({
+        text: text
+      });
+    };
+
+    api.setBadgeBackgroundColor = function (color) {
+      var chColor = color.split(',').map(function(i){return parseFloat(i);});
+      if (chColor.length === 4) {
+        chColor.push(parseInt(255 * chColor.splice(-1)[0]));
+      }
+      chrome.browserAction.setBadgeBackgroundColor({
+        color: chColor
+      });
     };
 
     return {
