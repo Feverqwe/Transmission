@@ -3434,19 +3434,15 @@ var manager = {
                     return window.location = "options.html";
                 }
 
-                if (mono.isChrome) {
-                    manager.options.windowMode = window !== chrome.extension.getViews({type: 'popup'})[0];
-                } else
-                if (mono.isFF) {
-                    manager.options.windowMode = mono.isFF && mono.noAddon;
-                    if (!manager.options.windowMode) {
-                        var popupHeight = manager.settings.popupHeight;
-                        if (popupHeight === 0) {
-                            popupHeight = document.body.clientHeight;
-                        }
-                        document.body.style.overflow = 'hidden';
-                        mono.sendMessage({action: 'resize', height: popupHeight}, null, "service");
+                manager.options.windowMode = mono.isTab();
+
+                if (mono.isFF && !manager.options.windowMode) {
+                    var popupHeight = manager.settings.popupHeight;
+                    if (popupHeight === 0) {
+                        popupHeight = document.body.clientHeight;
                     }
+                    document.body.style.overflow = 'hidden';
+                    mono.sendMessage({action: 'resize', height: popupHeight}, null, "service");
                 }
 
                 if (manager.options.trWordWrap) {
@@ -3943,14 +3939,9 @@ var manager = {
                     class: 'openInTab',
                     title: manager.language.openInTab,
                     on: ['click', function(e) {
-                        if (mono.isChrome) {
-                            chrome.tabs.create({url: window.location.href});
-                        } else
-                        if (mono.isFF) {
-                            mono.sendMessage({action: 'openTab', url: window.location.href}, null, 'service');
-                            if (!mono.noAddon) {
-                                mono.addon.postMessage('hidePopup');
-                            }
+                        mono.openTab(location.href);
+                        if (mono.isFF && !mono.noAddon) {
+                            mono.addon.postMessage('hidePopup');
                         }
                     }]
                 }));

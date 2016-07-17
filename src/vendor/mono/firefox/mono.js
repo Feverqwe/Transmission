@@ -612,6 +612,14 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
       mono.ffButton.badgeColor = hexColor;
     };
 
+    api.openTab = function (url) {
+      mono.sendMessage({action: 'openTab', url: url}, null, 'service');
+    };
+
+    api.isTab = function () {
+      return browserAddon.isVirtual;
+    };
+
     return {
       api: api
     };

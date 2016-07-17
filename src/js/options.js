@@ -455,12 +455,7 @@ var options = function() {
                                         color: 'green'
                                     }
                                 });
-                                var windowMode;
-                                if (mono.isChrome) {
-                                    windowMode = window !== chrome.extension.getViews({type: 'popup'})[0];
-                                } else {
-                                    windowMode = mono.isFF && mono.noAddon;
-                                }
+                                var windowMode = mono.isTab();
                                 if (!windowMode) {
                                     return window.location = "manager.html";
                                 }

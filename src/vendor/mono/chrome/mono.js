@@ -517,6 +517,18 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
       });
     };
 
+    api.openTab = function (url) {
+      chrome.tabs.create({url: url});
+    };
+
+    api.isTab = function () {
+      return !chrome.extension.getViews({
+        type: 'popup'
+      }).some(function (_window) {
+        return _window === _window;
+      });
+    };
+
     return {
       api: api
     };
