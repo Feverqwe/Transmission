@@ -590,8 +590,25 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
       mono.ffButton.badge = text;
     };
 
+    var rgba2hex = function(r, g, b, a) {
+      if (a > 1) {
+        a = a / 100;
+      }
+      a = parseFloat(a);
+      r = parseInt(r * a);
+      g = parseInt(g * a);
+      b = parseInt(b * a);
+
+      var componentToHex = function(c) {
+        var hex = c.toString(16);
+        return hex.length == 1 ? "0" + hex : hex;
+      };
+
+      return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+    };
+
     api.setBadgeBackgroundColor = function (color) {
-      var hexColor = mono.rgba2hex.apply(mono, color.split(','));
+      var hexColor = rgba2hex.apply(mono, color.split(','));
       mono.ffButton.badgeColor = hexColor;
     };
 

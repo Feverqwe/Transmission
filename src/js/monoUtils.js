@@ -162,23 +162,6 @@ mono.getNavigator = function() {
     return _navigator;
 };
 
-mono.rgba2hex = function(r, g, b, a) {
-    if (a > 1) {
-        a = a / 100;
-    }
-    a = parseFloat(a);
-    r = parseInt(r * a);
-    g = parseInt(g * a);
-    b = parseInt(b * a);
-
-    var componentToHex = function(c) {
-        var hex = c.toString(16);
-        return hex.length == 1 ? "0" + hex : hex;
-    };
-
-    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
-};
-
 mono.base64ToUrl = function(b64Data, contentType) {
     "use strict";
     var sliceSize = 256;
