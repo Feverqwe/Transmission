@@ -761,6 +761,13 @@ var engine = {
         }
 
         (function getLanguage(locale, cb) {
+            if (locale === 'pt') {
+                locale = 'pt_BR';
+            } else
+            if (locale === 'zh') {
+                locale = 'zh_CN';
+            }
+
             mono.getLanguage(locale, function (err, _language) {
                 if (err) {
                     if (locale !== defaultLocale) {
