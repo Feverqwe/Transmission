@@ -52,9 +52,6 @@ exports.run = function (grunt) {
 
         var content = grunt.file.readJSON(vendor + 'package.json');
 
-        grunt.file.copy(vendor + 'data/icons/icon-48.png', vendor + 'icon.png');
-        grunt.file.copy(vendor + 'data/icons/icon-64.png', vendor + 'icon64.png');
-
         var engines = {};
         engines.firefox = '>=' + grunt.config('pkg.ffMinVersion') + ' <=' + grunt.config('pkg.ffMaxVersion');
 

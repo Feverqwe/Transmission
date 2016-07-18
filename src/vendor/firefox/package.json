@@ -16,8 +16,8 @@
     "license": "MPL 2.0",
     "version": "1.3.9",
     "icon": {
-        "48": "icon.png",
-        "64": "icon64.png"
+        "48": "data/icons/icon-48.png",
+        "64": "data/icons/icon-64.png"
     },
     "engines": {
         "firefox": ">=28 <=47",
