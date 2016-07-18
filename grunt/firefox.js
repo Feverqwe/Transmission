@@ -71,64 +71,6 @@ exports.run = function (grunt) {
         grunt.file.delete(path);
     });
 
-    grunt.registerTask('ffJpmModInstallRdf', function() {
-        "use strict";
-        grunt.config.merge({
-            compress: {
-                ffZipBuild: {
-                    options: {
-                        mode: 'zip',
-                        archive: '<%= output %><%= vendor %>../<%= buildName %>.xpi'
-                    },
-                    files: [{
-                        expand: true,
-                        filter: 'isFile',
-                        cwd: '<%= output %><%= vendor %>../unzip/',
-                        src: '**',
-                        dest: ''
-                    }]
-                }
-            }
-        });
-
-        var done = this.async();
-        var vendor = grunt.template.process('<%= output %><%= vendor %>../');
-        var buildPath = vendor + grunt.config('buildName') + '.xpi';
-        var unZipPath = vendor + 'unzip/';
-
-        var fs = require('fs');
-        var unzip = require('unzip');
-
-        fs.createReadStream(buildPath).pipe(unzip.Extract({
-            path: unZipPath
-        })).on('close', function() {
-            var installRdfPath = unZipPath + 'install.rdf';
-            var content = grunt.file.read(installRdfPath);
-
-            var insert = function(text, target) {
-                var insertPos = content.lastIndexOf(target) + target.length;
-
-                var parts = [];
-                parts.push(content.substr(0, insertPos));
-                parts.push(text);
-                parts.push(content.substr(insertPos));
-
-                content = parts.join('');
-            };
-
-            insert([
-                '\n', '<em:multiprocessCompatible>true</em:multiprocessCompatible>'
-            ].join(''), '</em:optionsType>');
-
-
-            grunt.file.write(installRdfPath, content);
-
-            grunt.task.run('compress:ffZipBuild');
-
-            done();
-        });
-    });
-
     grunt.config.merge({
         copy: {
             ffBase: {
@@ -165,8 +107,7 @@ exports.run = function (grunt) {
             'ffJpmPackage',
             'ffPackageFormat',
             'buildJpmFF',
-            'ffJpmRenameBuild',
-            'ffJpmModInstallRdf'
+            'ffJpmRenameBuild'
         ]);
     });
 };

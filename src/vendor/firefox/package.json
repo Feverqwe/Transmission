@@ -22,5 +22,8 @@
     "engines": {
         "firefox": ">=28 <=47",
         "fennec": ">= 28 <= 47"
+    },
+    "permissions": {
+        "multiprocess": true
     }
 }
