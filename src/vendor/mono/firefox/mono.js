@@ -710,7 +710,6 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
        * @param {String} [createProperties.parentId]
        * @param {Array} [createProperties.contexts]
        * @param {Function} [createProperties.onclick]
-       * @param {Function} [createProperties._type]
        * @param {Function} [callback]
        */
       api.contextMenusCreate = function (createProperties, callback) {
