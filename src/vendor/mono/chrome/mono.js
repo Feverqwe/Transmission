@@ -529,6 +529,25 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
       });
     };
 
+    /**
+     * @param {Function} [callback]
+     */
+    api.contextMenusRemoveAll = function (callback) {
+      chrome.contextMenus.removeAll(callback);
+    };
+
+    /**
+     * @param {Object} [createProperties]
+     * @param {String} [createProperties.id]
+     * @param {String} [createProperties.parentId]
+     * @param {Array} [createProperties.contexts]
+     * @param {Function} [createProperties.onclick]
+     * @param {Function} [callback]
+     */
+    api.contextMenusCreate = function (createProperties, callback) {
+      chrome.contextMenus.create(createProperties, callback);
+    };
+
     return {
       api: api
     };

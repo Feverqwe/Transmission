@@ -619,6 +619,150 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
       return browserAddon.isVirtual;
     };
 
+    (function () {
+      var menu = [];
+      var items = {};
+
+      var getContentScript = function() {
+        var onClick = function() {
+          self.on("click", function(node) {
+            var data = {};
+            var href = node.href;
+            if (/^magnet:/.test(href)) {
+              data.href = href;
+            } else
+            if (href){
+              data.href = href;
+              data.referer = location.href;
+            } else {
+              data.error = -1;
+            }
+            return self.postMessage(data);
+          });
+        };
+        return '(' + onClick.toString() + ')()';
+      };
+
+      var onMenuItemClick = function (id, fn) {
+        return function (data) {
+          !data.error && fn({
+            linkUrl: data.href,
+            menuItemId: id,
+            referer: data.referer
+          });
+        };
+      };
+
+      var getDetails = function (createProperties) {
+        var cm = require("sdk/context-menu");
+
+        var details = {
+          label: createProperties.title
+        };
+
+        if (createProperties.contexts[0] === 'link') {
+          details.context = cm.SelectorContext("a");
+        }
+
+        if (createProperties.onclick) {
+          details.onMessage = onMenuItemClick(createProperties.id, createProperties.onclick);
+          details.contentScript = getContentScript();
+        }
+
+        if (!createProperties.parentId) {
+          var self = require('sdk/self');
+          details.image = self.data.url('./icons/icon-16.png');
+        }
+
+        return details;
+      };
+
+      var convertItemToMenu = function (mItem) {
+        return function () {
+          var cm = require("sdk/context-menu");
+          var oldItem = mItem.item;
+          if (mItem.type === 'item') {
+            mItem.createProperties.onclick = null;
+            var details = getDetails(mItem.createProperties);
+            var newItem = cm.Menu(details);
+            var parentMenu = oldItem.parentMenu;
+            if (parentMenu) {
+              parentMenu.removeItem(oldItem);
+              parentMenu.addItem(newItem);
+              mItem.type = 'menu';
+              mItem.item = newItem;
+
+              delete mItem.convert;
+
+              var pos = menu.indexOf(oldItem);
+              if (pos !== -1) {
+                menu.splice(pos, 1, newItem);
+              }
+            }
+          }
+        };
+      };
+
+      /**
+       * @param {Object} [createProperties]
+       * @param {String} [createProperties.title]
+       * @param {String} [createProperties.id]
+       * @param {String} [createProperties.parentId]
+       * @param {Array} [createProperties.contexts]
+       * @param {Function} [createProperties.onclick]
+       * @param {Function} [createProperties._type]
+       * @param {Function} [callback]
+       */
+      api.contextMenusCreate = function (createProperties, callback) {
+        var cm = require("sdk/context-menu");
+
+        var details = getDetails(createProperties);
+
+        if (items[createProperties.id]) {
+          throw new Error('Menu item is exists! ' + createProperties.id);
+        }
+
+        var item = cm.Item(details);
+        if (!createProperties.parentId) {
+          menu.push(item);
+        } else {
+          var parentItem = items[createProperties.parentId];
+          if (parentItem.type !== 'menu') {
+            parentItem.convert();
+          }
+          parentItem.item.addItem(item);
+        }
+
+        items[createProperties.id] = {
+          item: item,
+          type: 'item',
+          createProperties: createProperties
+        };
+
+        items[createProperties.id].convert = convertItemToMenu(items[createProperties.id]);
+
+        callback && callback();
+      };
+
+      /**
+       * @param {Function} [callback]
+       */
+      api.contextMenusRemoveAll = function (callback) {
+        menu.forEach(function (item) {
+          var parent = item.parentMenu;
+          parent && parent.removeItem(item);
+        });
+
+        Object.keys(items).forEach(function (id) {
+          delete items[id];
+        });
+
+        menu.splice(0);
+
+        callback && callback();
+      };
+    })();
+
     return {
       api: api
     };
