@@ -548,6 +548,23 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
       chrome.contextMenus.create(createProperties, callback);
     };
 
+    var _navigator = null;
+    /**
+     * @returns {{language: String, platform: String, userAgent: String}}
+     */
+    api.getNavigator = function () {
+      if (_navigator) {
+        return _navigator;
+      }
+
+      _navigator = {};
+      ['language', 'platform', 'userAgent'].forEach(function(key) {
+        _navigator[key] = navigator[key] || '';
+      });
+
+      return _navigator;
+    };
+
     return {
       api: api
     };

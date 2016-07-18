@@ -137,31 +137,6 @@ mono.param = function(params) {
     return args.join('&');
 };
 
-var _navigator = null;
-/**
- * @returns {{language: String, platform: String, userAgent: String}}
- */
-mono.getNavigator = function() {
-    "use strict";
-    if (_navigator) {
-        return _navigator;
-    }
-
-    var nav = null;
-    if (mono.isModule) {
-        nav = require('sdk/window/utils').getMostRecentBrowserWindow().navigator;
-    } else {
-        nav = navigator;
-    }
-
-    _navigator = {};
-    ['language', 'platform', 'userAgent'].forEach(function(key) {
-        _navigator[key] = nav[key] || '';
-    });
-
-    return _navigator;
-};
-
 mono.base64ToUrl = function(b64Data, contentType) {
     "use strict";
     var sliceSize = 256;

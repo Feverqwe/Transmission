@@ -762,6 +762,31 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
       };
     })();
 
+    var _navigator = null;
+    /**
+     * @returns {{language: String, platform: String, userAgent: String}}
+     */
+    api.getNavigator = function() {
+      "use strict";
+      if (_navigator) {
+        return _navigator;
+      }
+
+      var nav = null;
+      if (api.isModule) {
+        nav = require('sdk/window/utils').getMostRecentBrowserWindow().navigator;
+      } else {
+        nav = navigator;
+      }
+
+      _navigator = {};
+      ['language', 'platform', 'userAgent'].forEach(function(key) {
+        _navigator[key] = nav[key] || '';
+      });
+
+      return _navigator;
+    };
+
     return {
       api: api
     };
