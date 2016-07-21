@@ -784,9 +784,7 @@ var engine = {
     },
     getLanguage: function(cb) {
         engine.language = {};
-        engine.loadLanguage(function() {
-            engine.loadLanguage(cb);
-        }, 'en');
+        engine.loadLanguage(cb);
     },
     trafficCounter: function(torrentList) {
         var limit = 90;
