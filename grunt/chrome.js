@@ -80,4 +80,48 @@ exports.run = function (grunt) {
             'compress:chrome'
         ]);
     });
+
+  grunt.registerTask('firefoxCreateManifest', function() {
+    var src = grunt.template.process('<%= output %><%= vendor %>manifest.json');
+    var manifest = grunt.file.readJSON(src);
+
+    manifest.applications = {
+      gecko: {
+        id: grunt.config('geckoId'),
+        strict_min_version: '48.0'
+      }
+    };
+
+    manifest.options_ui = {};
+    manifest.options_ui.page = manifest.options_page;
+    manifest.options_ui.open_in_tab = true;
+
+    delete manifest.options_page;
+
+    grunt.file.write(src, JSON.stringify(manifest, null, 4));
+  });
+
+   grunt.registerTask('firefox', function () {
+       grunt.config('monoParams', monoParams);
+
+       grunt.config.merge({
+           geckoId: 'jid1-0GMKQAI8A9x5jg@jetpack',
+           browser: 'firefox',
+           vendor: 'firefox/src/',
+           libFolder: 'js/',
+           dataJsFolder: 'js/',
+           includesFolder: 'includes/',
+           dataFolder: '',
+           buildName: 'TransmissionEasyClient_firefox_<%= pkg.extVersion %>'
+       });
+
+       grunt.task.run([
+           'extensionBase',
+           'buildJs',
+           'chromeManifest',
+           'compressJs',
+           'firefoxCreateManifest',
+           'compress:chrome'
+       ]);
+   });
 };

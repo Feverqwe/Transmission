@@ -183,7 +183,6 @@ module.exports = function (grunt) {
     grunt.registerTask('buildJs', ['monoPrepare']);
 
     require('./grunt/chrome.js').run(grunt);
-    require('./grunt/firefox.js').run(grunt);
 
     grunt.registerTask('default', [
         'clean:output',
