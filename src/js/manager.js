@@ -255,9 +255,8 @@ var manager = {
                 width = 723;
             }
             document.body.style.width = width + 'px';
-            mono.isFF && mono.sendMessage({action: 'resize', width: width}, null, 'service');
 
-            mono.isChrome && setTimeout(function() {
+            setTimeout(function() {
                 var innerWidth = window.innerWidth;
                 if (innerWidth < 723 && innerWidth < width) {
                     document.body.style.minWidth = innerWidth + 'px';
@@ -2782,7 +2781,7 @@ var manager = {
                                         {input: {type: 'text', name: 'link', value: magnetLink, focus: true}}
                                     ],
                                     [
-                                        !mono.isChrome && !mono.isFF ? undefined : {input: {type: "button", value: manager.language.copy, focus: true, on: [
+                                        {input: {type: "button", value: manager.language.copy, focus: true, on: [
                                             ['click', function() {
                                                 var dataForm = this.getFormData();
                                                 mono.sendMessage({
@@ -3218,36 +3217,6 @@ var manager = {
             });
         };
 
-        if (mono.isFF) {
-            sendFileToBg = function(file, folderRequest) {
-                if (file.size > 10 * 1024 * 1024) {
-                    return console.error('File size more 5mb');
-                }
-
-                var type = file.type;
-                var reader = new FileReader();
-                reader.onloadend = function() {
-                    var fileBase64 = reader.result;
-
-                    var pos = fileBase64.indexOf('base64,') + 7;
-                    var m = fileBase64.substr(0, pos).match(/data:([^;]+);/);
-                    if (m) {
-                        type = type || m[1];
-                    }
-
-                    fileBase64 = fileBase64.substr(pos);
-
-                    mono.sendMessage({
-                        action: 'onSendFile',
-                        base64: fileBase64,
-                        type: type,
-                        folder: folderRequest
-                    });
-                };
-                reader.readAsDataURL(file);
-            };
-        }
-
         var onClickYes = function(dataForm) {
             if (!dataForm) {
                 dataForm = {};
@@ -3436,15 +3405,6 @@ var manager = {
 
                 manager.options.windowMode = mono.isTab();
 
-                if (mono.isFF && !manager.options.windowMode) {
-                    var popupHeight = manager.settings.popupHeight;
-                    if (popupHeight === 0) {
-                        popupHeight = document.body.clientHeight;
-                    }
-                    document.body.style.overflow = 'hidden';
-                    mono.sendMessage({action: 'resize', height: popupHeight}, null, "service");
-                }
-
                 if (manager.options.trWordWrap) {
                     document.body.appendChild(mono.create('style', {
                         text: 'div.torrent-list-layer td div {' +
@@ -3594,9 +3554,6 @@ var manager = {
                     }
                     if (el.classList.contains('add_file')) {
                         e.preventDefault();
-                        if (mono.isFF && !mono.isTab()) {
-                            mono.addon.postMessage('sleepTimeout');
-                        }
                         if (manager.varCache.selectFileInput !== undefined) {
                             document.body.removeChild(manager.varCache.selectFileInput);
                             delete manager.varCache.selectFileInput;
@@ -3940,13 +3897,10 @@ var manager = {
                     title: manager.language.openInTab,
                     on: ['click', function(e) {
                         mono.openTab(location.href);
-                        if (mono.isFF && !mono.isTab()) {
-                            mono.addon.postMessage('hidePopup');
-                        }
                     }]
                 }));
 
-                mono.isChrome && !manager.options.windowMode && setTimeout(function() {
+                !manager.options.windowMode && setTimeout(function() {
                     var popupHeight = manager.settings.popupHeight;
                     if (popupHeight === 0) {
                         popupHeight = document.body.clientHeight;

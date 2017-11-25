@@ -103,8 +103,8 @@ mono.debounce = function(fn, delay) {
     var timer = null;
     return function () {
         var context = this, args = arguments;
-        mono.clearTimeout(timer);
-        timer = mono.setTimeout(function () {
+        clearTimeout(timer);
+        timer = setTimeout(function () {
             fn.apply(context, args);
         }, delay);
     };
@@ -141,7 +141,7 @@ mono.base64ToUrl = function(b64Data, contentType) {
     "use strict";
     var sliceSize = 256;
     contentType = contentType || '';
-    var byteCharacters = mono.atob(b64Data);
+    var byteCharacters = atob(b64Data);
 
     var byteCharacters_len = byteCharacters.length;
     var byteArrays = new Array(Math.ceil(byteCharacters_len / sliceSize));
@@ -158,9 +158,9 @@ mono.base64ToUrl = function(b64Data, contentType) {
         n++;
     }
 
-    var blob = mono.createBlob(byteArrays, {type: contentType});
+    var blob = new Blob(byteArrays, {type: contentType});
 
-    var blobUrl = mono.urlCreateObjectURL(blob);
+    var blobUrl = URL.createObjectURL(blob);
 
     return blobUrl;
 };

@@ -344,40 +344,6 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
     }
 
     /**
-     * @param {Function} cb
-     * @param {number} [delay]
-     * @returns {number}
-     */
-    api.setTimeout = function (cb, delay) {
-      return setTimeout(cb, delay);
-    };
-
-    /**
-     * @param {number} timeout
-     */
-    api.clearTimeout = function(timeout) {
-      return clearTimeout(timeout);
-    };
-
-    /**
-     * @param {Function} cb
-     * @param {number} [delay]
-     * @returns {number}
-     */
-    api.setInterval = function(cb, delay) {
-      "use strict";
-      return setInterval(cb, delay);
-    };
-
-    /**
-     * @param {number} timeout
-     */
-    api.clearInterval = function(timeout) {
-      "use strict";
-      return clearInterval(timeout);
-    };
-
-    /**
      * @param {String} locale
      * @param {Function} cb
      */
@@ -420,34 +386,6 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
       return chrome.i18n.getMessage('lang');
     };
 
-    api.createBlob = function (byteArrays, details) {
-      return new Blob(byteArrays, details);
-    };
-
-    api.btoa = function (data) {
-      return btoa(data);
-    };
-
-    api.atob = function (b64) {
-      return atob(b64);
-    };
-
-    api.urlRevokeObjectURL = function (url) {
-      return URL.revokeObjectURL(url);
-    };
-
-    api.urlCreateObjectURL = function (url) {
-      return URL.createObjectURL(url);
-    };
-
-    api.getFileReader = function () {
-      return new FileReader();
-    };
-
-    api.prompt = function (message, def) {
-      return prompt(message, def);
-    };
-
     var notificationIdList = {};
     api.showNotification = function(icon, title, desc, details) {
       details = details || {};
@@ -483,7 +421,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
           }
       );
       if (timeout > 0) {
-        notificationIdList[timerId] = mono.setTimeout(function () {
+        notificationIdList[timerId] = setTimeout(function () {
           notificationIdList[notifyId] = undefined;
           chrome.notifications.clear(notifyId, function(){});
         }, timeout);
@@ -495,7 +433,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
       textArea.textContent = text;
       document.body.appendChild(textArea);
       textArea.select();
-      mono.setTimeout(function() {
+      setTimeout(function() {
         document.execCommand("copy", false, null);
         textArea.parentNode.removeChild(textArea);
       });
@@ -546,23 +484,6 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
      */
     api.contextMenusCreate = function (createProperties, callback) {
       chrome.contextMenus.create(createProperties, callback);
-    };
-
-    var _navigator = null;
-    /**
-     * @returns {{language: String, platform: String, userAgent: String}}
-     */
-    api.getNavigator = function () {
-      if (_navigator) {
-        return _navigator;
-      }
-
-      _navigator = {};
-      ['language', 'platform', 'userAgent'].forEach(function(key) {
-        _navigator[key] = navigator[key] || '';
-      });
-
-      return _navigator;
     };
 
     return {

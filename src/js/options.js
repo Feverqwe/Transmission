@@ -315,8 +315,6 @@ var options = function() {
                     options.defaultSettings = data.getDefaultSettings;
                     options.language = data.getLanguage;
 
-                    !(mono.isFF && mono.isTab()) && mono.sendMessage({action: 'resize', height: 480, width: 800}, null, "service");
-
                     var langSelect = document.getElementById("language");
                     var langPos = ['ru', 'en', 'fr', 'zh-CN', 'es', 'pt-BR'].indexOf(options.language.lang);
                     if (langPos === -1) {
@@ -392,12 +390,6 @@ var options = function() {
                     set_place_holder();
 
                     setColorPicker();
-
-                    if (!mono.isChrome) {
-                        domCache.saveInCloudBtn.hide();
-                        domCache.getFromCloudBtn.hide();
-                        domCache.clearCloudStorageBtn.hide();
-                    }
 
                     makeBackupForm();
 
