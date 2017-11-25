@@ -1252,7 +1252,7 @@ var engine = {
         getTorrentList: function(data, response) {
             var request = engine.api.getTorrentListRequest;
             if (data.cid) {
-                request = mono.cloneObj(request);
+                request = utils.cloneObj(request);
                 request.arguments.ids = 'recently-active';
             }
             engine.sendAction(request, function(data) {
@@ -1320,7 +1320,7 @@ var engine = {
                 delete message.base64;
                 delete message.type;
 
-                message.url = mono.base64ToUrl(b64Data, type);
+                message.url = utils.base64ToUrl(b64Data, type);
             }
 
             engine.sendFile(message.url, message.folder, message.label);

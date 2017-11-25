@@ -101,7 +101,7 @@ var selectBox = {
             currentBox.options.parentNode.removeChild(currentBox.options);
         }
 
-        currentBox.options = mono.create('div', {
+        currentBox.options = utils.create('div', {
             class: 'simple-select-box-menu',
             style: {
                 display: disaply,
@@ -118,17 +118,17 @@ var selectBox = {
                     if (item.tagName !== 'OPTION') {
                         continue;
                     }
-                    optionList.push(mono.create('div', {
+                    optionList.push(utils.create('div', {
                         class: 'item',
                         data: {
                             value: item.value,
                             index: i
                         },
                         append: [
-                            item.dataset.image ? mono.create('span', {
+                            item.dataset.image ? utils.create('span', {
                                 class: 'image'
                             }) : undefined,
-                            mono.create('span', {
+                            utils.create('span', {
                                 text: item.textContent,
                                 title: item.textContent
                             })
@@ -163,7 +163,7 @@ var selectBox = {
             hideOptions: selectBox.hideOptions.bind(selectBox, currentBox)
         };
 
-       currentBox.control = mono.create('a', {
+       currentBox.control = utils.create('a', {
             href: '#',
             class: 'simple-select-box',
             style: {
@@ -171,9 +171,9 @@ var selectBox = {
                 display: 'inline-block'
             },
             append: [
-                mono.create('span', {
+                utils.create('span', {
                     class: 'arrow',
-                    append: mono.create('span')
+                    append: utils.create('span')
                 })
             ],
             on: [
