@@ -1,7 +1,3 @@
-typeof window === 'undefined' && (function() {
-    mono = require('./../data/js/mono.js');
-})();
-
 var engine = {
     settings: {},
     defaultSettings: {
