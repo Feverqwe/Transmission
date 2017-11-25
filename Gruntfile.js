@@ -11,7 +11,8 @@ module.exports = function (grunt) {
         'jquery-2.1.3.min.js',
         'jquery.contextMenu.js',
         'd3.min.js',
-        'bootstrap-colorpicker.js'
+        'bootstrap-colorpicker.js',
+        'utils.js'
     ];
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
