@@ -304,13 +304,13 @@ var options = function() {
                 'folderList'/*,
                 'labelList'*/
             ], function(storage) {
-                mono.sendMessage([
+                utils.joinMessages([
                     {action: 'getLanguage'},
                     {action: 'getSettings'},
                     {action: 'getTrColumnArray'},
                     {action: 'getFlColumnArray'},
                     {action: 'getDefaultSettings'}
-                ], function (data) {
+                ]).then(function (data) {
                     options.settings = data.getSettings;
                     options.defaultSettings = data.getDefaultSettings;
                     options.language = data.getLanguage;

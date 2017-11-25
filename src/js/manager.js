@@ -110,12 +110,16 @@ var manager = {
             manager.timer.stop();
             manager.updateHead(type);
             manager.trFullUpdatePrepare([]);
-            mono.sendMessage([
-                {action: 'getRemoteTorrentList'},
-                {action: 'setTrColumnArray', data: manager.varCache.trColumnArray}
-            ], function(data) {
-                manager.writeTrList({torrents: data.getRemoteTorrentList});
-                manager.timer.start();
+            mono.sendMessage({
+                action: 'getRemoteTorrentList'
+            }, function (torrentList) {
+                mono.sendMessage({
+                    action: 'setTrColumnArray',
+                    data: manager.varCache.trColumnArray
+                }, function () {
+                    manager.writeTrList({torrents: torrentList});
+                    manager.timer.start();
+                });
             });
         } else
         if (type === 'fl') {
@@ -126,12 +130,17 @@ var manager = {
             manager.timer.stop();
             manager.updateHead(type);
             manager.flClearList();
-            mono.sendMessage([
-                {action: 'getFileList', hash: manager.varCache.flListLayer.hash},
-                {action: 'setFlColumnArray', data: manager.varCache.flColumnArray}
-            ], function(data) {
-                manager.writeFlList(data.api);
-                manager.timer.start();
+            mono.sendMessage({
+                action: 'getFileList',
+                hash: manager.varCache.flListLayer.hash
+            }, function (fileList) {
+                mono.sendMessage({
+                    action: 'setFlColumnArray',
+                    data: manager.varCache.flColumnArray
+                }, function () {
+                    manager.writeFlList(fileList);
+                    manager.timer.start();
+                });
             });
         }
     },
@@ -2171,12 +2180,16 @@ var manager = {
         columnObj.display = columnObj.display === 1 ? 0 : 1;
         manager.updateHead('tr');
         manager.trFullUpdatePrepare([]);
-        mono.sendMessage([
-            {action: 'getRemoteTorrentList'},
-            {action: 'setTrColumnArray', data: manager.varCache.trColumnArray}
-        ], function(data) {
-            manager.writeTrList({torrents: data.getRemoteTorrentList});
-            manager.timer.start();
+        mono.sendMessage({
+            action: 'getRemoteTorrentList'
+        }, function(torrentList) {
+            mono.sendMessage({
+                action: 'setTrColumnArray',
+                data: manager.varCache.trColumnArray
+            }, function() {
+                manager.writeTrList({torrents: torrentList});
+                manager.timer.start();
+            });
         });
     },
     flToggleColum: function(column) {
@@ -2189,12 +2202,17 @@ var manager = {
         columnObj.display = columnObj.display === 1 ? 0 : 1;
         manager.updateHead('fl');
         manager.flClearList();
-        mono.sendMessage([
-            {action: 'getFileList', hash: manager.varCache.flListLayer.hash},
-            {action: 'setFlColumnArray', data: manager.varCache.flColumnArray}
-        ], function(data) {
-            manager.writeFlList(data.getFileList);
-            manager.timer.start();
+        mono.sendMessage({
+            action: 'getFileList',
+            hash: manager.varCache.flListLayer.hash
+        }, function(fileList) {
+            mono.sendMessage({
+                action: 'setFlColumnArray',
+                data: manager.varCache.flColumnArray
+            }, function() {
+                manager.writeFlList(fileList);
+                manager.timer.start();
+            });
         });
     },
     setSpeedLimit: function(type, speed) {
@@ -3381,7 +3399,7 @@ var manager = {
             'selectedLabel',
             'folderList'
         ], function(storage) {
-            mono.sendMessage([
+            utils.joinMessages([
                 {action: 'getLanguage'},
                 {action: 'getSettings'},
                 {action: 'getTrColumnArray'},
@@ -3390,7 +3408,7 @@ var manager = {
                 {action: 'getRemoteSettings'},
                 {action: 'getPublicStatus'},
                 {action: 'managerIsOpen'}
-            ], function(data) {
+            ]).then(function(data) {
                 debug && console.timeEnd('remote data');
                 debug && console.time('manager render');
 

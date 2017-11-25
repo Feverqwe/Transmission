@@ -144,3 +144,21 @@ utils.base64ToUrl = function (b64Data, contentType) {
 utils.cloneObj = function (obj) {
     return JSON.parse(JSON.stringify({w: obj})).w;
 };
+
+utils.joinMessages = function (messages) {
+    return Promise.all(messages.map(function (msg) {
+        return new Promise(function (resolve) {
+            mono.sendMessage(msg, resolve);
+        }).then(function (result) {
+            var obj = {};
+            obj[msg.action] = result;
+            return obj;
+        });
+    })).then(function (results) {
+        const result = {};
+        results.forEach(function (item) {
+            Object.assign(result, item);
+        });
+        return result;
+    });
+};

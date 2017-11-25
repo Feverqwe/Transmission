@@ -1196,9 +1196,14 @@ var engine = {
             engine.getLanguage(function() {
                 engine.varCache.isReady = 1;
 
-                var msg;
-                while ( msg = engine.varCache.msgStack.shift() ) {
-                    engine.onMessage.apply(engine, msg);
+                var msgStack = engine.varCache.msgStack;
+                var result = null;
+                var args = null;
+                while (args = msgStack.shift()) {
+                    result = engine.onMessage.apply(engine, args);
+                    if (result !== true) {
+                        args[2](null);
+                    }
                 }
 
                 engine.updateTrackerList();
@@ -1209,31 +1214,13 @@ var engine = {
             });
         });
     },
-    onMessage: function(msgList, response) {
+    onMessage: function(msgList, sender, response) {
         if (engine.varCache.isReady !== 1) {
-            return engine.varCache.msgStack.push([msgList, response]);
-        }
-        if (Array.isArray(msgList)) {
-            var c_wait = msgList.length;
-            var c_ready = 0;
-            var resultList = {};
-            var ready = function(key, data) {
-                c_ready++;
-                resultList[key] = data;
-                if (c_wait === c_ready) {
-                    response(resultList);
-                }
-            };
-            msgList.forEach(function(message) {
-                var fn = engine.actionList[message.action];
-                fn && fn(message, function(response) {
-                    ready(message.action, response);
-                });
-            });
-            return;
+            engine.varCache.msgStack.push(arguments);
+            return true;
         }
         var fn = engine.actionList[msgList.action];
-        fn && fn(msgList, response);
+        return fn && fn(msgList, response);
     },
     storageCache: {},
     hookList: {
@@ -1245,7 +1232,7 @@ var engine = {
             }
             engine.sendAction(request, function(data) {
                 if (data.result !== 'success') {
-                    return;
+                    return response(null);
                 }
                 response(data.ut);
             });
@@ -1279,9 +1266,11 @@ var engine = {
         api: function(message, response) {
             var hook = engine.hookList[message.data.action];
             if (hook !== undefined) {
-                return hook(message.data, response);
+                hook(message.data, response);
+            } else {
+                engine.sendAction(message.data, response);
             }
-            engine.sendAction(message.data, response);
+            return true;
         },
         sessionSet: function(message, response) {
             engine.sendAction(message.data, function(data) {
@@ -1292,14 +1281,17 @@ var engine = {
                 }
                 response(data);
             });
+            return true;
         },
         setTrColumnArray: function(message, response) {
             engine.torrentListColumnList = message.data;
             mono.storage.set({torrentListColumnList: message.data}, response);
+            return true;
         },
         setFlColumnArray: function(message, response) {
             engine.fileListColumnList = message.data;
             mono.storage.set({fileListColumnList: message.data}, response);
+            return true;
         },
         onSendFile: function(message, response) {
             if (message.base64) {
@@ -1329,6 +1321,7 @@ var engine = {
                     });
                 });
             });
+            return true;
         },
         reloadSettings: function(message, response) {
             engine.loadSettings(function() {
@@ -1342,12 +1335,12 @@ var engine = {
                     response();
                 });
             });
+            return true;
         },
         managerIsOpen: function(message, response) {
             if (engine.timer.state !== 1) {
                 engine.timer.start();
             }
-            response();
         },
         getFileList: function(message, response) {
             engine.api.getFileListRequest.arguments.ids = [parseInt(message.hash.substr(4))];
@@ -1357,6 +1350,7 @@ var engine = {
                 }
                 response(data.ut);
             });
+            return true;
         },
         changeBadgeColor: function(message) {
             engine.settings.badgeColor = message.color;
