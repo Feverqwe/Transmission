@@ -651,7 +651,7 @@ var engine = {
         optionsList.push('ut_path');
         optionsList.push('ssl');
 
-        mono.storage.get(optionsList, function(storage) {
+        mono.storage.local.get(optionsList, function(storage) {
             var settings = {};
 
             // migration >>>
@@ -916,7 +916,7 @@ var engine = {
                 if (data.arguments['torrent-added']) {
                     var name = data.arguments['torrent-added'].name;
                     if (engine.settings.selectDownloadCategoryOnAddItemFromContextMenu) {
-                        mono.storage.set({selectedLabel: {label: 'DL', custom: 1}});
+                        mono.storage.local.set({selectedLabel: {label: 'DL', custom: 1}});
                     }
                     engine.showNotification(
                         engine.icons.add,
@@ -988,7 +988,7 @@ var engine = {
             dir = {download_dir: item[0], path: item[1]};
         }
         if (updateMenu) {
-            mono.storage.set({
+            mono.storage.local.set({
                 folderList: engine.varCache.folderList
             }, function() {
                 engine.createFolderCtxMenu();
@@ -1285,12 +1285,12 @@ var engine = {
         },
         setTrColumnArray: function(message, response) {
             engine.torrentListColumnList = message.data;
-            mono.storage.set({torrentListColumnList: message.data}, response);
+            mono.storage.local.set({torrentListColumnList: message.data}, response);
             return true;
         },
         setFlColumnArray: function(message, response) {
             engine.fileListColumnList = message.data;
-            mono.storage.set({fileListColumnList: message.data}, response);
+            mono.storage.local.set({fileListColumnList: message.data}, response);
             return true;
         },
         onSendFile: function(message, response) {

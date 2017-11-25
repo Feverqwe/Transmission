@@ -459,7 +459,7 @@ var manager = {
         var selectedIndex = manager.domCache.labelBox.selectedIndex;
         var currentLabel = manager.varCache.currentFilter = manager.varCache.labels[selectedIndex];
 
-        mono.storage.set({selectedLabel: currentLabel});
+        mono.storage.local.set({selectedLabel: currentLabel});
 
         if (manager.varCache['style.tr-filter']) {
             manager.varCache['style.tr-filter'].parentNode.removeChild(manager.varCache['style.tr-filter']);
@@ -1935,7 +1935,7 @@ var manager = {
         by && node.classList.add('sortDown');
         !by && node.classList.add('sortUp');
 
-        mono.storage.set(storage);
+        mono.storage.local.set(storage);
     },
     updateHead: function(type) {
         var oldHead = manager.domCache[type+'FixedHead'].firstChild;
@@ -3393,7 +3393,7 @@ var manager = {
             }
         });
 
-        mono.storage.get([
+        mono.storage.local.get([
             'trSortOptions',
             'flSortOptions',
             'selectedLabel',

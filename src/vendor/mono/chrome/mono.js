@@ -79,42 +79,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
       }
     };
 
-    var initChromeStorage = function(type) {
-      type = type || 'local';
-      return {
-        /**
-         * @param {String|[String]|Object|null|undefined} [keys]
-         * @param {Function} callback
-         */
-        get: function(keys, callback) {
-          chrome.storage[type].get(keys, callback);
-        },
-        /**
-         * @param {Object} items
-         * @param {Function} [callback]
-         */
-        set: function(items, callback) {
-          chrome.storage[type].set(items, callback);
-        },
-        /**
-         * @param {String|[String]} [keys]
-         * @param {Function} [callback]
-         */
-        remove: function(keys, callback) {
-          chrome.storage[type].remove(keys, callback);
-        },
-        /**
-         * @param {Function} [callback]
-         */
-        clear: function(callback) {
-          chrome.storage[type].clear(callback);
-        }
-      };
-    };
-    if (chrome.storage) {
-      api.storage = initChromeStorage();
-      api.storage.sync = initChromeStorage('sync');
-    }
+    api.storage = chrome.storage;
 
     /**
      * @param {String} locale

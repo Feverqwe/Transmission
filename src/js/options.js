@@ -86,19 +86,19 @@ var options = function() {
         obj[key] = value;
 
         var cb = this.cb;
-        mono.storage.set(obj, function() {
+        mono.storage.local.set(obj, function() {
             mono.sendMessage({action: 'reloadSettings'}, cb);
         });
     };
 
     var getBackupJson = function(cb) {
-        mono.storage.get(null, function(storage) {
+        mono.storage.local.get(null, function(storage) {
             cb && cb(JSON.stringify(storage));
         });
     };
 
     var restoreSettings = function(storage) {
-        mono.storage.clear();
+        mono.storage.local.clear();
         var data = {};
         for (var item in storage) {
             var value = storage[item];
@@ -107,7 +107,7 @@ var options = function() {
             }
             data[item] = value;
         }
-        mono.storage.set(data, function() {
+        mono.storage.local.set(data, function() {
             mono.sendMessage({action: 'reloadSettings'}, function() {
                 window.location.reload();
             });
@@ -202,7 +202,7 @@ var options = function() {
         for (var i = 0, item; item = optionNodeList[i]; i++) {
             optionList.push([item.dataset.dir, item.dataset.subPath, item.dataset.label]);
         }
-        mono.storage.set({folderList: optionList}, function() {
+        mono.storage.local.set({folderList: optionList}, function() {
             mono.sendMessage({action: 'reloadSettings'});
         });
     };
@@ -300,7 +300,7 @@ var options = function() {
 
     return {
         start: function() {
-            mono.storage.get([
+            mono.storage.local.get([
                 'folderList'/*,
                 'labelList'*/
             ], function(storage) {
@@ -325,7 +325,7 @@ var options = function() {
                         var index = langSelect.selectedIndex;
                         var option = langSelect.childNodes[index];
                         var lang = option.value;
-                        mono.storage.set({language: lang}, function() {
+                        mono.storage.local.set({language: lang}, function() {
                             mono.sendMessage({action: 'reloadSettings'}, function() {
                                 location.reload();
                             });
