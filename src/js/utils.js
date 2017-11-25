@@ -109,29 +109,6 @@ utils.isVisibleElement = function (el) {
     return el.offsetWidth > 0 && el.offsetHeight > 0;
 };
 
-utils.spaceToUnderline = function (string) {
-    return string.replace(/\s/, '_');
-};
-
-utils.param = function (params) {
-    if (typeof params === 'string') return params;
-
-    var args = [];
-    for (var key in params) {
-        var value = params[key];
-        if (value === null || value === undefined) {
-            continue;
-        }
-        if (!Array.isArray(value)) {
-            value = [value];
-        }
-        for (var i = 0, len = value.length; i < len; i++) {
-            args.push(encodeURIComponent(key) + '=' + encodeURIComponent(value[i]));
-        }
-    }
-    return args.join('&');
-};
-
 utils.base64ToUrl = function (b64Data, contentType) {
     var sliceSize = 256;
     contentType = contentType || '';
