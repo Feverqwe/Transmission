@@ -119,8 +119,8 @@ exports.run = function (grunt) {
        grunt.task.run([
            'extensionBase',
            'chromeManifest',
-           'compressJs',
            'firefoxCreateManifest',
+           'compressJs',
            'compress:chrome'
        ]);
    });
