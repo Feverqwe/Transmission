@@ -135,6 +135,9 @@ module.exports = function (grunt) {
                 });
             }).then(function (data) {
                 return fse.writeFile(dest, data);
+            }).catch(function (err) {
+                console.error(err);
+                throw err;
             });
         };
 

@@ -155,7 +155,7 @@ utils.joinMessages = function (messages) {
             return obj;
         });
     })).then(function (results) {
-        const result = {};
+        var result = {};
         results.forEach(function (item) {
             Object.assign(result, item);
         });
