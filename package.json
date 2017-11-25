@@ -14,5 +14,5 @@
     "grunt-cli": ""
   },
   "outputDir": "output/",
-  "extVersion": "1.7.1"
+  "extVersion": "1.7.2"
 }
