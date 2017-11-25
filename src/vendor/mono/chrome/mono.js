@@ -1,7 +1,7 @@
+"use strict";
 var mono = (typeof mono !== 'undefined') ? mono : undefined;
 
 (function(base, factory) {
-  "use strict";
   if (mono && mono.isLoaded) {
     return;
   }
@@ -51,9 +51,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
 
   return base;
 }, function initMono(_mono, _addon) {
-  "use strict";
   var browserApi = function() {
-    "use strict";
     var api = {
       isChrome: true,
       /**
