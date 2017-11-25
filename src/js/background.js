@@ -732,14 +732,6 @@ var engine = {
             customLang = customLang.substr(0, 2);
         }
         var locale = customLang || mono.getLoadedLocale();
-        if (!locale) {
-            var navLanguage = engine.getNavLanguage().substr(0, 2).toLowerCase();
-            if (langList.indexOf(navLanguage) !== -1) {
-                locale = navLanguage;
-            } else {
-                locale = defaultLocale;
-            }
-        }
 
         (function getLanguage(locale, cb) {
             if (/^pt/.test(locale)) {
