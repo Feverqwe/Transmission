@@ -2,6 +2,9 @@ exports.run = function (grunt) {
     var monoParams = {
         browser: 'chrome'
     };
+    var monoParamsFf = {
+        browser: 'firefox'
+    };
 
     grunt.config.merge({
         compress: {
@@ -50,7 +53,6 @@ exports.run = function (grunt) {
 
         grunt.task.run([
             'extensionBase',
-            'buildJs',
             'chromeManifest',
             'compressJs',
             'chromeManifestFormat',
@@ -73,7 +75,6 @@ exports.run = function (grunt) {
 
         grunt.task.run([
             'extensionBase',
-            'buildJs',
             'chromeManifest',
             'compressJs',
             'chromeManifestFormat',
@@ -102,7 +103,7 @@ exports.run = function (grunt) {
   });
 
    grunt.registerTask('firefox', function () {
-       grunt.config('monoParams', monoParams);
+       grunt.config('monoParams', monoParamsFf);
 
        grunt.config.merge({
            geckoId: 'jid1-0GMKQAI8A9x5jg@jetpack',
@@ -117,7 +118,6 @@ exports.run = function (grunt) {
 
        grunt.task.run([
            'extensionBase',
-           'buildJs',
            'chromeManifest',
            'compressJs',
            'firefoxCreateManifest',

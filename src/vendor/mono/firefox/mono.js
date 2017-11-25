@@ -50,31 +50,32 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
 }, function initMono(_mono, _addon) {
   var browserApi = function() {
     var api = {
-      isChrome: true,
+      isFirefox: true,
+      isFirefoxMobile: false,
       /**
        * @param {*} msg
        * @param {Function} [callback]
        */
       sendMessage: function(msg, callback) {
-        chrome.runtime.sendMessage(msg, callback);
+          browser.runtime.sendMessage(msg, callback);
       },
       onMessage: {
         /**
          * @param {Function} callback
          */
         addListener: function(callback) {
-            chrome.runtime.onMessage.addListener(callback);
+            browser.runtime.onMessage.addListener(callback);
         },
         /**
          * @param {Function} callback
          */
         removeListener: function(callback) {
-            chrome.runtime.onMessage.removeListener(callback);
+            browser.runtime.onMessage.removeListener(callback);
         }
       }
     };
 
-    api.storage = chrome.storage;
+    api.storage = browser.storage;
 
     /**
      * @param {String} locale
@@ -116,7 +117,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
     };
 
     api.getLoadedLocale = function () {
-      return chrome.i18n.getMessage('lang');
+      return browser.i18n.getMessage('lang');
     };
 
     var notificationIdList = {};
@@ -136,12 +137,12 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
       if (id !== undefined && notificationIdList[notifyId] !== undefined) {
         clearTimeout(notificationIdList[timerId]);
         delete notificationIdList[notifyId];
-        chrome.notifications.clear(notifyId, function(){});
+          browser.notifications.clear(notifyId, function(){});
       }
       /**
-       * @namespace chrome.notifications
+       * @namespace browser.notifications
        */
-      chrome.notifications.create(
+      browser.notifications.create(
           notifyId,
           {
             type: 'basic',
@@ -156,7 +157,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
       if (timeout > 0) {
         notificationIdList[timerId] = setTimeout(function () {
           notificationIdList[notifyId] = undefined;
-          chrome.notifications.clear(notifyId, function(){});
+            browser.notifications.clear(notifyId, function(){});
         }, timeout);
       }
     };
@@ -173,7 +174,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
     };
 
     api.setBadgeText = function (text) {
-      chrome.browserAction.setBadgeText({
+        browser.browserAction.setBadgeText({
         text: text
       });
     };
@@ -183,17 +184,29 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
       if (chColor.length === 4) {
         chColor.push(parseInt(255 * chColor.splice(-1)[0]));
       }
-      chrome.browserAction.setBadgeBackgroundColor({
+        browser.browserAction.setBadgeBackgroundColor({
         color: chColor
       });
     };
 
+    (function checkCompatibility() {
+        var ua = navigator.userAgent;
+        var m = /(Mobile|Tablet);/.exec(ua);
+        if (m) {
+            api.isFirefoxMobile = true;
+        }
+    })();
+
     api.openTab = function (url) {
-      chrome.tabs.create({url: url});
+        if (api.isFirefoxMobile) {
+            return;
+        }
+
+        browser.tabs.create({url: url});
     };
 
     api.isTab = function () {
-      return !chrome.extension.getViews({
+      return !browser.extension.getViews({
         type: 'popup'
       }).some(function (_window) {
         return window === _window;
@@ -204,7 +217,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
      * @param {Function} [callback]
      */
     api.contextMenusRemoveAll = function (callback) {
-      chrome.contextMenus.removeAll(callback);
+        browser.contextMenus.removeAll(callback);
     };
 
     /**
@@ -216,7 +229,7 @@ var mono = (typeof mono !== 'undefined') ? mono : undefined;
      * @param {Function} [callback]
      */
     api.contextMenusCreate = function (createProperties, callback) {
-      chrome.contextMenus.create(createProperties, callback);
+        browser.contextMenus.create(createProperties, callback);
     };
 
     return {
