@@ -15,7 +15,7 @@
     "icons": {
         "128": "images/icon_128.png"
     },
-    "permissions": [ "http://*/*", "https://*/*", "storage", "notifications", "tabs", "contextMenus" ],
+    "permissions": [ "http://*/*", "https://*/*", "storage", "notifications", "tabs", "contextMenus", "webRequest", "webRequestBlocking" ],
     "name": "Transmission easy client",
     "description": "__MSG_appDesc__",
     "default_locale": "en",

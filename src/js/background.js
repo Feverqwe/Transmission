@@ -845,7 +845,17 @@ var engine = {
         }
         xhr.responseType = 'blob';
         if (referer) {
-            xhr.setRequestHeader('Referer', referer);
+            chrome.webRequest.onBeforeSendHeaders.addListener(function modRefCallback(data) {
+                utils.modifyHeaders(data.requestHeaders, "Referer", referer);
+                chrome.webRequest.onBeforeSendHeaders.removeListener(modRefCallback);
+                return {"requestHeaders": data.requestHeaders};
+            }, { //Filter
+                urls: [url], //For testing purposes
+                types: ["xmlhttprequest"]
+            }, [
+                "requestHeaders",
+                "blocking"
+            ]);
         }
         xhr.onprogress = function (e) {
             if (e.total > 1024 * 1024 * 10 || e.loaded > 1024 * 1024 * 10) {
@@ -953,6 +963,7 @@ var engine = {
          * @namespace e.menuItemId
          */
         var link = e.linkUrl;
+        var referer = e.pageUrl;
         var id = e.menuItemId;
         var updateMenu = false;
         var contextMenu = engine.createFolderCtxMenu.contextMenu;
@@ -978,7 +989,7 @@ var engine = {
             }
         }
         if (id === 'main' || id === 'default') {
-            return engine.sendFile(link, undefined, undefined, e.referer);
+            return engine.sendFile(link, undefined, undefined, referer);
         }
         var dir, label;
         var item = contextMenu[id];
@@ -994,7 +1005,7 @@ var engine = {
                 engine.createFolderCtxMenu();
             });
         }
-        engine.sendFile(link, dir, label, e.referer);
+        engine.sendFile(link, dir, label, referer);
     },
     listToTreeList: function(contextMenu) {
         var tmp_folders_array = [];
