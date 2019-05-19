@@ -133,8 +133,9 @@ const SelectedLabelStore = types.model('SelectedLabelStore', {
 const ConfigStore = types.model('ConfigStore', {
   hostname: types.optional(types.string, ''),
   ssl: types.optional(types.boolean, false),
-  port: types.optional(types.number, 8080),
-  pathname: types.optional(types.string, '/gui/'),
+  port: types.optional(types.number, 9091),
+  pathname: types.optional(types.string, '/transmission/rpc'),
+  webPathname: types.optional(types.string, ''),
 
   authenticationRequired: types.optional(types.boolean, true),
   login: types.optional(types.string, ''),

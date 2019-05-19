@@ -21,11 +21,11 @@ const defaultTorrentListColumnList = [
   {column: 'upped', display: 0, order: 1, width: 60, lang: 'OV_COL_UPPED'},
   {column: 'downloaded', display: 0, order: 1, width: 60, lang: 'OV_COL_DOWNLOADED'},
   {column: 'shared', display: 0, order: 1, width: 60, lang: 'OV_COL_SHARED'},
-  {column: 'avail', display: 0, order: 1, width: 60, lang: 'OV_COL_AVAIL'},
-  {column: 'label', display: 0, order: 1, width: 100, lang: 'OV_COL_LABEL'},
+  // {column: 'avail', display: 0, order: 1, width: 60, lang: 'OV_COL_AVAIL'},
+  // {column: 'label', display: 0, order: 1, width: 100, lang: 'OV_COL_LABEL'},
   {column: 'added', display: 0, order: 1, width: 120, lang: 'OV_COL_DATE_ADDED'},
   {column: 'completed', display: 0, order: 1, width: 120, lang: 'OV_COL_DATE_COMPLETED'},
-  {column: 'actions', display: 1, order: 0, width: 57, lang: 'Actions'}
+  {column: 'actions', display: 1, order: 0, width: 36, lang: 'Actions'}
 ];
 
 const defaultFileListColumnList = [
@@ -42,6 +42,7 @@ const defaultConfig = {
   ssl: undefined,
   port: undefined,
   pathname: undefined,
+  webPathname: undefined,
 
   authenticationRequired: undefined,
   login: undefined,
