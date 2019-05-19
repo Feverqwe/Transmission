@@ -1,6 +1,6 @@
 {
     "appDesc": {
-        "message": "Extension add uTorrent web GUI in your web browser"
+        "message": "Extension add Transmission web GUI in your web browser"
     },
     "lang": {
         "message": "en"
@@ -324,7 +324,7 @@
         "message": "File is too large"
     },
     "addInTorrentClient": {
-        "message": "Add in uTorrent"
+        "message": "Add in Transmission"
     },
     "enterNewDirPath": {
         "message": "Enter the path to the new directory"
@@ -339,7 +339,7 @@
         "message": "Open in tab"
     },
     "optClient": {
-        "message": "uTorrent"
+        "message": "Transmission"
     },
     "optMain": {
         "message": "Main"
@@ -459,32 +459,56 @@
     "freeSpace": {
         "message": "Free space"
     },
-    "help": {
-        "message": "Help"
+    "startNow": {
+        "message": "Start now"
     },
-    "helpS1": {
-        "message": "Open uTorrent application"
+    "rename": {
+        "message": "Rename"
     },
-    "helpS2": {
-        "message": "Go in \"Options\" > \"Preferences\""
+    "renameText": {
+        "message": "Enter file name"
     },
-    "helpS3": {
-        "message": "Open \"Advanced\" section > \"Web UI\""
+    "move": {
+        "message": "Move"
     },
-    "helpS4": {
-        "message": "Check the box \"Enable Web UI\", enter \"Username\" and \"Password\""
+    "moveNewPath": {
+        "message": "Enter new path"
     },
-    "helpS5": {
-        "message": "Check the box \"Alternative listening port\", enter port number 8080"
+    "fullPath": {
+        "message": "Directory (full path)"
     },
-    "helpS6": {
-        "message": "Now enter \"Username\", \"Password\", \"IP\" and \"Port\". If you do not know your \"IP\" try enter 127.0.0.1"
+    "guiPath": {
+        "message": "WebUI path"
     },
-    "helpS7": {
-        "message": "Press the button \"Apply\""
+    "altSpeedEnable": {
+        "message": "Temporary Speed Limits"
+    },
+    "torrentFileIsExists": {
+        "message": "Torrent was added before"
+    },
+    "reannounce": {
+        "message": "Ask more peers"
+    },
+    "extra": {
+        "message": "Extra"
+    },
+    "queueTop": {
+        "message": "Top"
+    },
+    "queueBottom": {
+        "message": "Bottom"
+    },
+    "requireAuthentication": {
+        "message": "Authentication is required"
     },
     "badgeColor": {
         "message": "Notification color"
+    },
+    "magnetUri": {
+        "message": "Magnet-URI"
+    },
+    "copy": {
+        "message": "Copy"
     },
     "addItem": {
         "message": "Add item"

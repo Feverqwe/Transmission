@@ -1,6 +1,6 @@
 {
     "appDesc": {
-        "message": "扩展添加uTorrent的网页图形用户界面在网页浏览器"
+        "message": "扩展添加Transmission的网页图形用户界面在网页浏览器"
     },
     "lang": {
         "message": "zh-CN"
@@ -312,7 +312,7 @@
         "message": "文件过大"
     },
     "addInTorrentClient": {
-        "message": "在添加uTorrent的"
+        "message": "在添加Transmission的"
     },
     "enterNewDirPath": {
         "message": "输入路径到新目录"
@@ -327,7 +327,7 @@
         "message": "打开账单"
     },
     "optClient": {
-        "message": "uTorrent"
+        "message": "Transmission"
     },
     "optMain": {
         "message": "主要"
@@ -447,32 +447,56 @@
     "freeSpace": {
         "message": "免费空间"
     },
-    "help": {
-        "message": "救命"
+    "startNow": {
+        "message": "现在开始"
     },
-    "helpS1": {
-        "message": "打开uTorrent的应用"
+    "rename": {
+        "message": "重命名"
     },
-    "helpS2": {
-        "message": "进入 \"Options\" > \"Preferences\""
+    "renameText": {
+        "message": "输入文件名"
     },
-    "helpS3": {
-        "message": "开放 \"Advanced\" 部分 > \"Web UI\""
+    "move": {
+        "message": "打动"
     },
-    "helpS4": {
-        "message": "检查框 \"Enable Web UI\", 进入 \"Username\" 和 \"Password\""
+    "moveNewPath": {
+        "message": "进入新路径"
     },
-    "helpS5": {
-        "message": "检查框 \"Alternative listening port\",输入端口号 8080"
+    "fullPath": {
+        "message": "目录（完整路径）"
     },
-    "helpS6": {
-        "message": "现在进入 \"Username\", \"Password\", \"IP\" 和 \"Port\". 如果你不知道你的 \"IP\" 尝试进入 127.0.0.1"
+    "guiPath": {
+        "message": "WebUI中路径"
     },
-    "helpS7": {
-        "message": "按下按钮 \"应用(A)\""
+    "altSpeedEnable": {
+        "message": "临时限速"
+    },
+    "torrentFileIsExists": {
+        "message": "激流中前加入"
+    },
+    "reannounce": {
+        "message": "问多用户"
+    },
+    "extra": {
+        "message": "额外"
+    },
+    "queueTop": {
+        "message": "顶"
+    },
+    "queueBottom": {
+        "message": "底部"
+    },
+    "requireAuthentication": {
+        "message": "需要进行身份验证"
     },
     "badgeColor": {
         "message": "通知的颜色"
+    },
+    "magnetUri": {
+        "message": "Magnet-URI"
+    },
+    "copy": {
+        "message": "复制(C)"
     },
     "addItem": {
         "message": "添加项目"

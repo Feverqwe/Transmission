@@ -1,6 +1,6 @@
 {
     "appDesc": {
-        "message": "Extensão adicionar uTorrent web GUI no seu navegador"
+        "message": "Extensão adicionar Transmission web GUI no seu navegador"
     },
     "lang": {
         "message": "pt-BR"
@@ -324,7 +324,7 @@
         "message": "Arquivo é muito grande"
     },
     "addInTorrentClient": {
-        "message": "Adicionar no uTorrent"
+        "message": "Adicionar no Transmission"
     },
     "enterNewDirPath": {
         "message": "Digite o caminho para o novo diretório"
@@ -339,7 +339,7 @@
         "message": "Abrir em guia"
     },
     "optClient": {
-        "message": "uTorrent"
+        "message": "Transmission"
     },
     "optMain": {
         "message": "Principal"
@@ -459,32 +459,56 @@
     "freeSpace": {
         "message": "Espaço livre"
     },
-    "help": {
-        "message": "Socorro"
+    "startNow": {
+        "message": "Start now"
     },
-    "helpS1": {
-        "message": "Aberto uTorrent aplicação"
+    "rename": {
+        "message": "Rename"
     },
-    "helpS2": {
-        "message": "Entrar \"Options\" > \"Preferences\""
+    "renameText": {
+        "message": "Enter file name"
     },
-    "helpS3": {
-        "message": "Aberto \"Advanced\" seção > \"Web UI\""
+    "move": {
+        "message": "Move"
     },
-    "helpS4": {
-        "message": "Marque a caixa \"Enable Web UI\", entrar \"Username\" e \"Password\""
+    "moveNewPath": {
+        "message": "Enter new path"
     },
-    "helpS5": {
-        "message": "Marque a caixa \"Alternative listening port\", entrar número da porta 8080"
+    "fullPath": {
+        "message": "Directory (full path)"
     },
-    "helpS6": {
-        "message": "Agora insira \"Username\", \"Password\", \"IP\" e \"Port\". Se você não sabe o seu \"IP\" tente entrar 127.0.0.1"
+    "guiPath": {
+        "message": "WebUI path"
     },
-    "helpS7": {
-        "message": "Aperte o botão \"Aplicar\""
+    "altSpeedEnable": {
+        "message": "Temporary Speed Limits"
+    },
+    "torrentFileIsExists": {
+        "message": "Torrent was added before"
+    },
+    "reannounce": {
+        "message": "Ask more peers"
+    },
+    "extra": {
+        "message": "Extra"
+    },
+    "queueTop": {
+        "message": "Top"
+    },
+    "queueBottom": {
+        "message": "Bottom"
+    },
+    "requireAuthentication": {
+        "message": "Authentication is required"
     },
     "badgeColor": {
         "message": "Notificação de cor"
+    },
+    "magnetUri": {
+        "message": "Magnet-URI"
+    },
+    "copy": {
+        "message": "Copiar"
     },
     "addItem": {
         "message": "Adicionar Item"

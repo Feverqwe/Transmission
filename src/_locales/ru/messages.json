@@ -1,6 +1,6 @@
 {
     "appDesc": {
-        "message": "Расширение добавит Web-интерфейс uTorrent в ваш браузер"
+        "message": "Расширение добавит Web-интерфейс Transmission в ваш браузер"
     },
     "lang": {
         "message": "ru"
@@ -237,7 +237,7 @@
         "message": "Вы действительно хотите удалить выбранный торрент?"
     },
     "OV_CONFIRM_DELETE_MULTIPLE": {
-       "message": "Вы действительно хотите удалить %d выбранных торрента(ов)?"
+        "message": "Вы действительно хотите удалить %d выбранных торрента(ов)?"
     },
     "DLG_BTN_YES": {
         "message": "Да"
@@ -337,7 +337,7 @@
         "message": "Файл больше 10 мб"
     },
     "addInTorrentClient": {
-        "message": "Добавить в uTorrent"
+        "message": "Добавить в Transmission"
     },
     "enterNewDirPath": {
         "message": "Введите путь к новой директории"
@@ -352,7 +352,7 @@
         "message": "Открыть во вкладке"
     },
     "optClient": {
-        "message": "uTorrent"
+        "message": "Transmission"
     },
     "optMain": {
         "message": "Общие"
@@ -472,32 +472,56 @@
     "freeSpace": {
         "message": "Свободно"
     },
-    "help": {
-        "message": "Справка"
+    "startNow": {
+        "message": "Запустить сейчас"
     },
-    "helpS1": {
-        "message": "Откройте приложение uTorrent"
+    "rename": {
+        "message": "Переименовать"
     },
-    "helpS2": {
-        "message": "Войдите в \"Настройки\" > \"Настройки приложения\""
+    "renameText": {
+        "message": "Введите имя файла"
     },
-    "helpS3": {
-        "message": "Откройте раздел \"Дополнительно\" > \"Веб-интерфейс\""
+    "move": {
+        "message": "Переместить"
     },
-    "helpS4": {
-        "message": "Поставьте галочку \"Использовать Веб-интерфейс\", введите \"Имя\" и \"Пароль\""
+    "moveNewPath": {
+        "message": "Введите новый путь"
     },
-    "helpS5": {
-        "message": "Поставьте галочку \"Альтернативный порт\", введите номер порта 8080"
+    "fullPath": {
+        "message": "Каталог (полный путь)"
     },
-    "helpS6": {
-        "message": "Теперь введите \"Логин\" (Имя), \"Пароль\", \"IP-адрес\" и \"Порт\". Если вы не знаете ваш \"IP-адрес\" попробуйте ввести 127.0.0.1"
+    "guiPath": {
+        "message": "Путь к веб интерфейсу"
     },
-    "helpS7": {
-        "message": "Нажмите \"Применить\""
+    "altSpeedEnable": {
+        "message": "Временное ограничение скорости"
+    },
+    "torrentFileIsExists": {
+        "message": "Торрент уже был добавлен ранее"
+    },
+    "reannounce": {
+        "message": "Запросить пиров"
+    },
+    "extra": {
+        "message": "Дополнительно"
+    },
+    "queueTop": {
+        "message": "Первый"
+    },
+    "queueBottom": {
+        "message": "Последний"
+    },
+    "requireAuthentication": {
+        "message": "Требуется аутентификация"
     },
     "badgeColor": {
         "message": "Цвет уведомления"
+    },
+    "magnetUri": {
+        "message": "Magnet-URI"
+    },
+    "copy": {
+        "message": "Копировать"
     },
     "addItem": {
         "message": "Добавить элемент"

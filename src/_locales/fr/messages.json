@@ -1,6 +1,6 @@
 {
     "appDesc": {
-        "message": "Cette extension vous permet d'utiliser uTorrent directement dans votre navigateur"
+        "message": "Cette extension vous permet d'utiliser Transmission directement dans votre navigateur"
     },
     "lang": {
         "message": "fr"
@@ -320,7 +320,7 @@
         "message": "Le fichier est trop gros"
     },
     "addInTorrentClient": {
-        "message": "Ajouter à uTorrent"
+        "message": "Ajouter à Transmission"
     },
     "enterNewDirPath": {
         "message": "Entrez le chemin d'accès vers le nouveau répertoire"
@@ -335,7 +335,7 @@
         "message": "Ouvrez dans l'onglet"
     },
     "optClient": {
-        "message": "uTorrent"
+        "message": "Transmission"
     },
     "optMain": {
         "message": "Principale"
@@ -393,7 +393,7 @@
         "message": "Afficher une notification lorsque un téléchargement est terminé"
     },
     "displayActiveTorrentCountIcon": {
-        "message": "Afficher le nombre de torrents en téléchargement dans l'icone uTorrent"
+        "message": "Afficher le nombre de torrents en téléchargement dans l'icone Transmission"
     },
     "backgroundUpdateInterval": {
         "message": "Intervalle fond actualiser la liste des torrents"
@@ -455,32 +455,56 @@
     "freeSpace": {
         "message": "Disponible"
     },
-    "help": {
-        "message": "Aide"
+    "startNow": {
+        "message": "Démarrer maintenant"
     },
-    "helpS1": {
-        "message": "Ouvrir l'application uTorrent"
+    "rename": {
+        "message": "Renommer"
     },
-    "helpS2": {
-        "message": "Aller dans \"Options\" > \"Préferences\""
+    "renameText": {
+        "message": "Tapez un nouveau nom"
     },
-    "helpS3": {
-        "message": "Ouvrir la section \"Avancé\" > \"Plugin WebUI\""
+    "move": {
+        "message": "Déplacer"
     },
-    "helpS4": {
-        "message": "Cliquez sur \"Activer le plugin WebUI\", entrez le \"Nom\" et \"Mot de passe\""
+    "moveNewPath": {
+        "message": "Entrez le nouveau chemin d'accès"
     },
-    "helpS5": {
-        "message": "Cliquez sur le \"Port d'écoute alternatif\", entez le port 8080"
+    "fullPath": {
+        "message": "Répertoire (chemin complet)"
     },
-    "helpS6": {
-        "message": "Maintenant entrez le \"Identifiant\", \"M. passe\", \"IP\" et le \"Port\". Si vous ne connaissez pas votre \"IP\", essayez 127.0.0.1"
+    "guiPath": {
+        "message": "WebUI chemin"
     },
-    "helpS7": {
-        "message": "Cliquez sur \"Appliquer\""
+    "altSpeedEnable": {
+        "message": "Limites de vitesse temporaires"
+    },
+    "torrentFileIsExists": {
+        "message": "Torrent a été ajouté avant"
+    },
+    "reannounce": {
+        "message": "Demander plus d'pairs"
+    },
+    "extra": {
+        "message": "Supplémentaire"
+    },
+    "queueTop": {
+        "message": "Premier"
+    },
+    "queueBottom": {
+        "message": "Dernier"
+    },
+    "requireAuthentication": {
+        "message": "Authentification requise"
     },
     "badgeColor": {
         "message": "La Notification de la couleur"
+    },
+    "magnetUri": {
+        "message": "Magnet-URI"
+    },
+    "copy": {
+        "message": "Copier"
     },
     "addItem": {
         "message": "Ajouter un item"

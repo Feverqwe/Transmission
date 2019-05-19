@@ -1,6 +1,6 @@
 {
     "appDesc": {
-        "message": "La extensión de añadir uTorrent GUI web en su navegador web"
+        "message": "La extensión de añadir Transmission GUI web en su navegador web"
     },
     "lang": {
         "message": "es"
@@ -313,6 +313,7 @@
     },
 
 
+
     "torrentAdded": {
         "message": "Se añadió Torrent!"
     },
@@ -323,7 +324,7 @@
         "message": "El archivo es demasiado grande"
     },
     "addInTorrentClient": {
-        "message": "Añadir en la uTorrent"
+        "message": "Añadir en la Transmission"
     },
     "enterNewDirPath": {
         "message": "Introduzca la ruta de acceso al nuevo directorio"
@@ -338,7 +339,7 @@
         "message": "Abrir en pestaña"
     },
     "optClient": {
-        "message": "uTorrent"
+        "message": "Transmission"
     },
     "optMain": {
         "message": "Principal"
@@ -458,32 +459,56 @@
     "freeSpace": {
         "message": "Espacio libre"
     },
-    "help": {
-        "message": "Ayudar"
+    "startNow": {
+        "message": "Empezar ahora"
     },
-    "helpS1": {
-        "message": "Abierto uTorrent aplicación"
+    "rename": {
+        "message": "Renombrar"
     },
-    "helpS2": {
-        "message": "Entrar \"Options\" > \"Preferences\""
+    "renameText": {
+        "message": "Introduzca el nombre del archivo"
     },
-    "helpS3": {
-        "message": "Abierto \"Advanced\" sección > \"Web UI\""
+    "move": {
+        "message": "Movimiento"
     },
-    "helpS4": {
-        "message": "Marcar la casilla \"Enable Web UI\", entrar \"Username\" y \"Password\""
+    "moveNewPath": {
+        "message": "Introduzca nuevo camino"
     },
-    "helpS5": {
-        "message": "Marcar la casilla \"Alternative listening port\", introducir el número de puerto 8080"
+    "fullPath": {
+        "message": "Directorio (ruta completa)"
     },
-    "helpS6": {
-        "message": "A continuación, introduzca \"Username\", \"Password\", \"IP\" y \"Port\". Si usted no conoce su \"IP\" intente entrar 127.0.0.1"
+    "guiPath": {
+        "message": "Ruta WebUI"
     },
-    "helpS7": {
-        "message": "Presiona el boton \"Aplicar\""
+    "altSpeedEnable": {
+        "message": "Límites de velocidad temporales"
+    },
+    "torrentFileIsExists": {
+        "message": "Torrent se añadió antes"
+    },
+    "reannounce": {
+        "message": "Pregunta a más de sus compañeros"
+    },
+    "extra": {
+        "message": "Extra"
+    },
+    "queueTop": {
+        "message": "Top"
+    },
+    "queueBottom": {
+        "message": "Bottom"
+    },
+    "requireAuthentication": {
+        "message": "La autenticación es necesaria"
     },
     "badgeColor": {
         "message": "Notificación de color"
+    },
+    "magnetUri": {
+        "message": "Magnet-URI"
+    },
+    "copy": {
+        "message": "Copiar"
     },
     "addItem": {
         "message": "Añadir artículo"
