@@ -1,0 +1,483 @@
+{
+    "appDesc": {
+        "message": "扩展添加uTorrent的网页图形用户界面在网页浏览器"
+    },
+    "lang": {
+        "message": "zh-CN"
+    },
+    "sizeList": {
+        "message": "[\"B\", \"kB\", \"MB\", \"GB\", \"TB\", \"PB\", \"EB\"]"
+    },
+    "sizePsList": {
+        "message": "[\"B/s\", \"kB/s\", \"MB/s\", \"GB/s\", \"TB/s\", \"PB/s\", \"EB/s\"]"
+    },
+    "timeOutList": {
+        "message": "[\"周\", \"天\", \"小时\", \"分钟\", \"秒\"]"
+    },
+    "OV_COL_NAME": {
+        "message": "名称"
+    },
+    "OV_COL_ORDER": {
+        "message": "序号",
+        "modifed": 1,
+        "originalKey": "OV_FL_QUEUED"
+    },
+    "OV_COL_SIZE": {
+        "message": "大小"
+    },
+    "OV_COL_REMAINING": {
+        "message": "剩余"
+    },
+    "OV_COL_DONE": {
+        "message": "完成率"
+    },
+    "OV_COL_STATUS": {
+        "message": "状态"
+    },
+    "OV_COL_SEEDS": {
+        "message": "种子"
+    },
+    "OV_COL_PEERS": {
+        "message": "用户"
+    },
+    "OV_COL_SEEDS_PEERS": {
+        "message": "种子/用户"
+    },
+    "OV_COL_DOWNSPD": {
+        "message": "下载速度"
+    },
+    "OV_COL_UPSPD": {
+        "message": "上传速度"
+    },
+    "OV_COL_ETA": {
+        "message": "剩余时间"
+    },
+    "OV_COL_UPPED": {
+        "message": "已上传"
+    },
+    "OV_COL_DOWNLOADED": {
+        "message": "已下载"
+    },
+    "OV_COL_SHARED": {
+        "message": "分享率"
+    },
+    "OV_COL_AVAIL": {
+        "message": "健康度"
+    },
+    "OV_COL_LABEL": {
+        "message": "标签"
+    },
+    "OV_COL_DATE_ADDED": {
+        "message": "添加时间"
+    },
+    "OV_COL_DATE_COMPLETED": {
+        "message": "完成时间"
+    },
+    "Actions": {
+        "message": "操作"
+    },
+    "FI_COL_NAME": {
+        "message": "名称"
+    },
+    "FI_COL_SIZE": {
+        "message": "大小"
+    },
+    "FI_COL_PRIO": {
+        "message": "优先级"
+    },
+    "OV_FL_SEEDING": {
+        "message": "做种中"
+    },
+    "OV_CAT_ACTIVE": {
+        "message": "活动"
+    },
+    "OV_CAT_ALL": {
+        "message": "全部"
+    },
+    "OV_CAT_COMPL": {
+        "message": "完成"
+    },
+    "OV_CAT_DL": {
+        "message": "下载"
+    },
+    "OV_CAT_INACTIVE": {
+        "message": "停止"
+    },
+    "OV_CAT_NOLABEL": {
+        "message": "其他"
+    },
+    "OV_FL_CHECKED": {
+        "message": "已检查",
+        "modifed": 1
+    },
+    "OV_FL_DOWNLOADING": {
+        "message": "下载中"
+    },
+    "OV_FL_ERROR": {
+        "message": "错误",
+        "modifed": 1
+    },
+    "OV_FL_FINISHED": {
+        "message": "已完成"
+    },
+    "OV_FL_PAUSED": {
+        "message": "已暂停"
+    },
+    "OV_FL_QUEUED": {
+        "message": "排队中"
+    },
+    "OV_FL_QUEUED_SEED": {
+        "message": "排队做种"
+    },
+    "OV_FL_STOPPED": {
+        "message": "已停止"
+    },
+    "MF_DONT": {
+        "message": "取消下载(D)"
+    },
+    "MF_HIGH": {
+        "message": "较高优先级(H)",
+        "modifed": 1
+    },
+    "MF_LOW": {
+        "message": "较低优先级(L)",
+        "modifed": 1
+    },
+    "MF_NORMAL": {
+        "message": "正常优先级(N)",
+        "modifed": 1
+    },
+    "ML_START": {
+        "message": "开始(S)"
+    },
+    "ML_PAUSE": {
+        "message": "暂停(P)"
+    },
+    "ML_STOP": {
+        "message": "停止(S)"
+    },
+    "OV_REMOVE_LABEL": {
+        "message": "移除标签"
+    },
+    "OV_NEW_LABEL": {
+        "message": "新建标签..."
+    },
+    "ML_FORCE_START": {
+        "message": "强制开始(F)"
+    },
+    "ML_FORCE_RECHECK": {
+        "message": "强制校验(H)"
+    },
+    "ML_REMOVE": {
+        "message": "移除(R)"
+    },
+    "ML_REMOVE_AND": {
+        "message": "移除并(N)"
+    },
+    "ML_DELETE_TORRENT": {
+        "message": "删除 Torrent(D)"
+    },
+    "ML_DELETE_DATA": {
+        "message": "删除数据(L)"
+    },
+    "ML_DELETE_DATATORRENT": {
+        "message": "删除 Torrent 和数据(E)"
+    },
+    "DLG_RSSDOWNLOADER_24": {
+        "message": "下载(D)"
+    },
+    "MENU_UNLIMITED": {
+        "message": "无限制"
+    },
+    "Open_file": {
+        "message": "打开文件",
+        "originalKey": "Open file"
+    },
+    "ST_CAPT_WEBUI": {
+        "message": "远程"
+    },
+    "MM_FILE_ADD_URL": {
+        "message": "从链接添加 Torrent(U)..."
+    },
+    "STM_TORRENTS_RESUMEALL": {
+        "message": "续传所有的 Torrent(R)"
+    },
+    "STM_TORRENTS_PAUSEALL": {
+        "message": "暂停所有的 Torrent(P)"
+    },
+    "DLG_BTN_CLOSE": {
+        "message": "关闭(C)"
+    },
+    "OV_CONFIRM_DELETE_ONE": {
+        "message": "您确定要移除选定的 Torrent 吗？"
+    },
+    "OV_CONFIRM_DELETE_MULTIPLE": {
+        "message": "您确定要移除选定的 %d 个 Torrent 吗？"
+    },
+    "DLG_BTN_YES": {
+        "message": "是"
+    },
+    "DLG_BTN_NO": {
+        "message": "否"
+    },
+    "DLG_BTN_CANCEL": {
+        "message": "取消"
+    },
+    "DLG_BTN_APPLY": {
+        "message": "应用(A)"
+    },
+    "DLG_BTN_OK": {
+        "message": "确定"
+    },
+    "ST_CAPT_FOLDER": {
+        "message": "目录",
+        "modifed": 1
+    },
+    "Paste_a_torrent_URL": {
+        "message": "粘贴 Torrent URL",
+        "originalKey": "Paste a torrent or feed URL",
+        "modifed": 1
+    },
+    "OV_NEWLABEL_CAPTION": {
+        "message": "输入标签",
+        "modifed": 1
+    },
+    "DLG_SETTINGS_4_CONN_16": {
+        "message": "用户"
+    },
+    "DLG_SETTINGS_4_CONN_18": {
+        "message": "密码"
+    },
+    "PRS_COL_IP": {
+        "message": "IP 地址"
+    },
+    "PRS_COL_PORT": {
+        "message": "端口"
+    },
+    "ST_CAPT_ADVANCED": {
+        "message": "高级"
+    },
+    "resume": {
+        "message": "简历",
+        "originalKey": "STM_TORRENTS_RESUMEALL",
+        "modifed": 1
+    },
+    "enterNewLabel": {
+        "message": "为选定的 Torrent 输入新的标签",
+        "originalKey": "OV_NEWLABEL_TEXT",
+        "modifed": 1
+    },
+    "defaultPath": {
+        "message": "默认目录",
+        "originalKey": "DLG_SETTINGS_3_PATHS_10",
+        "modifed": 1
+    },
+    "add": {
+        "message": "添加"
+    },
+    "available": {
+        "message": "可存取",
+        "originalKey": "STATUS_REMOTE_01"
+    },
+    "up": {
+        "message": "上移(U)",
+        "originalKey": "ML_QUEUEUP",
+        "modifed": 1
+    },
+    "down": {
+        "message": "下移(D)",
+        "originalKey": "ML_QUEUEDOWN",
+        "modifed": 1
+    },
+    "update": {
+        "message": "刷新",
+        "originalKey": "DLG_RSSDOWNLOADER_22",
+        "modifed": 1
+    },
+    "deleteSelected": {
+        "message": "删除所选",
+        "originalKey": "DLG_RSSDOWNLOADER_35",
+        "modifed": 1
+    },
+
+
+
+    "torrentAdded": {
+        "message": "洪流加入!"
+    },
+    "unexpectedError": {
+        "message": "Unexpected error!"
+    },
+    "fileSizeError": {
+        "message": "文件过大"
+    },
+    "addInTorrentClient": {
+        "message": "在添加uTorrent的"
+    },
+    "enterNewDirPath": {
+        "message": "输入路径到新目录"
+    },
+    "torrentFileExists": {
+        "message": "也许torrent文件已经存在！"
+    },
+    "currentDirectory": {
+        "message": "目前的目錄 "
+    },
+    "openInTab": {
+        "message": "打开账单"
+    },
+    "optClient": {
+        "message": "uTorrent"
+    },
+    "optMain": {
+        "message": "主要"
+    },
+    "optNotify": {
+        "message": "通知"
+    },
+    "optCtx": {
+        "message": "上下文菜单"
+    },
+    "backup": {
+        "message": "备份"
+    },
+    "restore": {
+        "message": "復原 "
+    },
+    "useSSL": {
+        "message": "Use SSL"
+    },
+    "path": {
+        "message": "路径",
+        "note": "URL path"
+    },
+    "hideSeedStatusItem": {
+        "message": "藏洪地位 \"做种中\""
+    },
+    "hideFnishStatusItem": {
+        "message": "藏洪地位 \"已完成\""
+    },
+    "showSpeedGraph": {
+        "message": "显示速度图"
+    },
+    "popupHeight": {
+        "message": "身高弹出窗口"
+    },
+    "px": {
+        "message": "像素"
+    },
+    "ms": {
+        "message": "毫秒"
+    },
+    "popupUpdateInterval": {
+        "message": "山洪更新间隔列表"
+    },
+    "fixCirilicIf": {
+        "message": "Fix Cyrillic if..."
+    },
+    "fixCirilicTitle": {
+        "message": "Incorrectly displays the names of the torrents"
+    },
+    "fixCirilicTorrentPath": {
+        "message": "Incorrectly sets the directory to the newly added torrent"
+    },
+    "showNotificationOnDownloadCompleate": {
+        "message": "完成下载时，显示通知"
+    },
+    "displayActiveTorrentCountIcon": {
+        "message": "显示扩展程序图标下载种子的数量"
+    },
+    "backgroundUpdateInterval": {
+        "message": "间隔背景更新种子名单"
+    },
+    "notificationTimeout": {
+        "message": "隐藏通知后，"
+    },
+    "folderContextMenu": {
+        "message": "目录显示列表"
+    },
+    "labelContextMenu": {
+        "message": "标签显示列表"
+    },
+    "selectDownloadCategoryOnAddItemFromContextMenu": {
+        "message": "打开“下载中”类别加入洪流时，"
+    },
+    "treeViewContextMenu": {
+        "message": "树视图上下文菜单"
+    },
+    "showDefaultFolderContextMenuItem": {
+        "message": "显示默认的目录"
+    },
+    "dirList": {
+        "message": "目录列表"
+    },
+    "subPath": {
+        "message": "子路径"
+    },
+    "labelList": {
+        "message": "标签列表"
+    },
+    "optSaveInCloud": {
+        "message": "保存在云"
+    },
+    "toRestore": {
+        "message": "恢复"
+    },
+    "optGetFromCloud": {
+        "message": "得到云设置"
+    },
+    "optClearCloudStorage": {
+        "message": "删除云中的所有设置"
+    },
+    "showFileList": {
+        "message": "文件列表"
+    },
+    "selectAll": {
+        "message": "选择所有"
+    },
+    "refresh": {
+        "message": "刷新"
+    },
+    "checkSettings": {
+        "message": "测试设置"
+    },
+    "showFreeSpace": {
+        "message": "显示的可用磁盘空间的数量"
+    },
+    "freeSpace": {
+        "message": "免费空间"
+    },
+    "help": {
+        "message": "救命"
+    },
+    "helpS1": {
+        "message": "打开uTorrent的应用"
+    },
+    "helpS2": {
+        "message": "进入 \"Options\" > \"Preferences\""
+    },
+    "helpS3": {
+        "message": "开放 \"Advanced\" 部分 > \"Web UI\""
+    },
+    "helpS4": {
+        "message": "检查框 \"Enable Web UI\", 进入 \"Username\" 和 \"Password\""
+    },
+    "helpS5": {
+        "message": "检查框 \"Alternative listening port\",输入端口号 8080"
+    },
+    "helpS6": {
+        "message": "现在进入 \"Username\", \"Password\", \"IP\" 和 \"Port\". 如果你不知道你的 \"IP\" 尝试进入 127.0.0.1"
+    },
+    "helpS7": {
+        "message": "按下按钮 \"应用(A)\""
+    },
+    "badgeColor": {
+        "message": "通知的颜色"
+    },
+    "addItem": {
+        "message": "添加项目"
+    },
+    "shortName": {
+        "message": "简称"
+    }
+}

@@ -1,0 +1,508 @@
+{
+    "appDesc": {
+        "message": "Расширение добавит Web-интерфейс uTorrent в ваш браузер"
+    },
+    "lang": {
+        "message": "ru"
+    },
+    "sizeList": {
+        "message": "[\"Б\", \"кБ\", \"МБ\", \"ГБ\", \"ТБ\", \"ПБ\", \"ЭБ\"]"
+    },
+    "sizePsList": {
+        "message": "[\"Б/с\", \"кБ/с\", \"МБ/с\", \"ГБ/с\", \"ТБ/с\", \"ПБ/с\", \"ЭБ/с\"]"
+    },
+    "timeOutList": {
+        "message": "[\"н\", \"д\", \"ч\", \"м\", \"с\"]"
+    },
+    "OV_COL_NAME": {
+        "message": "Имя торрента"
+    },
+    "OV_COL_ORDER": {
+        "message": "Позиция"
+    },
+    "OV_COL_ORDER_SHORT": {
+        "message": "#",
+        "modifed": 1
+    },
+    "OV_COL_SIZE": {
+        "message": "Размер"
+    },
+    "OV_COL_REMAINING": {
+        "message": "Осталось"
+    },
+    "OV_COL_DONE": {
+        "message": "%"
+    },
+    "OV_COL_STATUS": {
+        "message": "Статус"
+    },
+    "OV_COL_SEEDS": {
+        "message": "Сиды"
+    },
+    "OV_COL_PEERS": {
+        "message": "Пиры"
+    },
+    "OV_COL_SEEDS_PEERS": {
+        "message": "Сиды/Пиры"
+    },
+    "OV_COL_SEEDS_PEERS_SHORT": {
+        "message": "С/П",
+        "originalKey": "OV_COL_SEEDS_PEERS",
+        "modifed": 1
+    },
+    "OV_COL_DOWNSPD": {
+        "message": "Скорость загрузки"
+    },
+    "OV_COL_DOWNSPD_SHORT": {
+        "message": "Загр. скор.",
+        "originalKey": "OV_COL_DOWNSPD"
+    },
+    "OV_COL_UPSPD": {
+        "message": "Скорость отдачи"
+    },
+    "OV_COL_UPSPD_SHORT": {
+        "message": "Отд. скор.",
+        "originalKey": "OV_COL_UPSPD"
+    },
+    "OV_COL_ETA": {
+        "message": "Время"
+    },
+    "OV_COL_UPPED": {
+        "message": "Отдано"
+    },
+    "OV_COL_DOWNLOADED": {
+        "message": "Получено"
+    },
+    "OV_COL_SHARED": {
+        "message": "Коэффициент"
+    },
+    "OV_COL_SHARED_SHORT": {
+        "message": "Коэфф.",
+        "originalKey": "OV_COL_SHARED"
+    },
+    "OV_COL_AVAIL": {
+        "message": "Доступность"
+    },
+    "OV_COL_AVAIL_SHORT": {
+        "message": "Доступ.",
+        "originalKey": "OV_COL_AVAIL"
+    },
+    "OV_COL_LABEL": {
+        "message": "Метка"
+    },
+    "OV_COL_DATE_ADDED": {
+        "message": "Добавлен"
+    },
+    "OV_COL_DATE_COMPLETED": {
+        "message": "Завершён"
+    },
+    "Actions": {
+        "message": "Действия"
+    },
+    "FI_COL_NAME": {
+        "message": "Имя файла"
+    },
+    "FI_COL_SIZE": {
+        "message": "Размер"
+    },
+    "FI_COL_PRIO": {
+        "message": "Приоритет"
+    },
+    "OV_FL_SEEDING": {
+        "message": "Раздается"
+    },
+    "OV_CAT_ACTIVE": {
+        "message": "Активные"
+    },
+    "OV_CAT_ALL": {
+        "message": "Все"
+    },
+    "OV_CAT_COMPL": {
+        "message": "Готовые"
+    },
+    "OV_CAT_DL": {
+        "message": "Загружаемые"
+    },
+    "OV_CAT_INACTIVE": {
+        "message": "Неактивные"
+    },
+    "OV_CAT_NOLABEL": {
+        "message": "Без метки"
+    },
+    "OV_FL_CHECKED": {
+        "message": "Проверено",
+        "modifed": 1
+    },
+    "OV_FL_DOWNLOADING": {
+        "message": "Загружается"
+    },
+    "OV_FL_ERROR": {
+        "message": "Ошибка",
+        "modifed": 1
+    },
+    "OV_FL_FINISHED": {
+        "message": "Загружен"
+    },
+    "OV_FL_PAUSED": {
+        "message": "Пауза"
+    },
+    "OV_FL_QUEUED": {
+        "message": "В очереди"
+    },
+    "OV_FL_QUEUED_SEED": {
+        "message": "Ожидает раздачи"
+    },
+    "OV_FL_STOPPED": {
+        "message": "Остановлен"
+    },
+    "MF_DONT": {
+        "message": "Не загружать"
+    },
+    "MF_HIGH": {
+        "message": "Высокий",
+        "modifed": 1
+    },
+    "MF_LOW": {
+        "message": "Низкий",
+        "modifed": 1
+    },
+    "MF_NORMAL": {
+        "message": "Средний",
+        "modifed": 1
+    },
+    "ML_START": {
+        "message": "Запустить"
+    },
+    "ML_PAUSE": {
+        "message": "Пауза"
+    },
+    "ML_STOP": {
+        "message": "Остановить"
+    },
+    "OV_REMOVE_LABEL": {
+        "message": "Удалить метку"
+    },
+    "OV_NEW_LABEL": {
+        "message": "Создать новую метку..."
+    },
+    "ML_FORCE_START": {
+        "message": "Запустить принудительно"
+    },
+    "ML_FORCE_RECHECK": {
+        "message": "Перехешировать"
+    },
+    "ML_REMOVE": {
+        "message": "Удалить"
+    },
+    "ML_REMOVE_AND": {
+        "message": "Удалить и"
+    },
+    "ML_DELETE_TORRENT": {
+        "message": "Только .torrent",
+        "modifed": 1
+    },
+    "ML_DELETE_DATA": {
+        "message": "Стереть загруженные файлы"
+    },
+    "ML_DELETE_DATATORRENT": {
+        "message": ".torrent и файл(ы)"
+    },
+    "DLG_RSSDOWNLOADER_24": {
+        "message": "Загрузить"
+    },
+    "MENU_UNLIMITED": {
+        "message": "Неограниченно",
+        "modifed": 1
+    },
+    "Open_file": {
+        "message": "Открыть файл",
+        "originalKey": "Open file"
+    },
+    "ST_CAPT_WEBUI": {
+        "message": "Web интерфейс"
+    },
+    "MM_FILE_ADD_URL": {
+        "message": "Добавить по URL..."
+    },
+    "STM_TORRENTS_RESUMEALL": {
+        "message": "Продолжить все загрузки"
+    },
+    "STM_TORRENTS_PAUSEALL": {
+        "message": "Пауза для всех"
+    },
+    "DLG_BTN_CLOSE": {
+        "message": "Закрыть"
+    },
+    "OV_CONFIRM_DELETE_ONE": {
+        "message": "Вы действительно хотите удалить выбранный торрент?"
+    },
+    "OV_CONFIRM_DELETE_MULTIPLE": {
+       "message": "Вы действительно хотите удалить %d выбранных торрента(ов)?"
+    },
+    "DLG_BTN_YES": {
+        "message": "Да"
+    },
+    "DLG_BTN_NO": {
+        "message": "Нет"
+    },
+    "DLG_BTN_CANCEL": {
+        "message": "Отмена"
+    },
+    "DLG_BTN_APPLY": {
+        "message": "Применить"
+    },
+    "DLG_BTN_OK": {
+        "message": "OK"
+    },
+    "ST_CAPT_FOLDER": {
+        "message": "Директория",
+        "modifed": 1
+    },
+    "Paste_a_torrent_URL": {
+        "message": "Вставьте URL торрента",
+        "originalKey": "Paste a torrent or feed URL",
+        "modifed": 1
+    },
+    "OV_NEWLABEL_CAPTION": {
+        "message": "Введите новую метку",
+        "modifed": 1
+    },
+    "DLG_SETTINGS_4_CONN_16": {
+        "message": "Логин"
+    },
+    "DLG_SETTINGS_4_CONN_18": {
+        "message": "Пароль"
+    },
+    "PRS_COL_IP": {
+        "message": "IP-адрес"
+    },
+    "PRS_COL_PORT": {
+        "message": "Порт"
+    },
+    "ST_CAPT_ADVANCED": {
+        "message": "Дополнительно"
+    },
+    "resume": {
+        "message": "Возобновить",
+        "originalKey": "STM_TORRENTS_RESUMEALL",
+        "modifed": 1
+    },
+    "enterNewLabel": {
+        "message": "Введите название метки",
+        "originalKey": "OV_NEWLABEL_TEXT",
+        "modifed": 1
+    },
+    "defaultPath": {
+        "message": "Путь по умолчанию",
+        "originalKey": "DLG_SETTINGS_3_PATHS_10",
+        "modifed": 1
+    },
+    "add": {
+        "message": "Добавить"
+    },
+    "available": {
+        "message": "Доступно",
+        "originalKey": "STATUS_REMOTE_01"
+    },
+    "up": {
+        "message": "Вверх",
+        "originalKey": "ML_QUEUEUP",
+        "modifed": 1
+    },
+    "down": {
+        "message": "Вниз",
+        "originalKey": "ML_QUEUEDOWN",
+        "modifed": 1
+    },
+    "update": {
+        "message": "Обновить",
+        "originalKey": "DLG_RSSDOWNLOADER_22",
+        "modifed": 1
+    },
+    "deleteSelected": {
+        "message": "Удалить выбранное",
+        "originalKey": "DLG_RSSDOWNLOADER_35",
+        "modifed": 1
+    },
+
+
+
+    "torrentAdded": {
+        "message": "Торрент добавлен!"
+    },
+    "unexpectedError": {
+        "message": "Неожиданная ошибка!"
+    },
+    "fileSizeError": {
+        "message": "Файл больше 10 мб"
+    },
+    "addInTorrentClient": {
+        "message": "Добавить в uTorrent"
+    },
+    "enterNewDirPath": {
+        "message": "Введите путь к новой директории"
+    },
+    "torrentFileExists": {
+        "message": "Возможно торрент файл уже существует!"
+    },
+    "currentDirectory": {
+        "message": "Текущая директория"
+    },
+    "openInTab": {
+        "message": "Открыть во вкладке"
+    },
+    "optClient": {
+        "message": "uTorrent"
+    },
+    "optMain": {
+        "message": "Общие"
+    },
+    "optNotify": {
+        "message": "Уведомления"
+    },
+    "optCtx": {
+        "message": "Контекстное меню"
+    },
+    "backup": {
+        "message": "Архивирование"
+    },
+    "restore": {
+        "message": "Восстановление"
+    },
+    "useSSL": {
+        "message": "Использовать SSL"
+    },
+    "path": {
+        "message": "Путь",
+        "note": "URL path"
+    },
+    "hideSeedStatusItem": {
+        "message": "Скрыть торренты со статусом \"Раздаются\""
+    },
+    "hideFnishStatusItem": {
+        "message": "Скрыть торренты со статусом \"Загружен\""
+    },
+    "showSpeedGraph": {
+        "message": "Отображать график скорости"
+    },
+    "popupHeight": {
+        "message": "Высота popup окна"
+    },
+    "px": {
+        "message": "пикселей"
+    },
+    "ms": {
+        "message": "миллисекунд"
+    },
+    "popupUpdateInterval": {
+        "message": "Интервал обновления списка торрентов"
+    },
+    "fixCirilicIf": {
+        "message": "Исправить кириллицу если..."
+    },
+    "fixCirilicTitle": {
+        "message": "Неправильно отображаются имена торрентов"
+    },
+    "fixCirilicTorrentPath": {
+        "message": "Неправильно присваивается директория к добавленному торренту"
+    },
+    "showNotificationOnDownloadCompleate": {
+        "message": "Уведомлять при завершении загрузки торрента"
+    },
+    "displayActiveTorrentCountIcon": {
+        "message": "Отображать количество загружаемых торрентов на иконке расширения"
+    },
+    "backgroundUpdateInterval": {
+        "message": "Интервал фонового обновления списка торрентов"
+    },
+    "notificationTimeout": {
+        "message": "Время отображения уведомлений"
+    },
+    "folderContextMenu": {
+        "message": "Отображать список директорий"
+    },
+    "labelContextMenu": {
+        "message": "Отображать список меток"
+    },
+    "selectDownloadCategoryOnAddItemFromContextMenu": {
+        "message": "Перейти в категорию \"Загрузки\" при успешном добавлении торрента"
+    },
+    "treeViewContextMenu": {
+        "message": "Древовидное контекстное меню"
+    },
+    "showDefaultFolderContextMenuItem": {
+        "message": "Отображать директорию по умолчанию"
+    },
+    "dirList": {
+        "message": "Список директорий"
+    },
+    "subPath": {
+        "message": "Подкаталог"
+    },
+    "labelList": {
+        "message": "Список меток"
+    },
+    "optSaveInCloud": {
+        "message": "Сохранить в облаке"
+    },
+    "toRestore": {
+        "message": "Восстановить"
+    },
+    "optGetFromCloud": {
+        "message": "Получить настройки из облака"
+    },
+    "optClearCloudStorage": {
+        "message": "Очистить настройки в облаке"
+    },
+    "showFileList": {
+        "message": "Список файлов"
+    },
+    "selectAll": {
+        "message": "Выбрать всё"
+    },
+    "refresh": {
+        "message": "Обновить"
+    },
+    "checkSettings": {
+        "message": "Проверить настройки"
+    },
+    "showFreeSpace": {
+        "message": "Отображать количество свободного места на диске"
+    },
+    "freeSpace": {
+        "message": "Свободно"
+    },
+    "help": {
+        "message": "Справка"
+    },
+    "helpS1": {
+        "message": "Откройте приложение uTorrent"
+    },
+    "helpS2": {
+        "message": "Войдите в \"Настройки\" > \"Настройки приложения\""
+    },
+    "helpS3": {
+        "message": "Откройте раздел \"Дополнительно\" > \"Веб-интерфейс\""
+    },
+    "helpS4": {
+        "message": "Поставьте галочку \"Использовать Веб-интерфейс\", введите \"Имя\" и \"Пароль\""
+    },
+    "helpS5": {
+        "message": "Поставьте галочку \"Альтернативный порт\", введите номер порта 8080"
+    },
+    "helpS6": {
+        "message": "Теперь введите \"Логин\" (Имя), \"Пароль\", \"IP-адрес\" и \"Порт\". Если вы не знаете ваш \"IP-адрес\" попробуйте ввести 127.0.0.1"
+    },
+    "helpS7": {
+        "message": "Нажмите \"Применить\""
+    },
+    "badgeColor": {
+        "message": "Цвет уведомления"
+    },
+    "addItem": {
+        "message": "Добавить элемент"
+    },
+    "shortName": {
+        "message": "Короткое имя"
+    }
+}
