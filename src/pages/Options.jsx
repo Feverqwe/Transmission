@@ -52,7 +52,7 @@ class Options extends React.Component {
     return (
       <div className="container">
         <div className="search_panel">
-          <h1>uTorrent easy client</h1>
+          <h1>Transmission easy client</h1>
         </div>
         <HashRouter>
           <div className="content">
