@@ -7,7 +7,7 @@ import formatBytes from "../tools/formatBytes";
 
 /**
  * @typedef {Object} TorrentStore
- * @property {string} id
+ * @property {number} id
  * @property {number} state
  * @property {string} name
  * @property {number} size
@@ -57,7 +57,7 @@ import formatBytes from "../tools/formatBytes";
  * @property {*} isDownloadAvailable
  */
 const TorrentStore = types.model('TorrentStore', {
-  id: types.identifier,
+  id: types.identifierNumber,
   state: types.number,
   name: types.string,
   size: types.number,

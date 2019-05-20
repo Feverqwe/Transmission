@@ -1,0 +1,593 @@
+import {fetch as fetchPolyfill} from "whatwg-fetch";
+import getLogger from "../tools/getLogger";
+import ErrorWithCode from "../tools/errorWithCode";
+import readBlobAsArrayBuffer from "../tools/readBlobAsArrayBuffer";
+import arrayBufferToBase64 from "../tools/arrayBufferToBase64";
+import arrayDifferent from "../tools/arrayDifferent";
+import splitByPart from "../tools/splitByPart";
+
+const logger = getLogger('TransmissionClient');
+
+class TransmissionClient {
+  constructor(/**Bg*/bg) {
+    this.bg = bg;
+
+    this.torrentsResponseTime = 0;
+    this.token = null;
+    this.url = this.bgStore.config.url;
+  }
+
+  /**
+   * @return {BgStore}
+   */
+  get bgStore() {
+    return this.bg.bgStore;
+  }
+
+  updateTorrents() {
+    const now = Math.trunc(Date.now() / 1000);
+
+    let isRecently = false;
+    if (now - this.torrentsResponseTime < 60) {
+      isRecently = true;
+    }
+
+    return this.sendAction({
+      method: 'torrent-get',
+      arguments: {
+        fields: [
+          'id', 'name', 'totalSize',
+          'percentDone', 'downloadedEver', 'uploadedEver',
+          'rateUpload', 'rateDownload', 'eta',
+          'peersSendingToUs', 'peersGettingFromUs', 'queuePosition',
+          'addedDate', 'doneDate', 'downloadDir',
+          'recheckProgress', 'status', 'error',
+          'errorString', 'trackerStats', 'magnetLink'
+        ],
+        ids: isRecently ? 'recently-active' : undefined
+      }
+    }).then((response) => {
+      this.torrentsResponseTime = now;
+      const previousActiveTorrentIds = this.bgStore.client.activeTorrentIds;
+
+      if (isRecently) {
+        const {removed, torrents} = response.arguments;
+
+        this.bgStore.client.removeTorrentByIds(removed);
+
+        this.bgStore.client.syncChanges(torrents.map(this.normalizeTorrent));
+      } else {
+        const {torrents} = response.arguments;
+
+        this.bgStore.client.sync(torrents.map(this.normalizeTorrent));
+      }
+
+      if (this.bgStore.config.showDownloadCompleteNotifications) {
+        const activeTorrentIds = this.bgStore.client.activeTorrentIds;
+        arrayDifferent(previousActiveTorrentIds, activeTorrentIds).forEach((torrentId) => {
+          // not active anymore
+          const torrent = this.bgStore.client.torrents.get(torrentId);
+          if (torrent) {
+            this.bg.torrentCompleteNotify(torrent);
+          }
+        });
+      }
+
+      const {downloadSpeed, uploadSpeed} = this.bgStore.client.currentSpeed;
+      this.bgStore.client.speedRoll.add(downloadSpeed, uploadSpeed);
+
+      return response;
+    });
+  }
+
+  getFileList(id) {
+    return this.sendAction({
+      method: 'torrent-get',
+      arguments: {
+        fields: ["id", 'files', 'fileStats'],
+        ids: [id]
+      }
+    }).then((response) => {
+      let files = null;
+      response.arguments.torrents.some((torrent) => {
+        if (torrent.id === id) {
+          return files = this.normalizeFiles(torrent);
+        }
+      });
+
+      if (!files) {
+        throw new ErrorWithCode('Files don\'t received');
+      }
+      return files;
+    });
+  }
+
+  getSettings() {
+    return this.sendAction({method: 'session-get'}).then((response) => {
+      this.bgStore.client.setSettings(this.normalizeSettings(response.arguments));
+    });
+  }
+
+  getDownloadDirs() {
+    throw new ErrorWithCode('Unsupported', 'IS_NOT_SUPPORTED')
+  }
+
+  getFreeSpace(path) {
+    return this.sendAction({
+      method: "free-space",
+      arguments: {path}
+    });
+  }
+
+  sendAction(body) {
+    return this.retryIfTokenInvalid(() => {
+      return fetchPolyfill(this.url, this.sign({
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Transmission-Session-Id': this.token
+        },
+        body: JSON.stringify(body),
+      })).then((response) => {
+        if (!response.ok) {
+          const error = new ErrorWithCode(`${response.status}: ${response.statusText}`, `RESPONSE_IS_NOT_OK`);
+          error.status = response.status;
+          error.statusText = response.statusText;
+          if (error.status === 409) {
+            error.token = response.headers.get('X-Transmission-Session-Id');
+            error.code = 'INVALID_TOKEN';
+          }
+          throw error;
+        }
+
+        if (!this.bg.daemon.isActive) {
+          this.bg.daemon.start();
+        }
+
+        return response.json();
+      });
+    }).then((response) => {
+      if (response.result !== 'success') {
+        throw new ErrorWithCode(response.result, 'TRANSMISSION_ERROR');
+      }
+
+      return response;
+    });
+  }
+
+  sendFile({blob, url}, directory) {
+    return Promise.resolve().then(() => {
+      if (url) {
+        return this.sendAction(putDirectory({
+          method: 'torrent-add',
+          arguments: {
+            filename: url
+          }
+        }));
+      } else {
+        return readBlobAsArrayBuffer(blob).then(ab => arrayBufferToBase64(ab)).then((base64) => {
+          return this.sendAction(putDirectory({
+            method: 'torrent-add',
+            arguments: {
+              metainfo: base64
+            }
+          }));
+        });
+      }
+    }).catch((err) => {
+      if (err.code === 'TRANSMISSION_ERROR') {
+        this.bg.torrentErrorNotify(err.message);
+      } else {
+        this.bg.torrentErrorNotify(chrome.i18n.getMessage('unexpectedError'));
+      }
+      throw err;
+    });
+
+    function putDirectory(query) {
+      if (directory) {
+        query.arguments['download-dir'] = directory.path;
+      }
+      return query;
+    }
+  }
+
+  putTorrent({blob, url}, directory) {
+    return this.sendFile({blob, url}, directory).then((response) => {
+      const {'torrent-added': torrentAdded, 'torrent-duplicate': torrentDuplicate} = response;
+      if (torrentAdded) {
+        this.bg.torrentAddedNotify(torrentAdded);
+      }
+
+      if (torrentDuplicate) {
+        this.bg.torrentIsExistsNotify(torrentDuplicate);
+      }
+    }, (err) => {
+      if (err.code === 'TRANSMISSION_ERROR') {
+        this.bg.torrentErrorNotify(err.message);
+      } else {
+        this.bg.torrentErrorNotify(chrome.i18n.getMessage('unexpectedError'));
+      }
+      throw err;
+    });
+  }
+
+  start(ids) {
+    return this.sendAction({
+      method: 'torrent-start',
+      arguments: {
+        ids,
+      }
+    });
+  }
+
+  forcestart(ids) {
+    return this.sendAction({
+      method: 'torrent-start-now',
+      arguments: {
+        ids,
+      }
+    });
+  }
+
+  unpause(ids) {
+    throw new ErrorWithCode('Unsupported', 'IS_NOT_SUPPORTED')
+  }
+
+  pause(ids) {
+    throw new ErrorWithCode('Unsupported', 'IS_NOT_SUPPORTED')
+  }
+
+  stop(ids) {
+    return this.sendAction({
+      method: 'torrent-stop',
+      arguments: {
+        ids,
+      }
+    });
+  }
+
+  recheck(ids) {
+    return this.sendAction({
+      method: 'torrent-verify',
+      arguments: {
+        ids,
+      }
+    });
+  }
+
+  removetorrent(ids) {
+    return this.sendAction({
+      method: 'torrent-remove',
+      arguments: {
+        ids,
+      }
+    });
+  }
+
+  removedatatorrent(ids) {
+    return this.sendAction({
+      method: 'torrent-remove',
+      arguments: {
+        ids,
+        'delete-local-data': true
+      }
+    });
+  }
+
+  torrentRenamePath(ids, currentName, name) {
+    return this.sendAction({
+      method: 'torrent-rename-path',
+      arguments: {
+        ids,
+        path: currentName,
+        name
+      }
+    });
+  }
+
+  torrentSetLocation(ids, location) {
+    return this.sendAction({
+      method: 'torrent-set-location',
+      arguments: {
+        ids,
+        location,
+        move: true
+      }
+    });
+  }
+
+  reannounce(ids) {
+    return this.sendAction({
+      method: 'torrent-reannounce',
+      arguments: {ids}
+    });
+  }
+
+  queueUp(ids) {
+    return this.sendAction({
+      method: 'queue-move-up',
+      arguments: {ids}
+    });
+  }
+
+  queueDown(ids) {
+    return this.sendAction({
+      method: 'queue-move-down',
+      arguments: {ids}
+    });
+  }
+
+  queueTop(ids) {
+    return this.sendAction({
+      method: 'queue-move-top',
+      arguments: {ids}
+    });
+  }
+
+  queueBottom(ids) {
+    return this.sendAction({
+      method: 'queue-move-bottom',
+      arguments: {ids}
+    });
+  }
+
+  setLabel(ids, label = '') {
+    throw new ErrorWithCode('Unsupported', 'IS_NOT_SUPPORTED')
+  }
+
+  setPriority(id, level, idxs) {
+    return Promise.all(splitByPart(idxs, 250).map((idxs) => {
+      const args = {
+        ids: [id]
+      };
+
+      if (level === 0) {
+        args['files-unwanted'] = idxs;
+      } else {
+        args['files-wanted'] = idxs;
+        switch (level) {
+          case 1: {
+            args['priority-low'] = idxs;
+            break;
+          }
+          case 2: {
+            args['priority-normal'] = idxs;
+            break;
+          }
+          case 3: {
+            args['priority-high'] = idxs;
+            break;
+          }
+        }
+      }
+
+      return this.sendAction({
+        method: 'torrent-set',
+        arguments: args
+      });
+    }));
+  }
+
+  setDownloadSpeedLimit(speed) {
+    const args = {};
+    args['speed-limit-down-enabled'] = !!speed;
+    if (speed) {
+      args['speed-limit-down'] = speed;
+    }
+
+    return this.sendAction({
+      method: 'session-set',
+      arguments: args
+    }).then(() => {
+      return this.getSettings();
+    });
+  }
+
+  setUploadSpeedLimit(speed) {
+    const args = {};
+    args['speed-limit-up-enabled'] = !!speed;
+    if (speed) {
+      args['speed-limit-up'] = speed;
+    }
+
+    return this.sendAction({
+      method: 'session-set',
+      arguments: args
+    }).then(() => {
+      return this.getSettings();
+    });
+  }
+
+  sendFiles(urls, directory) {
+    return Promise.all(urls.map((url) => {
+      return Promise.resolve().then(() => {
+        if (!/^blob:/.test(url)) {
+          return {url};
+        }
+
+        return fetch(url).then(response => {
+          if (!response.ok) {
+            throw new ErrorWithCode(`${response.status}: ${response.statusText}`, `RESPONSE_IS_NOT_OK`);
+          }
+
+          if (response.headers.get('Content-Length') > 1024 * 1024 * 10) {
+            throw new ErrorWithCode(`Size is more then 10mb`, 'FILE_SIZE_EXCEEDED');
+          }
+
+          return response.blob();
+        }).then((blob) => {
+          URL.revokeObjectURL(url);
+          return {blob};
+        }, (err) => {
+          if (err.code === 'FILE_SIZE_EXCEEDED') {
+            this.bg.torrentErrorNotify(chrome.i18n.getMessage('fileSizeError'));
+          } else {
+            this.bg.torrentErrorNotify(chrome.i18n.getMessage('unexpectedError'));
+          }
+          throw err;
+        });
+      }).then((data) => {
+        return this.putTorrent(data, directory);
+      }).then(() => {
+        return {result: true};
+      }, (err) => {
+        logger.error('sendFile error', url, err);
+        return {error: err};
+      });
+    }));
+  }
+
+  retryIfTokenInvalid(callback) {
+    return Promise.resolve(callback()).catch((err) => {
+      if (err.code === 'INVALID_TOKEN') {
+        this.token = err.token;
+        return callback();
+      }
+      throw err;
+    });
+  }
+
+  sign(fetchOptions = {}) {
+    if (this.bgStore.config.authenticationRequired) {
+      if (!fetchOptions.headers) {
+        fetchOptions.headers = {};
+      }
+      fetchOptions.headers.Authorization = 'Basic ' + btoa([this.bgStore.config.login, this.bgStore.config.password].join(':'));
+    }
+    return fetchOptions;
+  }
+
+  normalizeTorrent = (torrent) => {
+    const id = torrent.id;
+    const {statusCode, statusText} = normalizeTorrentStatus(torrent);
+    const state = statusCode;
+    const name = torrent.name;
+    const size = torrent.totalSize;
+    const progress = Math.trunc((torrent.recheckProgress || torrent.percentDone || 0) * 1000);
+    const downloaded = torrent.downloadedEver;
+    const uploaded = torrent.uploadedEver;
+    const shared = torrent.downloadedEver > 0 ? Math.round(torrent.uploadedEver / torrent.downloadedEver * 1000) : 0;
+    const uploadSpeed = torrent.rateUpload;
+    const downloadSpeed = torrent.rateDownload;
+    const eta = torrent.eta < 0 ? 0 : torrent.eta;
+    const label = '';
+
+    let _peers = 0;
+    let _seeds = 0;
+    Array.isArray(torrent.trackerStats) && torrent.trackerStats.forEach((tracker) => {
+      if (tracker.leecherCount > 0) {
+        _peers += tracker.leecherCount;
+      }
+      if (tracker.seederCount > 0) {
+        _seeds += tracker.seederCount;
+      }
+    });
+
+    const activePeers = torrent.peersGettingFromUs;
+    const peers = _peers;
+    const activeSeeds = torrent.peersSendingToUs;
+    const seeds = _seeds;
+
+    const available = 0;
+    const order = torrent.queuePosition;
+    const status = statusText;
+    const sid = undefined;
+    const addedTime = torrent.addedDate;
+    const completedTime = torrent.doneDate;
+    const directory = torrent.downloadDir;
+    const magnetLink = torrent.magnetLink;
+
+    return {
+      id, state, name, size, progress,
+      downloaded, uploaded, shared, uploadSpeed, downloadSpeed,
+      eta, label, activePeers, peers, activeSeeds,
+      seeds, available, order, status, sid,
+      addedTime, completedTime, directory, magnetLink
+    };
+
+    function normalizeTorrentStatus(torrent) {
+      let statusCode, statusText;
+      if (torrent.error > 0) {
+        statusCode = 144;
+        const errorString = torrent.errorString || 'Unknown error';
+        statusText = chrome.i18n.getMessage('OV_FL_ERROR') + ': ' + errorString;
+      } else {
+        switch (torrent.status) {
+          case 0: {
+            statusCode = 128;
+            statusText = 'Stopped';
+            break;
+          }
+          case 1: {
+            statusCode = 233;
+            statusText = 'Queued to check files';
+            break;
+          }
+          case 2: {
+            statusCode = 130;
+            statusText = 'Checking';
+            break;
+          }
+          case 3: {
+            statusCode = 200;
+            statusText = 'Queued to download';
+            break;
+          }
+          case 4: {
+            statusCode = 201;
+            statusText = 'Downloading';
+            break;
+          }
+          case 5: {
+            statusCode = 200;
+            statusText = 'Queued to seed';
+            break;
+          }
+          case 6: {
+            statusCode = 201;
+            statusText = 'Seeding';
+            break;
+          }
+          default: {
+            statusCode = 152;
+            statusText = 'Unknown';
+            break;
+          }
+        }
+      }
+      return {statusCode, statusText};
+    }
+  };
+
+  normalizeFiles = (torrent) => {
+    return torrent.files.map((file, index) => {
+      const state = torrent.fileStats[index];
+
+      const name = file.name;
+      const size = file.length;
+      const downloaded = file.bytesCompleted;
+      const priority = !state.wanted ? 0 : state.priority + 2;
+
+      return {name, size, downloaded, priority};
+    });
+  };
+
+  normalizeSettings = (settings) => {
+    return {
+      downloadSpeedLimit: settings['speed-limit-down'],
+      downloadSpeedLimitEnabled: settings['speed-limit-down-enabled'],
+      uploadSpeedLimit: settings['speed-limit-up'],
+      uploadSpeedLimitEnabled: settings['speed-limit-up-enabled'],
+      altSpeedEnabled: settings['alt-speed-enabled'],
+      altDownloadSpeedLimit: settings['alt-speed-down'],
+      altUploadSpeedLimit: settings['alt-speed-up'],
+      downloadDir: settings['download-dir'],
+    };
+  };
+
+  destroy() {
+
+  }
+}
+
+export default TransmissionClient;

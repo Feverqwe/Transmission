@@ -1,9 +1,9 @@
 import getLogger from "../tools/getLogger";
-import UTorrentClient from "./uTorrentClient";
 import Daemon from "./daemon";
 import ContextMenu from "./contextMenu";
 import BgStore from "../stores/BgStore";
 import {autorun} from "mobx";
+import TransmissionClient from "./transmissionClient";
 
 const serializeError = require('serialize-error');
 const logger = getLogger('background');
@@ -55,7 +55,7 @@ class Bg {
 
         if (dep.length) {
           this.bgStore.flushClient();
-          this.client = new UTorrentClient(this);
+          this.client = new TransmissionClient(this);
           this.client.getSettings().catch((err) => {
             logger.error('client', 'getSettings error', err);
           });
@@ -209,13 +209,19 @@ class Bg {
       }
       case 'sendFiles': {
         promise = this.whenReady().then(() => {
-          return this.client.sendFiles(message.urls, message.directory, message.label);
+          return this.client.sendFiles(message.urls, message.directory);
         });
         break;
       }
       case 'getDownloadDirs': {
         promise = this.whenReady().then(() => {
           return this.client.getDownloadDirs();
+        });
+        break;
+      }
+      case 'getFreeSpace': {
+        promise = this.whenReady().then(() => {
+          return this.client.getFreeSpace(message.path);
         });
         break;
       }
@@ -239,7 +245,13 @@ class Bg {
   torrentAddedNotify(torrent) {
     const icon = notificationIcons.add;
     const statusText = chrome.i18n.getMessage('torrentAdded');
-    showNotification(torrent.id, icon, torrent.name, statusText);
+    showNotification('' + torrent.id, icon, torrent.name, statusText);
+  }
+
+  torrentIsExistsNotify(torrent) {
+    const icon = notificationIcons.error;
+    const title = chrome.i18n.getMessage('torrentFileIsExists');
+    showNotification('' + torrent.id, icon, torrent.name, title);
   }
 
   torrentExistsNotify() {
@@ -254,7 +266,7 @@ class Bg {
     if (torrent.status) {
       statusText = chrome.i18n.getMessage('OV_COL_STATUS') + ': ' + torrent.status;
     }
-    showNotification(torrent.id, icon, torrent.name, statusText);
+    showNotification('' + torrent.id, icon, torrent.name, statusText);
   }
 
   torrentErrorNotify(message) {

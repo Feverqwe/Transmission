@@ -38,12 +38,13 @@ const byColumnMap = {
  * @property {function} beforeDestroy
  */
 const FileListStore = types.compose('FileListStore', ListSelectStore, types.model({
-  id: types.identifier,
+  id: types.identifierNumber,
   removeSelectOnHide: types.optional(types.boolean, false),
   state: types.optional(types.enumeration(['idle', 'pending', 'done', 'error']), 'idle'),
   files: types.array(FileStore),
   isLoading: types.optional(types.boolean, true),
   filter: types.optional(types.string, ''),
+  selectedIds: types.array(types.string),
 })).actions((self) => {
   return {
     fetchFiles: flow(function* () {

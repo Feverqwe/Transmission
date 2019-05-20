@@ -16,7 +16,7 @@ import {autorun} from "mobx";
  * @property {function} stopSortedIdsWatcher
  */
 const ListSelectStore = types.model('ListSelectStore', {
-  selectedIds: types.array(types.string),
+  selectedIds: types.array(types.number),
 }).actions((self) => {
   return {
     addSelectedId(id, reset) {

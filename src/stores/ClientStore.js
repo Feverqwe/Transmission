@@ -23,8 +23,14 @@ const LabelStore = types.model('LabelStore', {
  * @property {*} uploadSpeedLimitStr
  */
 const SettingsStore = types.model('SettingsStore', {
-  downloadSpeedLimit: types.maybe(types.number),
-  uploadSpeedLimit: types.maybe(types.number),
+  downloadSpeedLimit:types.number,
+  downloadSpeedLimitEnabled: types.boolean,
+  uploadSpeedLimit:types.number,
+  uploadSpeedLimitEnabled: types.boolean,
+  altSpeedEnabled: types.boolean,
+  altDownloadSpeedLimit:types.number,
+  altUploadSpeedLimit:types.number,
+  downloadDir: types.string,
 }).views((self) => {
   return {
     get downloadSpeedLimitStr() {
@@ -282,8 +288,8 @@ const ClientStore = types.model('ClientStore', {
     getSettings() {
       return callApi({action: 'getSettings'}).then(...exceptionLog()).then(syncUi);
     },
-    sendFiles(urls, directory, label) {
-      return callApi({action: 'sendFiles', urls, directory, label}).then(...exceptionLog()).then(syncUi);
+    sendFiles(urls, directory) {
+      return callApi({action: 'sendFiles', urls, directory}).then(...exceptionLog()).then(syncUi);
     },
     getDownloadDirs() {
       return callApi({action: 'getDownloadDirs'}).then(...exceptionLog()).then(syncUi);

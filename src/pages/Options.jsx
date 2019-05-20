@@ -223,46 +223,8 @@ class ClientOptions extends React.Component {
             </div>
             {status}
           </div>
-          <ClientOptionsHelp/>
         </form>
       </div>
-    );
-  }
-}
-
-class ClientOptionsHelp extends React.Component {
-  render() {
-    let url = null;
-    switch (chrome.i18n.getMessage('lang')) {
-      case 'fr': {
-        url = require('../assets/img/help_how_to_fr.png');
-        break;
-      }
-      case 'ru': {
-        url = require('../assets/img/help_how_to_ru.png');
-        break;
-      }
-      default: {
-        url = require('../assets/img/help_how_to_en.png');
-      }
-    }
-
-    return (
-      <>
-        <h2>{chrome.i18n.getMessage('help')}</h2>
-        <ol className="help">
-          <li>{chrome.i18n.getMessage('helpS1')}</li>
-          <li>{chrome.i18n.getMessage('helpS2')}</li>
-          <li>{chrome.i18n.getMessage('helpS3')}</li>
-          <li>{chrome.i18n.getMessage('helpS4')}</li>
-          <li>{chrome.i18n.getMessage('helpS5')}</li>
-          <li>{chrome.i18n.getMessage('helpS6')}</li>
-          <li>{chrome.i18n.getMessage('helpS7')}</li>
-        </ol>
-        <p className="helpImgContainer">
-          <img alt="" src={url}/>
-        </p>
-      </>
     );
   }
 }
