@@ -83,7 +83,7 @@ class TransmissionClient {
       try {
         return JSON.parse(text);
       } catch (err) {
-        return JSON.parse(text.replace(/"([^"]+)":"([^"]+)"/g, safeValue));
+        return JSON.parse(text.replace(/"(announce|scrape|lastAnnounceResult|lastScrapeResult)":"([^"]+)"/g, safeValue));
       }
     }
 
