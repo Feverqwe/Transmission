@@ -110,7 +110,7 @@ class TorrentListTableItem extends React.Component {
         }
         case 'order': {
           let value = torrent.order;
-          if (value < 0) {
+          if (!Number.isFinite(value)) {
             value = '*';
           }
 
@@ -227,22 +227,6 @@ class TorrentListTableItem extends React.Component {
           columns.push(
             <td key={name} className={name}>
               <div>{torrent.shared / 1000}</div>
-            </td>
-          );
-          break;
-        }
-        case 'avail': {
-          columns.push(
-            <td key={name} className={name}>
-              <div>{torrent.availableStr}</div>
-            </td>
-          );
-          break;
-        }
-        case 'label': {
-          columns.push(
-            <td key={name} className={name}>
-              <div title={torrent.label}>{torrent.label}</div>
             </td>
           );
           break;

@@ -46,7 +46,7 @@ class TransmissionClient {
         ],
         ids: isRecently ? 'recently-active' : undefined
       }
-    }).then((response) => {
+    }, safeParser).then((response) => {
       this.torrentsResponseTime = now;
       const previousActiveTorrentIds = this.bgStore.client.activeTorrentIds;
 
@@ -78,6 +78,22 @@ class TransmissionClient {
 
       return response;
     });
+
+    function safeParser(text) {
+      try {
+        return JSON.parse(text);
+      } catch (err) {
+        text = text.replace(/"(announce)":"([^"]+)"/g, safeValue);
+        text = text.replace(/"(scrape)":"([^"]+)"/g, safeValue);
+        text = text.replace(/"(lastAnnounceResult)":"([^"]+)"/g, safeValue);
+        text = text.replace(/"(lastScrapeResult)":"([^"]+)"/g, safeValue);
+        return JSON.parse(text);
+      }
+    }
+
+    function safeValue(match, key, value) {
+      return `"${key}":"${encodeURIComponent(value)}"`;
+    }
   }
 
   getFileList(id) {
@@ -119,7 +135,7 @@ class TransmissionClient {
     });
   }
 
-  sendAction(body) {
+  sendAction(body, customParser) {
     return this.retryIfTokenInvalid(() => {
       return fetchPolyfill(this.url, this.sign({
         method: 'POST',
@@ -144,7 +160,11 @@ class TransmissionClient {
           this.bg.daemon.start();
         }
 
-        return response.json();
+        if (customParser) {
+          return response.text().then(text => customParser(text));
+        } else {
+          return response.json();
+        }
       });
     }).then((response) => {
       if (response.result !== 'success') {
@@ -463,7 +483,8 @@ class TransmissionClient {
     const state = statusCode;
     const name = torrent.name;
     const size = torrent.totalSize;
-    const progress = Math.trunc((torrent.recheckProgress || torrent.percentDone || 0) * 1000);
+    const percentDone = torrent.percentDone || 0;
+    const progress = Math.trunc((torrent.recheckProgress || percentDone) * 1000);
     const downloaded = torrent.downloadedEver;
     const uploaded = torrent.uploadedEver;
     const shared = torrent.downloadedEver > 0 ? Math.round(torrent.uploadedEver / torrent.downloadedEver * 1000) : 0;
@@ -488,10 +509,8 @@ class TransmissionClient {
     const activeSeeds = torrent.peersSendingToUs;
     const seeds = _seeds;
 
-    const available = 0;
     const order = torrent.queuePosition;
     const status = statusText;
-    const sid = undefined;
     const addedTime = torrent.addedDate;
     const completedTime = torrent.doneDate;
     const directory = torrent.downloadDir;
@@ -501,8 +520,8 @@ class TransmissionClient {
       id, state, name, size, progress,
       downloaded, uploaded, shared, uploadSpeed, downloadSpeed,
       eta, label, activePeers, peers, activeSeeds,
-      seeds, available, order, status, sid,
-      addedTime, completedTime, directory, magnetLink
+      seeds, order, status, addedTime,
+      completedTime, directory, magnetLink
     };
 
     function normalizeTorrentStatus(torrent) {

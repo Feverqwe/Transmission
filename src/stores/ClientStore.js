@@ -105,7 +105,7 @@ const ClientStore = types.model('ClientStore', {
       });
     },
     sync(torrents) {
-      const removedIds = Array.from(self.torrents.keys());
+      const removedIds = self.torrentIds;
 
       torrents.forEach((torrent) => {
         const id = torrent.id;
@@ -162,7 +162,11 @@ const ClientStore = types.model('ClientStore', {
 
   return {
     get torrentIds() {
-      return Array.from(self.torrents.keys());
+      const result = [];
+      for (const torrent of self.torrents.values()) {
+        result.push(torrent.id);
+      }
+      return result;
     },
     get downloadingTorrentIds() {
       const result = [];
@@ -240,26 +244,14 @@ const ClientStore = types.model('ClientStore', {
     torrentsForceStart(ids) {
       return callApi({action: 'forcestart', ids: ids}).then(...exceptionLog()).then(syncUi);
     },
-    torrentsPause(ids) {
-      return callApi({action: 'pause', ids: ids}).then(...exceptionLog()).then(syncUi);
-    },
-    torrentsUnpause(ids) {
-      return callApi({action: 'unpause', ids: ids}).then(...exceptionLog()).then(syncUi);
-    },
     torrentsStop(ids) {
       return callApi({action: 'stop', ids: ids}).then(...exceptionLog()).then(syncUi);
     },
     torrentsRecheck(ids) {
       return callApi({action: 'recheck', ids: ids}).then(...exceptionLog()).then(syncUi);
     },
-    torrentsRemove(ids) {
-      return callApi({action: 'remove', ids: ids}).then(...exceptionLog()).then(syncUi);
-    },
     torrentsRemoveTorrent(ids) {
       return callApi({action: 'removetorrent', ids: ids}).then(...exceptionLog()).then(syncUi);
-    },
-    torrentsRemoveFiles(ids) {
-      return callApi({action: 'removedata', ids: ids}).then(...exceptionLog()).then(syncUi);
     },
     torrentsRemoveTorrentFiles(ids) {
       return callApi({action: 'removedatatorrent', ids: ids}).then(...exceptionLog()).then(syncUi);
@@ -269,9 +261,6 @@ const ClientStore = types.model('ClientStore', {
     },
     torrentsQueueDown(ids) {
       return callApi({action: 'queueDown', ids: ids}).then(...exceptionLog()).then(syncUi);
-    },
-    torrentsSetLabel(ids, label) {
-      return callApi({action: 'setLabel', label, ids: ids}).then(...exceptionLog()).then(syncUi);
     },
     filesSetPriority(id, fileIdxs, level) {
       return callApi({action: 'setPriority', level, id: id, fileIdxs}).then(...exceptionLog()).then(syncUi);

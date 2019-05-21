@@ -6,7 +6,6 @@ import callApi from "../tools/callApi";
 import FileListStore from "./FileListStore";
 import TorrentListStore from "./TorrentListStore";
 import PutFilesDialogStore from "./PutFilesDialogStore";
-import CreateLabelDialogStore from "./CreateLabelDialogStore";
 import RemoveConfirmDialogStore from "./RemoveConfirmDialogStore";
 import PutUrlDialogStore from "./PutUrlDialogStore";
 import SpaceWatcherStore from "./SpaceWatcherStore";
@@ -41,7 +40,7 @@ const RootStore = types.model('RootStore', {
   torrentList: types.optional(TorrentListStore, {}),
   fileList: types.maybe(FileListStore),
   spaceWatcher: types.maybe(SpaceWatcherStore),
-  dialogs: types.map(types.union(PutFilesDialogStore, PutUrlDialogStore, CreateLabelDialogStore, RemoveConfirmDialogStore)),
+  dialogs: types.map(types.union(PutFilesDialogStore, PutUrlDialogStore, RemoveConfirmDialogStore)),
 }).actions((self) => {
   return {
     init: flow(function* () {

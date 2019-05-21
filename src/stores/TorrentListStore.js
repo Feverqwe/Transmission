@@ -1,14 +1,13 @@
 import {getRoot, types} from "mobx-state-tree";
 import ListSelectStore from "./ListSelectStore";
 
-const customLabels = ['ALL', 'DL', 'SEEDING', 'COMPL', 'ACTIVE', 'INACTIVE', 'NOLABEL'];
+const customLabels = ['ALL', 'DL', 'SEEDING', 'COMPL', 'ACTIVE', 'INACTIVE'];
 
 const byColumnMap = {
   done: 'progress',
   downspd: 'downloadSpeed',
   upspd: 'uploadSpeed',
   upped: 'uploaded',
-  avail: 'available',
   added: 'addedTime',
   completed: 'completedTime',
 };
@@ -72,12 +71,6 @@ const TorrentListStore = types.compose('TorrentListStore', ListSelectStore, type
             }
             case 'INACTIVE': {
               if (!torrent.isActive){
-                result.push(torrent);
-              }
-              break;
-            }
-            case 'NOLABEL': {
-              if (!torrent.label){
                 result.push(torrent);
               }
               break;

@@ -98,12 +98,6 @@ class ContextMenu {
             });
             break;
           }
-          case 'createLabel': {
-            this.bg.whenReady().then(() => {
-              return this.onCreateLabel();
-            });
-            break;
-          }
         }
         break;
       }
@@ -111,13 +105,6 @@ class ContextMenu {
         this.bg.whenReady().then(() => {
           const folder = this.bgStore.config.folders[itemInfo.index];
           return this.onSendLink(linkUrl, tab.id, frameId, folder);
-        });
-        break;
-      }
-      case 'label': {
-        this.bg.whenReady().then(() => {
-          const label = this.bgStore.config.labels[itemInfo.index];
-          return this.onSendLink(linkUrl, tab.id, frameId, undefined, label);
         });
         break;
       }
@@ -136,9 +123,6 @@ class ContextMenu {
           switch (this.bgStore.config.contextMenuType) {
             case 'folder': {
               return this.createFolderMenu(menuId);
-            }
-            case 'label': {
-              return this.createLabelMenu(menuId);
             }
           }
         });
@@ -184,27 +168,6 @@ class ContextMenu {
 
       await contextMenusCreate({
         id: JSON.stringify({type: 'action', name: 'createFolder'}),
-        parentId: parentId,
-        title: chrome.i18n.getMessage('add') + '...',
-        contexts: ['link']
-      });
-    }
-  }
-
-  async createLabelMenu(parentId) {
-    const labels = this.bgStore.config.labels;
-    await Promise.all(labels.map((label, index) => {
-      return contextMenusCreate({
-        id: JSON.stringify({type: 'label', index}),
-        parentId: parentId,
-        title: label,
-        contexts: ['link']
-      });
-    }));
-
-    if (labels.length) {
-      await contextMenusCreate({
-        id: JSON.stringify({type: 'action', name: 'createLabel'}),
         parentId: parentId,
         title: chrome.i18n.getMessage('add') + '...',
         contexts: ['link']

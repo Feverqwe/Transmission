@@ -6,7 +6,7 @@ import PropTypes from "prop-types";
 import {FixedMenu} from "./FixedReactContexify";
 
 const fileMenuItems = [
-  'high', 'normal', 'low', '_', 'dntdownload', '_', 'download'
+  'high', 'normal', 'low', '_', 'dntdownload'
 ];
 
 const FileMenu = React.memo(() => {
@@ -34,15 +34,6 @@ class FileMenuBody extends ContextMenuBody {
     const id = this.fileListStore.id;
     const selectedIndexes = this.fileListStore.selectedIndexes;
     this.rootStore.client.filesSetPriority(id, selectedIndexes, priority);
-  };
-
-  handleDownload = ({event: e, props}) => {
-    this.fileListStore.selectedIds.forEach((name) => {
-      const url = this.fileListStore.getDownloadUrlById(name);
-      if (url) {
-        chrome.tabs.create({url});
-      }
-    });
   };
 
   render() {
@@ -93,22 +84,10 @@ class FileMenuBody extends ContextMenuBody {
           );
           break;
         }
-        case 'download': {
-          const torrent = this.fileListStore.torrent;
-          if (torrent && torrent.isDownloadAvailable) {
-            buttons.push(
-              <Item key={action} onClick={this.handleDownload}>{chrome.i18n.getMessage('DLG_RSSDOWNLOADER_24')}</Item>
-            );
-          }
-          break;
-        }
         case '_': {
-          const torrent = this.fileListStore.torrent;
-          if (index !== 5 || torrent && torrent.isDownloadAvailable) {
-            buttons.push(
-              <Separator key={'separator_' + index}/>
-            );
-          }
+          buttons.push(
+            <Separator key={'separator_' + index}/>
+          );
           break;
         }
       }

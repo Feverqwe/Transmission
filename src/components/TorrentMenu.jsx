@@ -6,9 +6,9 @@ import ContextMenuBody from "./ContextMenuBody";
 import {FixedMenu} from "./FixedReactContexify";
 
 const torrentMenuItems = [
-  'start', 'forcestart', 'pause', 'unpause',
+  'start', 'forcestart',
   'stop', '_', 'recheck', 'remove',
-  'remove_with', '_', 'order', 'torrent_files', 'labels'
+  'remove_with', '_', 'order', 'torrent_files'
 ];
 
 const TorrentMenu = React.memo(() => {
@@ -40,14 +40,6 @@ class TorrentMenuBody extends ContextMenuBody {
     this.rootStore.client.torrentsForceStart(this.torrentListStore.selectedIds);
   };
 
-  handlePause = ({event: e, props}) => {
-    this.rootStore.client.torrentsPause(this.torrentListStore.selectedIds);
-  };
-
-  handleUnpause = ({event: e, props}) => {
-    this.rootStore.client.torrentsUnpause(this.torrentListStore.selectedIds);
-  };
-
   handleStop = ({event: e, props}) => {
     this.rootStore.client.torrentsStop(this.torrentListStore.selectedIds);
   };
@@ -65,10 +57,6 @@ class TorrentMenuBody extends ContextMenuBody {
 
   handleRemoveTorrent = ({event: e, props}) => {
     this.rootStore.client.torrentsRemoveTorrent(this.torrentListStore.selectedIds);
-  };
-
-  handleRemoveFiles = ({event: e, props}) => {
-    this.rootStore.client.torrentsRemoveFiles(this.torrentListStore.selectedIds);
   };
 
   handleRemoveTorrentFiles = ({event: e, props}) => {
@@ -90,21 +78,6 @@ class TorrentMenuBody extends ContextMenuBody {
     }
   };
 
-  handleCreateLabel = ({event: e, props}) => {
-    this.rootStore.createDialog({
-      type: 'createLabel',
-      torrentIds: this.torrentListStore.selectedIds.slice(0)
-    });
-  };
-
-  handleRemoveLabel = ({event: e, props}) => {
-    this.rootStore.client.torrentsSetLabel(this.torrentListStore.selectedIds, '');
-  };
-
-  handleSetLabel = ({event: e, props, label}) => {
-    this.rootStore.client.torrentsSetLabel(this.torrentListStore.selectedIds, label);
-  };
-
   render() {
     const selectedIds = this.torrentListStore.selectedIds;
     if (!selectedIds.length) {
@@ -116,7 +89,7 @@ class TorrentMenuBody extends ContextMenuBody {
       disabledActions.push('torrent_files');
     }
 
-    const actions = ['_', 'remove', 'remove_with', 'order', 'torrent_files', 'labels'];
+    const actions = ['_', 'remove', 'remove_with', 'order', 'torrent_files'];
     selectedIds.forEach((id) => {
       const torrent = this.rootStore.client.torrents.get(id);
       if (torrent) {
@@ -146,18 +119,6 @@ class TorrentMenuBody extends ContextMenuBody {
         case 'forcestart': {
           buttons.push(
             <Item key={action} onClick={this.handleForceStart}>{chrome.i18n.getMessage('ML_FORCE_START')}</Item>
-          );
-          break;
-        }
-        case 'pause': {
-          buttons.push(
-            <Item key={action} onClick={this.handlePause}>{chrome.i18n.getMessage('ML_PAUSE')}</Item>
-          );
-          break;
-        }
-        case 'unpause': {
-          buttons.push(
-            <Item key={action} onClick={this.handleUnpause}>{chrome.i18n.getMessage('resume')}</Item>
           );
           break;
         }
@@ -193,14 +154,6 @@ class TorrentMenuBody extends ContextMenuBody {
               <Item onClick={this.handleRemoveTorrentFiles}>{chrome.i18n.getMessage('ML_DELETE_DATATORRENT')}</Item>
             );
           }
-
-          buttons.push(
-            <Submenu key={action} label={chrome.i18n.getMessage('ML_REMOVE_AND')}>
-              {removeTorrent}
-              <Item onClick={this.handleRemoveFiles}>{chrome.i18n.getMessage('ML_DELETE_DATA')}</Item>
-              {removeDataTorrent}
-            </Submenu>
-          );
           break;
         }
         case 'order': {
@@ -218,54 +171,6 @@ class TorrentMenuBody extends ContextMenuBody {
           );
           break;
         }
-        case 'labels': {
-          const subButtons = [];
-
-          this.rootStore.client.allLabels.forEach((label) => {
-            let selected = false;
-            if (selectedIds.length === 1 && firstTorrent.label === label) {
-              selected = true;
-            }
-            subButtons.push(
-              <LabelItem key={`label-${label}`} label={label} selected={selected} onSetLabel={this.handleSetLabel}/>
-            );
-          });
-
-          if (subButtons.length) {
-            subButtons.unshift(
-              <Separator key={`_`}/>
-            );
-          }
-
-          if (selectedIds.length > 1 || firstTorrent.label) {
-            subButtons.unshift(
-              <Item key={`remove`} onClick={this.handleRemoveLabel}>{chrome.i18n.getMessage('OV_REMOVE_LABEL')}</Item>
-            );
-          } else {
-            subButtons.unshift(
-              <Item key={`create`} onClick={this.handleCreateLabel}>{chrome.i18n.getMessage('OV_NEW_LABEL')}</Item>
-            );
-          }
-
-          let label = null;
-          if (selectedIds.length === 1 && firstTorrent.label) {
-            label = (
-              <>
-                {chrome.i18n.getMessage('OV_COL_LABEL')}
-                <i>{firstTorrent.label}</i>
-              </>
-            );
-          } else {
-            label = chrome.i18n.getMessage('OV_COL_LABEL');
-          }
-
-          buttons.push(
-            <Submenu key={action} label={label}>
-              {subButtons}
-            </Submenu>
-          );
-          break;
-        }
         case '_': {
           buttons.push(
             <Separator key={action + index}/>
@@ -277,31 +182,6 @@ class TorrentMenuBody extends ContextMenuBody {
 
     return (
       buttons
-    );
-  }
-}
-
-class LabelItem extends React.PureComponent {
-  static propTypes = {
-    label: PropTypes.string.isRequired,
-    selected: PropTypes.bool.isRequired,
-    onSetLabel: PropTypes.func.isRequired,
-  };
-
-  handleClick = ({event, props}) => {
-    this.props.onSetLabel({event, props, label: this.props.label});
-  };
-
-  render() {
-    let selected = null;
-    if (this.props.selected) {
-      selected = (
-        <label>●</label>
-      )
-    }
-
-    return (
-      <Item onClick={this.handleClick}>{selected}{this.props.label}</Item>
     );
   }
 }

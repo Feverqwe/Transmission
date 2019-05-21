@@ -84,23 +84,6 @@ const FileListStore = types.compose('FileListStore', ListSelectStore, types.mode
       }
       return null;
     },
-    getDownloadUrlById(name) {
-      const torrent = self.torrent;
-      if (torrent && torrent.sid) {
-        const index = self.getFileIndexById(name);
-        if (index !== null) {
-          /**@type RootStore*/const rootStore = getRoot(self);
-          return new URL('/proxy?' + qs.stringify({
-            sid: torrent.sid,
-            file: index,
-            disposition: 'ATTACHMENT',
-            service: 'DOWNLOAD',
-            qos: 0
-          }), rootStore.config.webUiUrl).toString();
-        }
-      }
-      return null;
-    },
     get torrent() {
       return resolveIdentifier(TorrentStore, self, self.id);
     },

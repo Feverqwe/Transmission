@@ -11,7 +11,6 @@ import TorrentListTable from "../components/TorrentListTable";
 import FileListTable from "../components/FileListTable";
 import Footer from "../components/Footer";
 import PutFilesDialog from "../components/PutFilesDialog";
-import CreateLabelDialog from "../components/CreateLabelDialog";
 import RemoveConfirmDialog from "../components/RemoveConfirmDialog";
 import PutUrlDialog from "../components/PutUrlDialog";
 import Interval from "../components/Interval";
@@ -129,11 +128,6 @@ class Dialogs extends React.Component {
         case 'putUrl': {
           return (
             <PutUrlDialog key={dialog.id} dialogStore={dialog}/>
-          );
-        }
-        case 'createLabel': {
-          return (
-            <CreateLabelDialog key={dialog.id} dialogStore={dialog}/>
           );
         }
         case 'removeConfirm': {

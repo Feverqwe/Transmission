@@ -137,14 +137,6 @@ class Bg {
         promise = this.client.forcestart(message.ids);
         break;
       }
-      case 'unpause': {
-        promise = this.client.unpause(message.ids);
-        break;
-      }
-      case 'pause': {
-        promise = this.client.pause(message.ids);
-        break;
-      }
       case 'stop': {
         promise = this.client.stop(message.ids);
         break;
@@ -153,16 +145,8 @@ class Bg {
         promise = this.client.recheck(message.ids);
         break;
       }
-      case 'remove': {
-        promise = this.client.remove(message.ids);
-        break;
-      }
       case 'removetorrent': {
         promise = this.client.removetorrent(message.ids);
-        break;
-      }
-      case 'removedata': {
-        promise = this.client.removedata(message.ids);
         break;
       }
       case 'removedatatorrent': {
@@ -175,10 +159,6 @@ class Bg {
       }
       case 'queueDown': {
         promise = this.client.queueDown(message.ids);
-        break;
-      }
-      case 'setLabel': {
-        promise = this.client.setLabel(message.ids, message.label);
         break;
       }
       case 'setPriority': {

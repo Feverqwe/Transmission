@@ -24,7 +24,7 @@ class RemoveConfirmDialog extends React.Component {
   handleSubmit = (e) => {
     e.preventDefault();
 
-    this.rootStore.client.torrentsRemove(this.dialogStore.torrentIds);
+    this.rootStore.client.torrentsRemoveTorrent(this.dialogStore.torrentIds);
 
     this.dialogStore.close();
   };

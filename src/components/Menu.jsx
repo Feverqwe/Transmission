@@ -216,9 +216,6 @@ class LabelSelect extends React.Component {
       let dataImage = null;
       let image = null;
       if (isCustom) {
-        if (label !== 'NOLABEL') {
-          dataImage = label;
-        }
         image = (
           <span className="image" data-image={dataImage}/>
         );

@@ -73,13 +73,12 @@ const TorrentStore = types.model('TorrentStore', {
   peers: types.number,
   activeSeeds: types.number,
   seeds: types.number,
-  available: types.number,
-  order: types.number,
-  status: types.maybe(types.string),
-  sid: types.maybe(types.string),
-  addedTime: types.maybe(types.number),
-  completedTime: types.maybe(types.number),
+  order: types.maybe(types.number),
+  status: types.string,
+  addedTime: types.number,
+  completedTime: types.number,
   directory: types.maybe(types.string),
+  magnetLink: types.maybe(types.string),
 }).views((self) => {
   return {
     start() {
@@ -132,9 +131,6 @@ const TorrentStore = types.model('TorrentStore', {
     },
     get downloadedStr() {
       return formatBytes(self.downloaded);
-    },
-    get availableStr() {
-      return Math.round((self.available / 65535) * 1000) / 1000;
     },
     get addedTimeStr() {
       if (!self.addedTime) {
@@ -211,9 +207,6 @@ const TorrentStore = types.model('TorrentStore', {
     },
     get isActive() {
       return !!(self.downloadSpeed || self.uploadSpeed);
-    },
-    get isDownloadAvailable() {
-      return !!self.sid;
     }
   };
 });
