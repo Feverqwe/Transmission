@@ -154,6 +154,13 @@ class TorrentMenuBody extends ContextMenuBody {
               <Item onClick={this.handleRemoveTorrentFiles}>{chrome.i18n.getMessage('ML_DELETE_DATATORRENT')}</Item>
             );
           }
+
+          buttons.push(
+            <Submenu key={action} label={chrome.i18n.getMessage('ML_REMOVE_AND')}>
+              {removeTorrent}
+              {removeDataTorrent}
+            </Submenu>
+          );
           break;
         }
         case 'order': {
