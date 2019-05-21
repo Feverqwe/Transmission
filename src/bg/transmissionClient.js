@@ -83,13 +83,17 @@ class TransmissionClient {
       try {
         return JSON.parse(text);
       } catch (err) {
-        text = text.replace(/"(announce|scrape|lastAnnounceResult|lastScrapeResult)":"([^"]+)"/g, safeValue);
-        return JSON.parse(text);
+        return JSON.parse(text.replace(/"([^"]+)":"([^"]+)"/g, safeValue));
       }
     }
 
     function safeValue(match, key, value) {
-      return `"${key}":"${encodeURIComponent(value)}"`;
+      try {
+        JSON.parse(`"${value}"`);
+      } catch (err) {
+        value = encodeURIComponent(value);
+      }
+      return `"${key}":"${value}"`;
     }
   }
 
