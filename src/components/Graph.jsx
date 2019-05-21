@@ -2,7 +2,7 @@ import {inject, observer} from "mobx-react";
 import {autorun} from "mobx";
 import React from "react";
 import PropTypes from "prop-types";
-import {easeQuadOut, line, scaleLinear, select, transition} from "d3";
+import {curveBasis, easeQuadOut, line, scaleLinear, select, transition} from "d3";
 
 @inject('rootStore')
 @observer
@@ -45,8 +45,8 @@ class Graph extends React.Component {
     const x = scaleLinear();
     const y = scaleLinear();
 
-    const uploadLine = line().x(d => x(d.time)).y(d => y(d.upload));
-    const downloadLine = line().x(d => x(d.time)).y(d => y(d.download));
+    const uploadLine = line().x(d => x(d.time)).y(d => y(d.upload)).curve(curveBasis);
+    const downloadLine = line().x(d => x(d.time)).y(d => y(d.download)).curve(curveBasis);
 
     let width = null;
     const height = 30;
