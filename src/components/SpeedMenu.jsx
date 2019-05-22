@@ -39,6 +39,15 @@ class SpeedMenuBody extends React.Component {
     }
   }
 
+  get speedLimitEnabled() {
+    if (this.menuType === 'download') {
+      return this.rootStore.client.settings.downloadSpeedLimitEnabled;
+    } else
+    if (this.menuType === 'upload') {
+      return this.rootStore.client.settings.uploadSpeedLimitEnabled;
+    }
+  }
+
   handleUnlimited = ({event: e, props}) => {
     if (this.menuType === 'download') {
       this.rootStore.client.setDownloadSpeedLimit(0);
@@ -61,7 +70,7 @@ class SpeedMenuBody extends React.Component {
     const items = [];
 
     let selected = null;
-    if (this.rootStore.client.settings && !this.speedLimit) {
+    if (this.rootStore.client.settings && !this.speedLimitEnabled) {
       selected = (
         <label>●</label>
       );
@@ -76,9 +85,9 @@ class SpeedMenuBody extends React.Component {
       );
 
       getSpeedArray(this.speedLimit, 10).forEach((speed) => {
+        const selected = this.speedLimitEnabled && speed === this.speedLimit;
         items.push(
-          <SpeedLimitItem key={`speed-${speed}`} speed={speed} selected={speed === this.speedLimit}
-                          onSetSpeedLimit={this.handleSetSpeedLimit}/>
+          <SpeedLimitItem key={`speed-${speed}`} speed={speed} selected={selected} onSetSpeedLimit={this.handleSetSpeedLimit}/>
         );
       });
     }
