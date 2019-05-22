@@ -193,12 +193,6 @@ class Bg {
         });
         break;
       }
-      case 'getDownloadDirs': {
-        promise = this.whenReady().then(() => {
-          return this.client.getDownloadDirs();
-        });
-        break;
-      }
       case 'getFreeSpace': {
         promise = this.whenReady().then(() => {
           return this.client.getFreeSpace(message.path);

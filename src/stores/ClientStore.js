@@ -17,8 +17,15 @@ const LabelStore = types.model('LabelStore', {
 
 /**
  * @typedef {Object} SettingsStore
- * @property {number|undefined} downloadSpeedLimit
- * @property {number|undefined} uploadSpeedLimit
+ * @property {number} downloadSpeedLimit
+ * @property {boolean} downloadSpeedLimitEnabled
+ * @property {number} uploadSpeedLimit
+ * @property {boolean} uploadSpeedLimitEnabled
+ * @property {boolean} altSpeedEnabled
+ * @property {number} altDownloadSpeedLimit
+ * @property {number} altUploadSpeedLimit
+ * @property {string} downloadDir
+ * @property {number|undefined} downloadDirFreeSpace
  * @property {*} downloadSpeedLimitStr
  * @property {*} uploadSpeedLimitStr
  */
@@ -31,6 +38,7 @@ const SettingsStore = types.model('SettingsStore', {
   altDownloadSpeedLimit:types.number,
   altUploadSpeedLimit:types.number,
   downloadDir: types.string,
+  downloadDirFreeSpace: types.maybe(types.number),
 }).views((self) => {
   return {
     get downloadSpeedLimitStr() {
@@ -64,28 +72,21 @@ const SettingsStore = types.model('SettingsStore', {
  * @property {*} currentSpeed
  * @property {*} currentSpeedStr
  * @property {*} allLabels
- * @property {*} isSupportedApiRemoveTorrent
- * @property {*} isSupportedApiRemoveDataTorrent
  * @property {function} torrentsStart
  * @property {function} torrentsForceStart
- * @property {function} torrentsPause
- * @property {function} torrentsUnpause
  * @property {function} torrentsStop
  * @property {function} torrentsRecheck
- * @property {function} torrentsRemove
  * @property {function} torrentsRemoveTorrent
- * @property {function} torrentsRemoveFiles
  * @property {function} torrentsRemoveTorrentFiles
  * @property {function} torrentsQueueUp
  * @property {function} torrentsQueueDown
- * @property {function} torrentsSetLabel
  * @property {function} filesSetPriority
  * @property {function} setDownloadSpeedLimit
  * @property {function} setUploadSpeedLimit
  * @property {function} getTorrentFiles
  * @property {function} getSettings
  * @property {function} sendFiles
- * @property {function} getDownloadDirs
+ * @property {function} getFreeSpace
  * @property {function} getSnapshot
  * @property {function} syncUiClient
  */
@@ -229,15 +230,6 @@ const ClientStore = types.model('ClientStore', {
       }
       return result;
     },
-    get isSupportedApiRemoveTorrent() {
-      for (const torrent of self.torrents.values()) {
-        return torrent.status !== undefined;
-      }
-      return false;
-    },
-    get isSupportedApiRemoveDataTorrent() {
-      return self.isSupportedApiRemoveTorrent;
-    },
     torrentsStart(ids) {
       return callApi({action: 'start', ids: ids}).then(...exceptionLog()).then(syncUi);
     },
@@ -280,8 +272,8 @@ const ClientStore = types.model('ClientStore', {
     sendFiles(urls, directory) {
       return callApi({action: 'sendFiles', urls, directory}).then(...exceptionLog()).then(syncUi);
     },
-    getDownloadDirs() {
-      return callApi({action: 'getDownloadDirs'}).then(...exceptionLog()).then(syncUi);
+    getFreeSpace(path) {
+      return callApi({action: 'getFreeSpace', path}).then(...exceptionLog()).then(syncUi);
     },
     getSnapshot() {
       return getSnapshot(self);

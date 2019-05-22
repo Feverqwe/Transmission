@@ -16,7 +16,7 @@ const DownloadDirStore = types.model('DownloadDirStore', {
 }).views((self) => {
   return {
     get availableStr() {
-      return formatBytes(self.available * 1024 * 1024);
+      return formatBytes(self.available);
     }
   };
 });
@@ -24,16 +24,14 @@ const DownloadDirStore = types.model('DownloadDirStore', {
 /**
  * @typedef {Object} SpaceWatcherStore
  * @property {string} [state]
- * @property {string} [errorMessage]
- * @property {boolean|undefined} isSupported
  * @property {DownloadDirStore[]} downloadDirs
+ * @property {string} [errorMessage]
  * @property {function:Promise} fetchDownloadDirs
  */
 const SpaceWatcherStore = types.model('SpaceWatcherStore', {
   state: types.optional(types.enumeration(['idle', 'pending', 'done', 'error']), 'idle'),
-  errorMessage: types.optional(types.string, ''),
-  isSupported: types.maybe(types.boolean),
   downloadDirs: types.array(DownloadDirStore),
+  errorMessage: types.optional(types.string, ''),
 }).actions((self) => {
   return {
     fetchDownloadDirs: flow(function* () {
@@ -41,11 +39,28 @@ const SpaceWatcherStore = types.model('SpaceWatcherStore', {
       self.state = 'pending';
       self.errorMessage = '';
       try {
+        const result = [];
         /**@type RootStore*/const rootStore = getRoot(self);
-        const result = yield rootStore.client.getDownloadDirs();
+        if (!rootStore.client.settings) {
+          yield rootStore.client.getSettings();
+        }
         if (isAlive(self)) {
-          self.downloadDirs = result.downloadDirs;
-          self.isSupported = true;
+          const {downloadDir, downloadDirFreeSpace} = rootStore.client.settings;
+          if (downloadDirFreeSpace) {
+            result.push({
+              path: downloadDir,
+              available: downloadDirFreeSpace,
+            });
+          } else {
+            const {path, sizeBytes} = yield rootStore.client.getFreeSpace(downloadDir);
+            result.push({
+              path: path,
+              available: sizeBytes,
+            });
+          }
+        }
+        if (isAlive(self)) {
+          self.downloadDirs = result;
           self.state = 'done';
         }
       } catch (err) {
@@ -53,11 +68,6 @@ const SpaceWatcherStore = types.model('SpaceWatcherStore', {
         if (isAlive(self)) {
           self.state = 'error';
           self.errorMessage = `${err.name}: ${err.message}`;
-          if (self.isSupported === undefined) {
-            if (err.status === 300) {
-              self.isSupported = false;
-            }
-          }
         }
       }
     })

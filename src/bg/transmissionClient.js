@@ -125,14 +125,15 @@ class TransmissionClient {
     });
   }
 
-  getDownloadDirs() {
-    throw new ErrorWithCode('Unsupported', 'IS_NOT_SUPPORTED')
-  }
-
   getFreeSpace(path) {
     return this.sendAction({
       method: "free-space",
       arguments: {path}
+    }).then((response) => {
+      return {
+        path: response.arguments.path,
+        sizeBytes: response.arguments['size-bytes'],
+      };
     });
   }
 
@@ -602,6 +603,7 @@ class TransmissionClient {
       altDownloadSpeedLimit: settings['alt-speed-down'],
       altUploadSpeedLimit: settings['alt-speed-up'],
       downloadDir: settings['download-dir'],
+      downloadDirFreeSpace: settings['download-dir-free-space'],
     };
   };
 

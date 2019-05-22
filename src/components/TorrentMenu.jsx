@@ -101,9 +101,6 @@ class TorrentMenuBody extends ContextMenuBody {
       }
     });
 
-    const firstTorrentId = selectedIds[0];
-    const firstTorrent = this.rootStore.client.torrents.get(firstTorrentId);
-
     const buttons = [];
     torrentMenuItems.forEach((action, index) => {
       if (disabledActions.indexOf(action) !== -1) return;
@@ -141,24 +138,10 @@ class TorrentMenuBody extends ContextMenuBody {
           break;
         }
         case 'remove_with': {
-          let removeTorrent = null;
-          if (this.rootStore.client.isSupportedApiRemoveTorrent) {
-            removeTorrent = (
-              <Item onClick={this.handleRemoveTorrent}>{chrome.i18n.getMessage('ML_DELETE_TORRENT')}</Item>
-            );
-          }
-
-          let removeDataTorrent = null;
-          if (this.rootStore.client.isSupportedApiRemoveDataTorrent) {
-            removeDataTorrent = (
-              <Item onClick={this.handleRemoveTorrentFiles}>{chrome.i18n.getMessage('ML_DELETE_DATATORRENT')}</Item>
-            );
-          }
-
           buttons.push(
             <Submenu key={action} label={chrome.i18n.getMessage('ML_REMOVE_AND')}>
-              {removeTorrent}
-              {removeDataTorrent}
+              <Item onClick={this.handleRemoveTorrent}>{chrome.i18n.getMessage('ML_DELETE_TORRENT')}</Item>
+              <Item onClick={this.handleRemoveTorrentFiles}>{chrome.i18n.getMessage('ML_DELETE_DATATORRENT')}</Item>
             </Submenu>
           );
           break;

@@ -144,7 +144,7 @@ class SpaceWatcher extends React.Component {
   };
 
   render() {
-    if (!this.spaceWatcherStore || this.spaceWatcherStore.isSupported === false) return null;
+    if (!this.spaceWatcherStore) return null;
 
     let title = null;
     let body = null;
