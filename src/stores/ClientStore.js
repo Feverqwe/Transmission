@@ -28,6 +28,9 @@ const LabelStore = types.model('LabelStore', {
  * @property {number|undefined} downloadDirFreeSpace
  * @property {*} downloadSpeedLimitStr
  * @property {*} uploadSpeedLimitStr
+ * @property {*} altDownloadSpeedLimitStr
+ * @property {*} altUploadSpeedLimitStr
+ * @property {*} hasDownloadDirFreeSpace
  */
 const SettingsStore = types.model('SettingsStore', {
   downloadSpeedLimit:types.number,
@@ -53,6 +56,9 @@ const SettingsStore = types.model('SettingsStore', {
     get altUploadSpeedLimitStr() {
       return speedToStr(self.altUploadSpeedLimit * 1024);
     },
+    get hasDownloadDirFreeSpace() {
+      return typeof self.downloadDirFreeSpace === 'number';
+    }
   };
 });
 
@@ -84,8 +90,13 @@ const SettingsStore = types.model('SettingsStore', {
  * @property {function} torrentsQueueUp
  * @property {function} torrentsQueueDown
  * @property {function} filesSetPriority
+ * @property {function} setDownloadSpeedLimitEnabled
  * @property {function} setDownloadSpeedLimit
+ * @property {function} setUploadSpeedLimitEnabled
  * @property {function} setUploadSpeedLimit
+ * @property {function} setAltSpeedEnabled
+ * @property {function} setAltDownloadSpeedLimit
+ * @property {function} setAltUploadSpeedLimit
  * @property {function} getTorrentFiles
  * @property {function} getSettings
  * @property {function} sendFiles
