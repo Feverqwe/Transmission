@@ -24,11 +24,11 @@ class TransmissionClient {
     return this.bg.bgStore;
   }
 
-  updateTorrents() {
+  updateTorrents(force) {
     const now = Math.trunc(Date.now() / 1000);
 
     let isRecently = false;
-    if (now - this.torrentsResponseTime < 60) {
+    if (!force && now - this.torrentsResponseTime < 60) {
       isRecently = true;
     }
 

@@ -291,8 +291,8 @@ const ClientStore = types.model('ClientStore', {
     getSnapshot() {
       return getSnapshot(self);
     },
-    syncUiClient() {
-      return callApi({action: 'updateTorrentList'}).then((client) => {
+    syncUiClient(force) {
+      return callApi({action: 'updateTorrentList', force}).then((client) => {
         self.setTorrents(client.torrents);
         self.setSettings(client.settings);
         self.speedRoll.setData(client.speedRoll.data);
