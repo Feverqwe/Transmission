@@ -141,7 +141,7 @@ class Menu extends React.Component {
     }
 
     const altSpeedClassList = ['btn alt_speed'];
-    if (this.rootStore.client) {
+    if (this.rootStore.client && this.rootStore.client.settings) {
       if (this.rootStore.client.settings.altSpeedEnabled) {
         altSpeedClassList.push('active');
       }
