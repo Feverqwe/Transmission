@@ -304,17 +304,6 @@ class UiOptions extends OptionsPage {
           {' '}
           <span>{chrome.i18n.getMessage('ms')}</span>
         </label>
-        <div className="cirilicFixs">
-          <h3>{chrome.i18n.getMessage('fixCirilicIf')}</h3>
-          <label>
-            <span>{chrome.i18n.getMessage('fixCirilicTitle')}</span>
-            <input onChange={this.handleChange} name="fixCyrillicTorrentName" type="checkbox" defaultChecked={this.configStore.fixCyrillicTorrentName}/>
-          </label>
-          <label>
-            <span>{chrome.i18n.getMessage('fixCirilicTorrentPath')}</span>
-            <input onChange={this.handleChange} name="fixCyrillicDownloadPath" type="checkbox" defaultChecked={this.configStore.fixCyrillicDownloadPath}/>
-          </label>
-        </div>
       </div>
     );
   }

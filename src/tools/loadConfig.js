@@ -92,8 +92,6 @@ const oldConfigMap = {
   hideFnishStatusItem: 'hideFinishedTorrents',
   selectDownloadCategoryOnAddItemFromContextMenu: 'selectDownloadCategoryAfterPutTorrentFromContextMenu',
   showDefaultFolderContextMenuItem: 'putDefaultPathInContextMenu',
-  fixCirilicTitle: 'fixCyrillicTorrentName',
-  fixCirilicTorrentPath: 'fixCyrillicDownloadPath',
   folderList: 'folders',
   torrentListColumnList: 'torrentColumns',
   fileListColumnList: 'filesColumns',
@@ -165,8 +163,6 @@ function migrateConfig(oldConfig, config) {
     treeViewContextMenu: intToBoolean,
     showDefaultFolderContextMenuItem: intToBoolean,
     showFreeSpace: intToBoolean,
-    fixCirilicTitle: intToBoolean,
-    fixCirilicTorrentPath: intToBoolean,
     folderList: folderListToFolders,
     selectedLabel: selectedLabelToLabel,
   };
