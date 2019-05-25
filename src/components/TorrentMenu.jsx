@@ -31,6 +31,15 @@ class TorrentMenuBody extends ContextMenuBody {
     return this.rootStore.torrentList;
   }
 
+  get firstTorrent() {
+    const selectedIds = this.torrentListStore.selectedIds;
+    if (selectedIds.length) {
+      const id = selectedIds[0];
+      return this.rootStore.client.torrents.get(id);
+    }
+    return null;
+  }
+
   handleStart = ({event: e, props}) => {
     this.rootStore.client.torrentsStart(this.torrentListStore.selectedIds);
   };
@@ -63,15 +72,36 @@ class TorrentMenuBody extends ContextMenuBody {
   };
 
   handleRename = ({event: e, props}) => {
-    // todo: handleRename
+    const torrent = this.firstTorrent;
+    if (!torrent) return;
+
+    this.rootStore.createDialog({
+      type: 'rename',
+      path: torrent.name,
+      torrentIds: this.torrentListStore.selectedIds.slice(0)
+    });
   };
 
-  handleGetMagnet = ({event: e, props}) => {
-    // todo: handleGetMagnet
+  handleCopyMagnetUrl = ({event: e, props}) => {
+    const torrent = this.firstTorrent;
+    if (!torrent) return;
+
+    this.rootStore.createDialog({
+      type: 'copyMagnetUrl',
+      magnetLink: torrent.magnetLink,
+      torrentIds: this.torrentListStore.selectedIds.slice(0)
+    });
   };
 
   handleMove = ({event: e, props}) => {
-    // todo: handleMove
+    const torrent = this.firstTorrent;
+    if (!torrent) return;
+
+    this.rootStore.createDialog({
+      type: 'move',
+      directory: torrent.directory,
+      torrentIds: this.torrentListStore.selectedIds.slice(0)
+    });
   };
 
   handleReannounce = ({event: e, props}) => {
@@ -177,7 +207,7 @@ class TorrentMenuBody extends ContextMenuBody {
               <Item onClick={this.handleRename}>{chrome.i18n.getMessage('rename')}</Item>
             );
             getMagnet = (
-              <Item onClick={this.handleGetMagnet}>{chrome.i18n.getMessage('magnetUri')}</Item>
+              <Item onClick={this.handleCopyMagnetUrl}>{chrome.i18n.getMessage('magnetUri')}</Item>
             );
           }
 

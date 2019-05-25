@@ -30,6 +30,15 @@ class FileMenuBody extends ContextMenuBody {
     return this.rootStore.fileList;
   }
 
+  get firstFile() {
+    const selectedIds = this.fileListStore.selectedIds;
+    if (selectedIds.length) {
+      const id = selectedIds[0];
+      return this.fileListStore.getFileById(id);
+    }
+    return null;
+  }
+
   handleSetPriority = ({event: e, props, priority}) => {
     const id = this.fileListStore.id;
     const selectedIndexes = this.fileListStore.selectedIndexes;
@@ -37,7 +46,15 @@ class FileMenuBody extends ContextMenuBody {
   };
 
   handleRename = ({event: e, props}) => {
-    // todo: handleRename
+    const id = this.fileListStore.id;
+    const file = this.firstFile;
+    if (!file) return;
+
+    this.rootStore.createDialog({
+      type: 'rename',
+      path: file.name,
+      torrentIds: [id]
+    });
   };
 
   render() {

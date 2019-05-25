@@ -15,6 +15,9 @@ import RemoveConfirmDialog from "../components/RemoveConfirmDialog";
 import PutUrlDialog from "../components/PutUrlDialog";
 import Interval from "../components/Interval";
 import getLogger from "../tools/getLogger";
+import RenameDialog from "../components/RenameDialog";
+import CopyMagnetUrlDialog from "../components/CopyMagnetUrlDialog";
+import MoveDialog from "../components/MoveDialog";
 
 const logger = getLogger('Index');
 
@@ -133,6 +136,21 @@ class Dialogs extends React.Component {
         case 'removeConfirm': {
           return (
             <RemoveConfirmDialog key={dialog.id} dialogStore={dialog}/>
+          );
+        }
+        case 'rename': {
+          return (
+            <RenameDialog key={dialog.id} dialogStore={dialog}/>
+          );
+        }
+        case 'copyMagnetUrl': {
+          return (
+            <CopyMagnetUrlDialog key={dialog.id} dialogStore={dialog}/>
+          );
+        }
+        case 'move': {
+          return (
+            <MoveDialog key={dialog.id} dialogStore={dialog}/>
           );
         }
       }

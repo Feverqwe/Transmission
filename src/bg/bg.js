@@ -240,6 +240,18 @@ class Bg {
         });
         break;
       }
+      case 'rename': {
+        promise = this.whenReady().then(() => {
+          return this.client.rename(message.ids, message.path, message.name);
+        });
+        break;
+      }
+      case 'torrentSetLocation': {
+        promise = this.whenReady().then(() => {
+          return this.client.torrentSetLocation(message.ids, message.location);
+        });
+        break;
+      }
       default: {
         promise = Promise.reject(new Error('Unknown request'));
       }

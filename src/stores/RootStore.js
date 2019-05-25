@@ -9,6 +9,9 @@ import PutFilesDialogStore from "./PutFilesDialogStore";
 import RemoveConfirmDialogStore from "./RemoveConfirmDialogStore";
 import PutUrlDialogStore from "./PutUrlDialogStore";
 import SpaceWatcherStore from "./SpaceWatcherStore";
+import RenameDialogStore from "./RenameDialogStore";
+import CopyMagnetUrlDialogStore from "./CopyMagnetUrlDialogStore";
+import MoveDialogStore from "./MoveDialogStore";
 
 const logger = getLogger('RootStore');
 
@@ -40,7 +43,10 @@ const RootStore = types.model('RootStore', {
   torrentList: types.optional(TorrentListStore, {}),
   fileList: types.maybe(FileListStore),
   spaceWatcher: types.maybe(SpaceWatcherStore),
-  dialogs: types.map(types.union(PutFilesDialogStore, PutUrlDialogStore, RemoveConfirmDialogStore)),
+  dialogs: types.map(types.union(
+    PutFilesDialogStore, PutUrlDialogStore, RemoveConfirmDialogStore,
+    RenameDialogStore, CopyMagnetUrlDialogStore, MoveDialogStore
+  )),
 }).actions((self) => {
   return {
     init: flow(function* () {

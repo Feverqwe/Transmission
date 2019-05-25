@@ -288,14 +288,10 @@ class TransmissionClient {
     });
   }
 
-  torrentRenamePath(ids, currentName, name) {
+  rename(ids, path, name) {
     return this.sendAction({
       method: 'torrent-rename-path',
-      arguments: {
-        ids,
-        path: currentName,
-        name
-      }
+      arguments: {ids, path, name}
     });
   }
 

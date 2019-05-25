@@ -277,6 +277,12 @@ const ClientStore = types.model('ClientStore', {
     reannounce(ids) {
       return callApi({action: 'reannounce', ids: ids}).then(...exceptionLog()).then(syncUi);
     },
+    rename(ids, path, name){
+      return callApi({action: 'rename', ids: ids, path, name}).then(...exceptionLog()).then(syncUi);
+    },
+    torrentSetLocation(ids, location){
+      return callApi({action: 'torrentSetLocation', ids: ids, location}).then(...exceptionLog()).then(syncUi);
+    },
     getSnapshot() {
       return getSnapshot(self);
     },

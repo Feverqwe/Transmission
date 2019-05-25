@@ -1,15 +1,17 @@
 import {getRoot, types} from "mobx-state-tree";
 
 /**
- * @typedef {Object} RemoveConfirmDialogStore
+ * @typedef {Object} RenameDialogStore
  * @property {string} id
  * @property {string} type
- * @property {string[]} torrentIds
+ * @property {string} path
+ * @property {number[]} torrentIds
  * @property {function} close
  */
-const RemoveConfirmDialogStore = types.model('RemoveConfirmDialogStore', {
+const RenameDialogStore = types.model('RenameDialogStore', {
   id: types.identifier,
-  type: types.literal('removeConfirm'),
+  type: types.literal('rename'),
+  path: types.string,
   torrentIds: types.array(types.number)
 }).views((self) => {
   return {
@@ -20,4 +22,4 @@ const RemoveConfirmDialogStore = types.model('RemoveConfirmDialogStore', {
   };
 });
 
-export default RemoveConfirmDialogStore;
+export default RenameDialogStore;
