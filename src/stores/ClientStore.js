@@ -244,8 +244,14 @@ const ClientStore = types.model('ClientStore', {
     filesSetPriority(id, fileIdxs, level) {
       return callApi({action: 'setPriority', level, id: id, fileIdxs}).then(...exceptionLog()).then(syncUi);
     },
+    setDownloadSpeedLimitEnabled(enabled) {
+      return callApi({action: 'setDownloadSpeedLimitEnabled', enabled}).then(...exceptionLog()).then(syncUi);
+    },
     setDownloadSpeedLimit(speed) {
       return callApi({action: 'setDownloadSpeedLimit', speed}).then(...exceptionLog()).then(syncUi);
+    },
+    setUploadSpeedLimitEnabled(enabled) {
+      return callApi({action: 'setUploadSpeedLimitEnabled', enabled}).then(...exceptionLog()).then(syncUi);
     },
     setUploadSpeedLimit(speed) {
       return callApi({action: 'setUploadSpeedLimit', speed}).then(...exceptionLog()).then(syncUi);

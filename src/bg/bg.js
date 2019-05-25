@@ -166,9 +166,21 @@ class Bg {
         promise = this.client.getFileList(message.id);
         break;
       }
+      case 'setDownloadSpeedLimitEnabled': {
+        promise = this.whenReady().then(() => {
+          return this.client.setDownloadSpeedLimitEnabled(message.enabled);
+        });
+        break;
+      }
       case 'setDownloadSpeedLimit': {
         promise = this.whenReady().then(() => {
           return this.client.setDownloadSpeedLimit(message.speed);
+        });
+        break;
+      }
+      case 'setUploadSpeedLimitEnabled': {
+        promise = this.whenReady().then(() => {
+          return this.client.setUploadSpeedLimitEnabled(message.enabled);
         });
         break;
       }

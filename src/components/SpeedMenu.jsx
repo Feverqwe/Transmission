@@ -68,14 +68,14 @@ class SpeedMenuBody extends React.Component {
       if (this.isAltSpeed) {
         this.rootStore.client.setAltSpeedEnabled(false);
       } else {
-        this.rootStore.client.setDownloadSpeedLimit(0);
+        this.rootStore.client.setDownloadSpeedLimitEnabled(false);
       }
     } else
     if (this.menuType === 'upload') {
       if (this.isAltSpeed) {
         this.rootStore.client.setAltSpeedEnabled(false);
       } else {
-        this.rootStore.client.setUploadSpeedLimit(0);
+        this.rootStore.client.setUploadSpeedLimitEnabled(false);
       }
     }
   };
@@ -115,7 +115,7 @@ class SpeedMenuBody extends React.Component {
         <Separator key={`_`}/>
       );
 
-      getSpeedArray(this.speedLimit, 10, this.speedLimitEnabled).forEach((speed) => {
+      getSpeedArray(this.speedLimit, 10, true).forEach((speed) => {
         const selected = this.speedLimitEnabled && speed === this.speedLimit;
         items.push(
           <SpeedLimitItem key={`speed-${speed}`} speed={speed} selected={selected} onSetSpeedLimit={this.handleSetSpeedLimit}/>
@@ -158,12 +158,18 @@ function getSpeedArray(currentLimit, count, maybeZero) {
   if (!maybeZero && !currentLimit) {
     currentLimit = 512;
   }
-  if (currentLimit < Math.round(count / 2)) {
-    currentLimit = Math.round(count / 2);
+  const middle = Math.round(count / 2);
+  let middleSpeed = currentLimit;
+  if (middleSpeed < middle) {
+    middleSpeed = middle;
   }
   const arr = new Array(count);
   for (let i = 0; i < count; i++) {
-    arr[i] = Math.round((i + 1) / Math.round(count / 2) * currentLimit);
+    arr[i] = Math.round((i + 1) / middle * middleSpeed);
+  }
+  if (currentLimit === 0) {
+    arr.pop();
+    arr.unshift(currentLimit);
   }
   return arr;
 }

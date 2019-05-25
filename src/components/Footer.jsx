@@ -47,7 +47,7 @@ class Footer extends React.Component {
     if (this.rootStore.client.settings.altSpeedEnabled) {
       this.rootStore.client.setAltSpeedEnabled(false);
     } else {
-      this.rootStore.client.setDownloadSpeedLimit(0);
+      this.rootStore.client.setDownloadSpeedLimitEnabled(false);
     }
   };
 
@@ -57,7 +57,7 @@ class Footer extends React.Component {
     if (this.rootStore.client.settings.altSpeedEnabled) {
       this.rootStore.client.setAltSpeedEnabled(false);
     } else {
-      this.rootStore.client.setUploadSpeedLimit(0);
+      this.rootStore.client.setUploadSpeedLimitEnabled(false);
     }
   };
 

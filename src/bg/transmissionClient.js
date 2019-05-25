@@ -386,31 +386,47 @@ class TransmissionClient {
     }));
   }
 
-  setDownloadSpeedLimit(speed) {
-    const args = {};
-    args['speed-limit-down-enabled'] = !!speed;
-    if (speed) {
-      args['speed-limit-down'] = speed;
-    }
-
+  setDownloadSpeedLimitEnabled(enabled) {
     return this.sendAction({
       method: 'session-set',
-      arguments: args
+      arguments: {
+        'speed-limit-down-enabled': enabled
+      }
+    }).then(() => {
+      return this.getSettings();
+    });
+  }
+
+  setDownloadSpeedLimit(speed) {
+    return this.sendAction({
+      method: 'session-set',
+      arguments: {
+        'speed-limit-down-enabled': true,
+        'speed-limit-down': speed
+      }
+    }).then(() => {
+      return this.getSettings();
+    });
+  }
+
+  setUploadSpeedLimitEnabled(enabled) {
+    return this.sendAction({
+      method: 'session-set',
+      arguments: {
+        'speed-limit-up-enabled': enabled
+      }
     }).then(() => {
       return this.getSettings();
     });
   }
 
   setUploadSpeedLimit(speed) {
-    const args = {};
-    args['speed-limit-up-enabled'] = !!speed;
-    if (speed) {
-      args['speed-limit-up'] = speed;
-    }
-
     return this.sendAction({
       method: 'session-set',
-      arguments: args
+      arguments: {
+        'speed-limit-up-enabled': true,
+        'speed-limit-up': speed
+      }
     }).then(() => {
       return this.getSettings();
     });
