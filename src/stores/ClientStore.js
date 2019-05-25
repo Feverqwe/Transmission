@@ -75,8 +75,6 @@ const SettingsStore = types.model('SettingsStore', {
  * @property {function} setSettings
  * @property {function} setLastErrorMessage
  * @property {*} torrentIds
- * @property {*} downloadingTorrentIds
- * @property {*} stoppedTorrentIds
  * @property {*} activeTorrentIds
  * @property {*} activeCount
  * @property {*} currentSpeed
@@ -176,24 +174,6 @@ const ClientStore = types.model('ClientStore', {
       const result = [];
       for (const torrent of self.torrents.values()) {
         result.push(torrent.id);
-      }
-      return result;
-    },
-    get downloadingTorrentIds() {
-      const result = [];
-      for (const torrent of self.torrents.values()) {
-        if (torrent.isDownloading) {
-          result.push(torrent.id);
-        }
-      }
-      return result;
-    },
-    get stoppedTorrentIds() {
-      const result = [];
-      for (const torrent of self.torrents.values()) {
-        if (torrent.isStopped) {
-          result.push(torrent.id);
-        }
       }
       return result;
     },
