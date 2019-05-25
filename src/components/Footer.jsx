@@ -44,13 +44,21 @@ class Footer extends React.Component {
   handleResetDownloadSpeed = (e) => {
     e.preventDefault();
 
-    this.rootStore.client.setDownloadSpeedLimit(0);
+    if (this.rootStore.client.settings.altSpeedEnabled) {
+      this.rootStore.client.setAltSpeedEnabled(false);
+    } else {
+      this.rootStore.client.setDownloadSpeedLimit(0);
+    }
   };
 
   handleResetUploadSpeed = (e) => {
     e.preventDefault();
 
-    this.rootStore.client.setUploadSpeedLimit(0);
+    if (this.rootStore.client.settings.altSpeedEnabled) {
+      this.rootStore.client.setAltSpeedEnabled(false);
+    } else {
+      this.rootStore.client.setUploadSpeedLimit(0);
+    }
   };
 
   handleOpenTab = (e) => {
@@ -65,14 +73,26 @@ class Footer extends React.Component {
     let uploadLimit = null;
     const settings = this.rootStore.client.settings;
     if (settings) {
-      if (settings.downloadSpeedLimit && settings.downloadSpeedLimitEnabled) {
+      if (settings.altSpeedEnabled || settings.downloadSpeedLimitEnabled) {
+        let speedStr = null;
+        if (settings.altSpeedEnabled) {
+          speedStr = settings.altDownloadSpeedLimitStr;
+        } else {
+          speedStr = settings.downloadSpeedLimitStr;
+        }
         downloadLimit = (
-          <span onClick={this.handleResetDownloadSpeed} className="limit dl">{settings.downloadSpeedLimitStr}</span>
+          <span onClick={this.handleResetDownloadSpeed} className="limit dl">{speedStr}</span>
         );
       }
-      if (settings.uploadSpeedLimit && settings.uploadSpeedLimitEnabled) {
+      if (settings.altSpeedEnabled || settings.uploadSpeedLimitEnabled) {
+        let speedStr = null;
+        if (settings.altSpeedEnabled) {
+          speedStr = settings.altUploadSpeedLimitStr;
+        } else {
+          speedStr = settings.uploadSpeedLimitStr;
+        }
         uploadLimit = (
-          <span onClick={this.handleResetUploadSpeed} className="limit up">{settings.uploadSpeedLimitStr}</span>
+          <span onClick={this.handleResetUploadSpeed} className="limit up">{speedStr}</span>
         );
       }
     }

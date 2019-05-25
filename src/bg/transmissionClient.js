@@ -416,6 +416,39 @@ class TransmissionClient {
     });
   }
 
+  setAltSpeedEnabled(enabled) {
+    return this.sendAction({
+      method: 'session-set',
+      arguments: {
+        'alt-speed-enabled': enabled
+      }
+    }).then(() => {
+      return this.getSettings();
+    });
+  }
+
+  setAltDownloadSpeedLimit(speed) {
+    return this.sendAction({
+      method: 'session-set',
+      arguments: {
+        'alt-speed-down': speed
+      }
+    }).then(() => {
+      return this.getSettings();
+    });
+  }
+
+  setAltUploadSpeedLimit(speed) {
+    return this.sendAction({
+      method: 'session-set',
+      arguments: {
+        'alt-speed-up': speed
+      }
+    }).then(() => {
+      return this.getSettings();
+    });
+  }
+
   sendFiles(urls, directory) {
     return Promise.all(urls.map((url) => {
       return Promise.resolve().then(() => {

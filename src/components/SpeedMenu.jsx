@@ -30,16 +30,31 @@ class SpeedMenuBody extends React.Component {
     return this.props.propsFromTrigger.type;
   }
 
+  get isAltSpeed() {
+    return this.rootStore.client.settings.altSpeedEnabled;
+  }
+
   get speedLimit() {
     if (this.menuType === 'download') {
-      return this.rootStore.client.settings.downloadSpeedLimit;
+      if (this.isAltSpeed) {
+        return this.rootStore.client.settings.altDownloadSpeedLimit;
+      } else {
+        return this.rootStore.client.settings.downloadSpeedLimit;
+      }
     } else
     if (this.menuType === 'upload') {
-      return this.rootStore.client.settings.uploadSpeedLimit;
+      if (this.isAltSpeed) {
+        return this.rootStore.client.settings.altUploadSpeedLimit;
+      } else {
+        return this.rootStore.client.settings.uploadSpeedLimit;
+      }
     }
   }
 
   get speedLimitEnabled() {
+    if (this.isAltSpeed) {
+      return true;
+    }
     if (this.menuType === 'download') {
       return this.rootStore.client.settings.downloadSpeedLimitEnabled;
     } else
@@ -50,19 +65,35 @@ class SpeedMenuBody extends React.Component {
 
   handleUnlimited = ({event: e, props}) => {
     if (this.menuType === 'download') {
-      this.rootStore.client.setDownloadSpeedLimit(0);
+      if (this.isAltSpeed) {
+        this.rootStore.client.setAltSpeedEnabled(false);
+      } else {
+        this.rootStore.client.setDownloadSpeedLimit(0);
+      }
     } else
     if (this.menuType === 'upload') {
-      this.rootStore.client.setUploadSpeedLimit(0);
+      if (this.isAltSpeed) {
+        this.rootStore.client.setAltSpeedEnabled(false);
+      } else {
+        this.rootStore.client.setUploadSpeedLimit(0);
+      }
     }
   };
 
   handleSetSpeedLimit = ({event: e, props, speed}) => {
     if (this.menuType === 'download') {
-      this.rootStore.client.setDownloadSpeedLimit(speed);
+      if (this.isAltSpeed) {
+        this.rootStore.client.setAltDownloadSpeedLimit(speed);
+      } else {
+        this.rootStore.client.setDownloadSpeedLimit(speed);
+      }
     } else
     if (this.menuType === 'upload') {
-      this.rootStore.client.setUploadSpeedLimit(speed);
+      if (this.isAltSpeed) {
+        this.rootStore.client.setAltUploadSpeedLimit(speed);
+      } else {
+        this.rootStore.client.setUploadSpeedLimit(speed);
+      }
     }
   };
 
@@ -84,7 +115,7 @@ class SpeedMenuBody extends React.Component {
         <Separator key={`_`}/>
       );
 
-      getSpeedArray(this.speedLimit, 10).forEach((speed) => {
+      getSpeedArray(this.speedLimit, 10, this.speedLimitEnabled).forEach((speed) => {
         const selected = this.speedLimitEnabled && speed === this.speedLimit;
         items.push(
           <SpeedLimitItem key={`speed-${speed}`} speed={speed} selected={selected} onSetSpeedLimit={this.handleSetSpeedLimit}/>
@@ -123,8 +154,8 @@ class SpeedLimitItem extends React.PureComponent {
   }
 }
 
-function getSpeedArray(currentLimit, count) {
-  if (!currentLimit) {
+function getSpeedArray(currentLimit, count, maybeZero) {
+  if (!maybeZero && !currentLimit) {
     currentLimit = 512;
   }
   if (currentLimit < Math.round(count / 2)) {

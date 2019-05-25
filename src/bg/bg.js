@@ -178,6 +178,24 @@ class Bg {
         });
         break;
       }
+      case 'setAltSpeedEnabled': {
+        promise = this.whenReady().then(() => {
+          return this.client.setAltSpeedEnabled(message.enabled);
+        });
+        break;
+      }
+      case 'setAltUploadSpeedLimit': {
+        promise = this.whenReady().then(() => {
+          return this.client.setAltUploadSpeedLimit(message.speed);
+        });
+        break;
+      }
+      case 'setAltDownloadSpeedLimit': {
+        promise = this.whenReady().then(() => {
+          return this.client.setAltDownloadSpeedLimit(message.speed);
+        });
+        break;
+      }
       case 'getSettings': {
         promise = this.whenReady().then(() => {
           return this.client.getSettings();

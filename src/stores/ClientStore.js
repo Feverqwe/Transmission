@@ -47,6 +47,12 @@ const SettingsStore = types.model('SettingsStore', {
     get uploadSpeedLimitStr() {
       return speedToStr(self.uploadSpeedLimit * 1024);
     },
+    get altDownloadSpeedLimitStr() {
+      return speedToStr(self.altDownloadSpeedLimit * 1024);
+    },
+    get altUploadSpeedLimitStr() {
+      return speedToStr(self.altUploadSpeedLimit * 1024);
+    },
   };
 });
 
@@ -243,6 +249,15 @@ const ClientStore = types.model('ClientStore', {
     },
     setUploadSpeedLimit(speed) {
       return callApi({action: 'setUploadSpeedLimit', speed}).then(...exceptionLog()).then(syncUi);
+    },
+    setAltSpeedEnabled(enabled) {
+      return callApi({action: 'setAltSpeedEnabled', enabled}).then(...exceptionLog()).then(syncUi);
+    },
+    setAltDownloadSpeedLimit(speed) {
+      return callApi({action: 'setAltDownloadSpeedLimit', speed}).then(...exceptionLog()).then(syncUi);
+    },
+    setAltUploadSpeedLimit(speed) {
+      return callApi({action: 'setAltUploadSpeedLimit', speed}).then(...exceptionLog()).then(syncUi);
     },
     getTorrentFiles(id) {
       return callApi({action: 'getFileList', id: id}).then(...exceptionLog());
