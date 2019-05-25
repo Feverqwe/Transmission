@@ -41,7 +41,7 @@ const SpaceWatcherStore = types.model('SpaceWatcherStore', {
       try {
         const result = [];
         /**@type RootStore*/const rootStore = getRoot(self);
-        if (!rootStore.client.settings) {
+        if (!rootStore.client.settings || rootStore.client.settings.downloadDirFreeSpace) {
           yield rootStore.client.getSettings();
         }
         if (isAlive(self)) {
