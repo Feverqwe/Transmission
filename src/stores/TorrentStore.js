@@ -85,10 +85,6 @@ const TorrentStore = types.model('TorrentStore', {
       /**@type RootStore*/const rootStore = getRoot(self);
       return rootStore.client.torrentsStart([self.id]);
     },
-    pause() {
-      /**@type RootStore*/const rootStore = getRoot(self);
-      return rootStore.client.torrentsPause([self.id]);
-    },
     stop() {
       /**@type RootStore*/const rootStore = getRoot(self);
       return rootStore.client.torrentsStop([self.id]);
@@ -165,7 +161,7 @@ const TorrentStore = types.model('TorrentStore', {
       const started = !!(stat & 1);
 
       const actions = [];
-      if (!checking && !started && !queued) {
+      if (!checking) {
         actions.push('recheck');
       }
       if (checking || started || queued) {
@@ -180,7 +176,7 @@ const TorrentStore = types.model('TorrentStore', {
       if (!queued || paused) {
         actions.push('start');
       }
-      if ((!started || queued || paused) && !checking) {
+      if ((!started || paused) && !checking) {
         actions.push('forcestart');
       }
 

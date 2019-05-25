@@ -54,7 +54,7 @@ class PutUrlDialog extends React.Component {
     if (folders.length) {
       directorySelect = (
         <div className="nf-subItem">
-          <label>{chrome.i18n.getMessage('ST_CAPT_FOLDER')}</label>
+          <label>{chrome.i18n.getMessage('path')}</label>
           <select name="directory">
             <option value={-1}>{chrome.i18n.getMessage('defaultPath')}</option>
             {folders.map((folder, index) => {

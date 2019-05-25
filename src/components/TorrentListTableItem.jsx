@@ -43,11 +43,6 @@ class TorrentListTableItem extends React.Component {
     this.torrentStore.start();
   };
 
-  handlePause = (e) => {
-    e.preventDefault();
-    this.torrentStore.pause();
-  };
-
   handleStop = (e) => {
     e.preventDefault();
     this.torrentStore.stop();
@@ -253,8 +248,6 @@ class TorrentListTableItem extends React.Component {
               <div className="btns">
                 <a onClick={this.handleStart} title={chrome.i18n.getMessage('ML_START')} className="start"
                    href="#start"/>
-                <a onClick={this.handlePause} title={chrome.i18n.getMessage('ML_PAUSE')} className="pause"
-                   href="#pause"/>
                 <a onClick={this.handleStop} title={chrome.i18n.getMessage('ML_STOP')} className="stop" href="#stop"/>
               </div>
             </td>

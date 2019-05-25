@@ -88,13 +88,13 @@ class Menu extends React.Component {
   handleStartAll = (e) => {
     e.preventDefault();
     const ids = this.rootStore.client.pausedTorrentIds;
-    this.rootStore.client.torrentsUnpause(ids);
+    this.rootStore.client.torrentsStart(ids);
   };
 
-  handlePauseAll = (e) => {
+  handleStopAll = (e) => {
     e.preventDefault();
     const ids = this.rootStore.client.downloadingTorrentIds;
-    this.rootStore.client.torrentsPause(ids);
+    this.rootStore.client.torrentsStop(ids);
   };
 
   handleToggleAltSpeed = (e) => {
@@ -180,8 +180,8 @@ class Menu extends React.Component {
                className="btn start_all" href="#start_all"/>
           </li>
           <li>
-            <a onClick={this.handlePauseAll} title={chrome.i18n.getMessage('STM_TORRENTS_PAUSEALL')}
-               className="btn pause_all" href="#pause_all"/>
+            <a onClick={this.handleStopAll} title={chrome.i18n.getMessage('STM_TORRENTS_PAUSEALL')}
+               className="btn pause_all" href="#stop_all"/>
           </li>
           <li className="graph">
             {graph}
