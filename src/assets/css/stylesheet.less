@@ -26,14 +26,15 @@ ul {
 }
 .menu {
     display: flex;
-    height: 33px;
+    height: 32px;
+    align-items: center;
+    flex-shrink: 0;
 
     li {
         display: inline-block;
         width: 30px;
         height: 30px;
         overflow: hidden;
-        margin-top: 1px;
         flex-shrink: 0;
     }
 
@@ -45,7 +46,6 @@ ul {
         height: 24px;
         width: 3px;
         border-left: 1px solid #939393;
-        margin-bottom: 2px;
         margin-left: 3px;
     }
 
@@ -60,7 +60,6 @@ ul {
     li.select {
         width: 140px;
         margin: 0;
-        padding-top: 3px;
         padding-right: 2px;
         height: auto;
     }
@@ -106,6 +105,19 @@ ul {
         background-image: url("../img/magnet.png");
         background-size: 28px;
     }
+    a.alt_speed{
+        background-image: url("../img/alt_speed.png");
+        background-size: 28px;
+        &.active {
+            background-image: url("../img/alt_speed_active.png");
+            box-shadow: inset 0 0 1px 0px #000;
+        }
+    }
+}
+
+table.status-panel td.space.disk {
+    background-image: url(../img/free_space.png);
+    background-size: 16px;
 }
 
 @media
@@ -115,33 +127,29 @@ only screen and (                min-resolution: 2dppx) {
     .menu {
         a.wui{
             background-image: url("../img/wui@2x.png");
-            background-size: 28px;
         }
         a.start_all{
             background-image: url("../img/play_all@2x.png");
-            background-size: 28px;
         }
         a.pause_all{
             background-image: url("../img/pause_all@2x.png");
-            background-size: 28px;
         }
         a.add_file{
             background-image: url("../img/add@2x.png");
-            background-size: 28px;
         }
         a.add_magnet{
             background-image: url("../img/magnet@2x.png");
-            background-size: 28px;
+        }
+        a.alt_speed{
+            background-image: url("../img/alt_speed@2x.png");
+            &.active {
+                background-image: url("../img/alt_speed_active@2x.png");
+            }
         }
     }
     table.status-panel td.space.disk {
         background-image: url(../img/free_space@2x.png);
-        background-size: 16px;
     }
-}
-
-table.status-panel td.space.disk {
-    background-image: url(../img/free_space.png);
 }
 
 .torrent-list-layer {
@@ -851,7 +859,7 @@ tr > th {
 }
 
 .rc-select-dropdown {
-    top: 25px !important;
+    top: 26px !important;
     border: solid 1px #bbb;
     border-top-color: #dbdbdb;
     color: #000;

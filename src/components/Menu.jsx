@@ -97,6 +97,11 @@ class Menu extends React.Component {
     this.rootStore.client.torrentsPause(ids);
   };
 
+  handleToggleAltSpeed = (e) => {
+    e.preventDefault();
+    this.rootStore.client.setAltSpeedEnabled(!this.rootStore.client.settings.altSpeedEnabled);
+  };
+
   refFileInput = React.createRef();
 
   onPutFiles(files) {
@@ -118,7 +123,7 @@ class Menu extends React.Component {
 
   render() {
     let dropLayer = null;
-    if (this.state.showDropLayer){
+    if (this.state.showDropLayer) {
       const classList = ['drop_layer'];
       if (this.state.isDropped) {
         classList.push('dropped');
@@ -133,6 +138,13 @@ class Menu extends React.Component {
       graph = (
         <ComponentLoader load-page={'graph'}/>
       );
+    }
+
+    const altSpeedClassList = ['btn alt_speed'];
+    if (this.rootStore.client) {
+      if (this.rootStore.client.settings.altSpeedEnabled) {
+        altSpeedClassList.push('active');
+      }
     }
 
     return (
@@ -156,6 +168,11 @@ class Menu extends React.Component {
           <li>
             <a onClick={this.handleAddUrl} title={chrome.i18n.getMessage('MM_FILE_ADD_URL')}
                className="btn add_magnet" href="#add_magnet"/>
+          </li>
+          <li className="separate"/>
+          <li>
+            <a onClick={this.handleToggleAltSpeed} title={chrome.i18n.getMessage('altSpeedEnable')}
+               className={altSpeedClassList.join(' ')} href="#alt_speed"/>
           </li>
           <li className="separate"/>
           <li>
