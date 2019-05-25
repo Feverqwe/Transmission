@@ -105,11 +105,7 @@ class ContextMenu {
           title: chrome.i18n.getMessage('addInTorrentClient'),
           contexts: ['link']
         }).then(() => {
-          switch (this.bgStore.config.contextMenuType) {
-            case 'folder': {
-              return this.createFolderMenu(menuId);
-            }
-          }
+          return this.createFolderMenu(menuId);
         });
       });
     });

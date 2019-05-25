@@ -90,7 +90,6 @@ const SelectedLabelStore = types.model('SelectedLabelStore', {
  * @property {boolean} [showSpeedGraph]
  * @property {number} [popupHeight]
  * @property {boolean} [selectDownloadCategoryAfterPutTorrentFromContextMenu]
- * @property {string} [contextMenuType]
  * @property {boolean} [treeViewContextMenu]
  * @property {boolean} [putDefaultPathInContextMenu]
  * @property {string} [badgeColor]
@@ -147,7 +146,6 @@ const ConfigStore = types.model('ConfigStore', {
 
   popupHeight: types.optional(types.number, 300),
   selectDownloadCategoryAfterPutTorrentFromContextMenu: types.optional(types.boolean, false),
-  contextMenuType: types.optional(types.enumeration(['folder', 'label']), 'folder'),
   treeViewContextMenu: types.optional(types.boolean, false),
   putDefaultPathInContextMenu: types.optional(types.boolean, false),
 
@@ -159,7 +157,6 @@ const ConfigStore = types.model('ConfigStore', {
   fixCyrillicDownloadPath: types.optional(types.boolean, false),
 
   folders: types.array(FolderStore),
-  labels: types.array(types.string),
 
   torrentColumns: types.array(TorrentsColumnStore),
   filesColumns: types.array(FilesColumnStore),

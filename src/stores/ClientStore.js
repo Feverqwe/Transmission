@@ -53,7 +53,6 @@ const SettingsStore = types.model('SettingsStore', {
 /**
  * @typedef {Object} ClientStore
  * @property {Map<*,TorrentStore>} torrents
- * @property {LabelStore[]|undefined} labels
  * @property {SettingsStore|undefined} settings
  * @property {SpeedRollStore} [speedRoll]
  * @property {string|undefined} lastErrorMessage

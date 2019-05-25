@@ -393,14 +393,6 @@ class CtxOptions extends OptionsPage {
       <div className="page ctx">
         <h2>{chrome.i18n.getMessage('optCtx')}</h2>
         <label>
-          <span>{chrome.i18n.getMessage('folderContextMenu')}</span>
-          <input onChange={this.handleRadioChange} defaultChecked={this.configStore.contextMenuType === 'folder'} type="radio" name="contextMenuType" value="folder"/>
-        </label>
-        <label>
-          <span>{chrome.i18n.getMessage('labelContextMenu')}</span>
-          <input onChange={this.handleRadioChange} defaultChecked={this.configStore.contextMenuType === 'label'} type="radio" name="contextMenuType" value="label"/>
-        </label>
-        <label>
           <span>{chrome.i18n.getMessage('selectDownloadCategoryOnAddItemFromContextMenu')}</span>
           <input onChange={this.handleChange} defaultChecked={this.configStore.selectDownloadCategoryAfterPutTorrentFromContextMenu} type="checkbox" name="selectDownloadCategoryAfterPutTorrentFromContextMenu"/>
         </label>

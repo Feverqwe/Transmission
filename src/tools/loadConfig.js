@@ -59,7 +59,6 @@ const defaultConfig = {
 
   popupHeight: undefined,
   selectDownloadCategoryAfterPutTorrentFromContextMenu: undefined,
-  contextMenuType: undefined,
   treeViewContextMenu: undefined,
   putDefaultPathInContextMenu: undefined,
 
@@ -71,7 +70,6 @@ const defaultConfig = {
   fixCyrillicDownloadPath: undefined,
 
   folders: undefined,
-  labels: undefined,
 
   torrentColumns: defaultTorrentListColumnList,
   filesColumns: defaultFileListColumnList,
@@ -93,12 +91,10 @@ const oldConfigMap = {
   hideSeedStatusItem: 'hideSeedingTorrents',
   hideFnishStatusItem: 'hideFinishedTorrents',
   selectDownloadCategoryOnAddItemFromContextMenu: 'selectDownloadCategoryAfterPutTorrentFromContextMenu',
-  ctxMenuType: 'contextMenuType',
   showDefaultFolderContextMenuItem: 'putDefaultPathInContextMenu',
   fixCirilicTitle: 'fixCyrillicTorrentName',
   fixCirilicTorrentPath: 'fixCyrillicDownloadPath',
   folderList: 'folders',
-  labelList: 'labels',
   torrentListColumnList: 'torrentColumns',
   fileListColumnList: 'filesColumns',
 };
@@ -166,7 +162,6 @@ function migrateConfig(oldConfig, config) {
     hideFnishStatusItem: intToBoolean,
     showSpeedGraph: intToBoolean,
     selectDownloadCategoryOnAddItemFromContextMenu: intToBoolean,
-    ctxMenuType: value => value ? 'folder' : 'label',
     treeViewContextMenu: intToBoolean,
     showDefaultFolderContextMenuItem: intToBoolean,
     showFreeSpace: intToBoolean,

@@ -88,7 +88,6 @@ class Bg {
         logger.info('contextMenu');
         const dep = [
           this.bgStore.config.folders.length,
-          this.bgStore.config.contextMenuType,
           this.bgStore.config.treeViewContextMenu,
           this.bgStore.config.putDefaultPathInContextMenu
         ];
