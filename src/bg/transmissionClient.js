@@ -447,6 +447,7 @@ class TransmissionClient {
     return this.sendAction({
       method: 'session-set',
       arguments: {
+        'alt-speed-enabled': true,
         'alt-speed-down': speed
       }
     }).then(() => {
@@ -458,6 +459,7 @@ class TransmissionClient {
     return this.sendAction({
       method: 'session-set',
       arguments: {
+        'alt-speed-enabled': true,
         'alt-speed-up': speed
       }
     }).then(() => {
