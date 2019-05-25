@@ -117,8 +117,9 @@ class SpeedMenuBody extends React.Component {
 
       getSpeedArray(this.speedLimit, 10, true).forEach((speed) => {
         const selected = this.speedLimitEnabled && speed === this.speedLimit;
+        const isDefault = speed === this.speedLimit;
         items.push(
-          <SpeedLimitItem key={`speed-${speed}`} speed={speed} selected={selected} onSetSpeedLimit={this.handleSetSpeedLimit}/>
+          <SpeedLimitItem key={`speed-${speed}`} speed={speed} selected={selected} isDefault={isDefault} onSetSpeedLimit={this.handleSetSpeedLimit}/>
         );
       });
     }
@@ -133,6 +134,7 @@ class SpeedLimitItem extends React.PureComponent {
   static propTypes = {
     speed: PropTypes.number.isRequired,
     selected: PropTypes.bool.isRequired,
+    isDefault: PropTypes.bool.isRequired,
     onSetSpeedLimit: PropTypes.func.isRequired,
   };
 
@@ -148,8 +150,19 @@ class SpeedLimitItem extends React.PureComponent {
       )
     }
 
+    const speed = speedToStr(this.props.speed * 1024);
+
+    let value = null;
+    if (this.props.isDefault) {
+      value = (
+        <b>{speed}</b>
+      )
+    } else {
+      value = speed;
+    }
+
     return (
-      <Item onClick={this.handleClick}>{selected}{speedToStr(this.props.speed * 1024)}</Item>
+      <Item onClick={this.handleClick}>{selected}{value}</Item>
     );
   }
 }
