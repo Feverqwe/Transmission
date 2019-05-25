@@ -180,10 +180,10 @@ function migrateConfig(oldConfig, config) {
   }
 
   function folderListToFolders(value) {
-    return value.map(([path, label]) => {
+    return value.map(([, path, label]) => {
       return {
         path,
-        label: label || ''
+        name: label || ''
       };
     });
   }
