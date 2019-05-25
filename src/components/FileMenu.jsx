@@ -6,7 +6,7 @@ import PropTypes from "prop-types";
 import {FixedMenu} from "./FixedReactContexify";
 
 const fileMenuItems = [
-  'high', 'normal', 'low', '_', 'dntdownload'
+  'high', 'normal', 'low', '_', 'dntdownload', 'rename'
 ];
 
 const FileMenu = React.memo(() => {
@@ -34,6 +34,10 @@ class FileMenuBody extends ContextMenuBody {
     const id = this.fileListStore.id;
     const selectedIndexes = this.fileListStore.selectedIndexes;
     this.rootStore.client.filesSetPriority(id, selectedIndexes, priority);
+  };
+
+  handleRename = ({event: e, props}) => {
+    // todo: handleRename
   };
 
   render() {
@@ -81,6 +85,12 @@ class FileMenuBody extends ContextMenuBody {
         case 'dntdownload': {
           buttons.push(
             <PriorityItem key={action} onSetPriority={this.handleSetPriority} selected={currentPriority === 0} level={0}/>
+          );
+          break;
+        }
+        case 'rename': {
+          buttons.push(
+            <Item key={action} onClick={this.handleRename}>{chrome.i18n.getMessage('rename')}</Item>
           );
           break;
         }

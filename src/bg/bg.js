@@ -150,12 +150,20 @@ class Bg {
         promise = this.client.removedatatorrent(message.ids);
         break;
       }
+      case 'queueTop': {
+        promise = this.client.queueTop(message.ids);
+        break;
+      }
       case 'queueUp': {
         promise = this.client.queueUp(message.ids);
         break;
       }
       case 'queueDown': {
         promise = this.client.queueDown(message.ids);
+        break;
+      }
+      case 'queueBottom': {
+        promise = this.client.queueBottom(message.ids);
         break;
       }
       case 'setPriority': {
@@ -223,6 +231,12 @@ class Bg {
       case 'getFreeSpace': {
         promise = this.whenReady().then(() => {
           return this.client.getFreeSpace(message.path);
+        });
+        break;
+      }
+      case 'reannounce': {
+        promise = this.whenReady().then(() => {
+          return this.client.reannounce(message.ids);
         });
         break;
       }

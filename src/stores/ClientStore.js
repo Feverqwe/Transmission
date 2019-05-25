@@ -226,11 +226,17 @@ const ClientStore = types.model('ClientStore', {
     torrentsRemoveTorrentFiles(ids) {
       return callApi({action: 'removedatatorrent', ids: ids}).then(...exceptionLog()).then(syncUi);
     },
+    torrentsQueueTop(ids) {
+      return callApi({action: 'queueTop', ids: ids}).then(...exceptionLog()).then(syncUi);
+    },
     torrentsQueueUp(ids) {
       return callApi({action: 'queueUp', ids: ids}).then(...exceptionLog()).then(syncUi);
     },
     torrentsQueueDown(ids) {
       return callApi({action: 'queueDown', ids: ids}).then(...exceptionLog()).then(syncUi);
+    },
+    torrentsQueueBottom(ids) {
+      return callApi({action: 'queueBottom', ids: ids}).then(...exceptionLog()).then(syncUi);
     },
     filesSetPriority(id, fileIdxs, level) {
       return callApi({action: 'setPriority', level, id: id, fileIdxs}).then(...exceptionLog()).then(syncUi);
@@ -267,6 +273,9 @@ const ClientStore = types.model('ClientStore', {
     },
     getFreeSpace(path) {
       return callApi({action: 'getFreeSpace', path}).then(...exceptionLog()).then(syncUi);
+    },
+    reannounce(ids) {
+      return callApi({action: 'reannounce', ids: ids}).then(...exceptionLog()).then(syncUi);
     },
     getSnapshot() {
       return getSnapshot(self);

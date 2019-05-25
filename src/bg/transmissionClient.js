@@ -317,6 +317,13 @@ class TransmissionClient {
     });
   }
 
+  queueTop(ids) {
+    return this.sendAction({
+      method: 'queue-move-top',
+      arguments: {ids}
+    });
+  }
+
   queueUp(ids) {
     return this.sendAction({
       method: 'queue-move-up',
@@ -327,13 +334,6 @@ class TransmissionClient {
   queueDown(ids) {
     return this.sendAction({
       method: 'queue-move-down',
-      arguments: {ids}
-    });
-  }
-
-  queueTop(ids) {
-    return this.sendAction({
-      method: 'queue-move-top',
       arguments: {ids}
     });
   }
