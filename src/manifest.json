@@ -1,24 +1,30 @@
 {
     "manifest_version": 2,
+    "minimum_chrome_version": "49",
     "browser_action": {
-        "default_icon": "images/icon.png",
-        "default_popup": "manager.html",
+        "default_icon": {
+            "16": "assets/icons/icon_16.png",
+            "24": "assets/icons/icon_24.png",
+            "32": "assets/icons/icon_32.png"
+        },
+        "default_popup": "index.html#popup",
         "default_title": "Transmission easy client"
     },
     "background": {
         "scripts": [
-            "js/utils.js",
-            "js/mono.js",
-            "js/background.js"
+            "commons.chunk.js",
+            "bg.js"
         ]
     },
     "icons": {
-        "128": "images/icon_128.png"
+        "16": "assets/icons/icon_16.png",
+        "48": "assets/icons/icon_48.png",
+        "128": "assets/icons/icon_128.png"
     },
     "permissions": [ "http://*/*", "https://*/*", "storage", "notifications", "tabs", "contextMenus" ],
     "name": "Transmission easy client",
     "description": "__MSG_appDesc__",
     "default_locale": "en",
     "options_page": "options.html",
-    "version": "1.4.1"
+    "version": "2.9.0"
 }

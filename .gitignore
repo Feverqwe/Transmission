@@ -1,5 +1,2 @@
-/.idea/
-/output/
+/dist/
 /node_modules/
-/env.json
-package-lock.json
