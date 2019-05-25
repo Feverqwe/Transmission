@@ -3,7 +3,7 @@ import {autorun} from "mobx";
 
 /**
  * @typedef {Object} ListSelectStore
- * @property {string[]} selectedIds
+ * @property {number[]} selectedIds
  * @property {function} addSelectedId
  * @property {function} isSelectedId
  * @property {function} removeSelectedId

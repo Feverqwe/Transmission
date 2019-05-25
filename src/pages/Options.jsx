@@ -209,8 +209,16 @@ class ClientOptions extends React.Component {
           </label>
           <h3>{chrome.i18n.getMessage('ST_CAPT_ADVANCED')}</h3>
           <label>
+            <span>{chrome.i18n.getMessage('requireAuthentication')}</span>
+            <input type="checkbox" name="authenticationRequired" defaultChecked={this.configStore.authenticationRequired}/>
+          </label>
+          <label>
+            <span>{chrome.i18n.getMessage('guiPath')}</span>
+            <input type="text" name="webPathname" defaultValue={this.configStore.webPathname}/>
+          </label>
+          <label>
             <span>{chrome.i18n.getMessage('useSSL')}</span>
-            <input type="checkbox" name="ssl" defaultValue={this.configStore.ssl}/>
+            <input type="checkbox" name="ssl" defaultChecked={this.configStore.ssl}/>
           </label>
           <label>
             <span>{chrome.i18n.getMessage('path')}</span>

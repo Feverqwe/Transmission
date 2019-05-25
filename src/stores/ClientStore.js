@@ -85,8 +85,10 @@ const SettingsStore = types.model('SettingsStore', {
  * @property {function} torrentsRecheck
  * @property {function} torrentsRemoveTorrent
  * @property {function} torrentsRemoveTorrentFiles
+ * @property {function} torrentsQueueTop
  * @property {function} torrentsQueueUp
  * @property {function} torrentsQueueDown
+ * @property {function} torrentsQueueBottom
  * @property {function} filesSetPriority
  * @property {function} setDownloadSpeedLimitEnabled
  * @property {function} setDownloadSpeedLimit
@@ -99,6 +101,9 @@ const SettingsStore = types.model('SettingsStore', {
  * @property {function} getSettings
  * @property {function} sendFiles
  * @property {function} getFreeSpace
+ * @property {function} reannounce
+ * @property {function} rename
+ * @property {function} torrentSetLocation
  * @property {function} getSnapshot
  * @property {function} syncUiClient
  */

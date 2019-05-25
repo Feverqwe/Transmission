@@ -95,7 +95,6 @@ const SelectedLabelStore = types.model('SelectedLabelStore', {
  * @property {string} [badgeColor]
  * @property {boolean} [showFreeSpace]
  * @property {FolderStore[]} folders
- * @property {string[]} labels
  * @property {TorrentsColumnStore[]} torrentColumns
  * @property {FilesColumnStore[]} filesColumns
  * @property {{by:string,[direction]:number}} [torrentsSort]

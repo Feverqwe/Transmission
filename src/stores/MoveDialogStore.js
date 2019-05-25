@@ -4,7 +4,7 @@ import {getRoot, types} from "mobx-state-tree";
  * @typedef {Object} MoveDialogStore
  * @property {string} id
  * @property {string} type
- * @property {string} path
+ * @property {string} directory
  * @property {number[]} torrentIds
  * @property {function} close
  */

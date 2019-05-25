@@ -8,7 +8,7 @@ const logger = getLogger('SpaceWatcherStore');
  * @typedef {Object} DownloadDirStore
  * @property {string} path
  * @property {number} available
- * @property {function} availableStr
+ * @property {*} availableStr
  */
 const DownloadDirStore = types.model('DownloadDirStore', {
   path: types.string,

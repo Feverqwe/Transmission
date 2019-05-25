@@ -15,25 +15,26 @@ const byColumnMap = {
 
 /**
  * @typedef {ListSelectStore} FileListStore
- * @property {string} id
+ * @property {number} id
  * @property {boolean} [removeSelectOnHide]
  * @property {string} [state]
  * @property {FileStore[]} files
+ * @property {string} [directory]
  * @property {boolean} [isLoading]
  * @property {string} [filter]
+ * @property {string[]} selectedIds
  * @property {function:Promise} fetchFiles
  * @property {function} setFilter
  * @property {function} setRemoveSelectOnHide
  * @property {function} getFileById
  * @property {function} getFileIndexById
- * @property {function} getDownloadUrlById
  * @property {*} torrent
  * @property {*} filteredFiles
  * @property {*} sortedFiles
  * @property {*} _sortedIds
- * @property {*} isSelectedAll
  * @property {*} selectedIndexes
  * @property {*} filterLevel
+ * @property {*} joinedDirectory
  * @property {function} afterCreate
  * @property {function} beforeDestroy
  */
