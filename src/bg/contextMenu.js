@@ -36,11 +36,10 @@ class ContextMenu {
     }
 
     const firstFolder = this.bg.bgStore.config.folders[0];
-    const volume = firstFolder.volume;
     const path = prompt(chrome.i18n.getMessage('enterNewDirPath'), firstFolder.path);
     if (path) {
-      if (!this.bg.bgStore.config.hasFolder(volume, path)) {
-        this.bg.bgStore.config.addFolder(volume, path);
+      if (!this.bg.bgStore.config.hasFolder(path)) {
+        this.bg.bgStore.config.addFolder(path);
       }
     }
   }

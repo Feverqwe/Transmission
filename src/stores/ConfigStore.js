@@ -43,12 +43,10 @@ const FilesColumnStore = types.compose('FilesColumnsStore', ColumnStore, types.m
 
 /**
  * @typedef {Object} FolderStore
- * @property {string} volume
  * @property {string} name
  * @property {string} path
  */
 const FolderStore = types.model('FolderStore', {
-  volume: types.number,
   name: types.string,
   path: types.string
 });
@@ -79,6 +77,7 @@ const SelectedLabelStore = types.model('SelectedLabelStore', {
  * @property {boolean} [ssl]
  * @property {number} [port]
  * @property {string} [pathname]
+ * @property {string} [webPathname]
  * @property {boolean} [authenticationRequired]
  * @property {string} [login]
  * @property {string} [password]
@@ -183,14 +182,14 @@ const ConfigStore = types.model('ConfigStore', {
     setKeyValue(keyValue) {
       Object.assign(self, keyValue);
     },
-    addFolder(volume, path, name = '') {
-      self.folders.push({volume, path, name});
+    addFolder(path, name = '') {
+      self.folders.push({path, name});
       return storageSet({
         folders: self.folders
       });
     },
-    hasFolder(volume, path) {
-      return self.folders.some((folder) => folder.volume === volume &&  folder.path === path);
+    hasFolder(path) {
+      return self.folders.some(folder => folder.path === path);
     },
     moveTorrensColumn(from, to) {
       const column = resolveIdentifier(TorrentsColumnStore, self, from);

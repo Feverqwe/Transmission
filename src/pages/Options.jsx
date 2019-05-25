@@ -413,68 +413,22 @@ class CtxOptions extends OptionsPage {
 @inject('rootStore')
 @observer
 class CtxOptionsDirs extends OptionsPage {
-  state = {
-    downloadDirsState: 'idle', // idle, pending, done, error
-    downloadDirs: [],
-  };
-
-  componentDidMount() {
-    this.handleUpdateDownloadDirs();
-  }
-
-  handleUpdateDownloadDirs = (e) => {
-    e && e.preventDefault();
-    this.setState({
-      downloadDirsState: 'pending'
-    });
-    this.rootStore.client.getDownloadDirs().then((result) => {
-      if (!this.bodyRef.current) return;
-      this.setState({
-        downloadDirs: result.downloadDirs,
-        downloadDirsState: 'done'
-      });
-    }, (err) => {
-      logger.error('handleUpdateDownloadDirs error', err);
-      if (!this.bodyRef.current) return;
-      this.setState({
-        downloadDirs: [],
-        downloadDirsState: 'error'
-      });
-    });
-  };
-
-  get selectedDownloadDir() {
-    let index = -1;
-    if (this.refDownloadDirSelect.current) {
-      const value = this.refDownloadDirSelect.current.value;
-      if (value) {
-        index = parseInt(this.refDownloadDirSelect.current.value, 10);
-      }
-    }
-    if (index === -1 && this.state.downloadDirs.length) {
-      index = 0;
-    }
-    return this.state.downloadDirs[index] || null;
-  }
-
   handleSubmit = (e) => {
     e.preventDefault();
     const form = e.currentTarget;
 
-    const volume = parseInt(form.elements.volume.value, 10);
     const path = form.elements.path.value.trim();
     const name = form.elements.name.value.trim();
-    if (!Number.isFinite(volume) || !path) return;
+    if (!path) return;
 
-    if (!this.configStore.hasFolder(volume, path)) {
-      this.configStore.addFolder(volume, path, name);
+    if (!this.configStore.hasFolder(path)) {
+      this.configStore.addFolder(path, name);
       form.elements.path.value = '';
       form.elements.name.value = '';
     }
   };
 
   bodyRef = React.createRef();
-  refDownloadDirSelect = React.createRef();
   refDirectorySelect = React.createRef();
 
   get selectedDirectories() {
@@ -499,26 +453,8 @@ class CtxOptionsDirs extends OptionsPage {
   };
 
   render() {
-    const downloadDirs = this.state.downloadDirs.map((directory, index) => {
-      return (
-        <option key={directory.path} value={index}>{directory.path}</option>
-      );
-    });
-
-    let downloadDirAvailable = null;
-    if (this.selectedDownloadDir) {
-      downloadDirAvailable = (
-        <>
-          {' '}
-          <span>{chrome.i18n.getMessage('available')}</span>:
-          {' '}
-          <span>{formatBytes(this.selectedDownloadDir.available * 1024 * 1024)}</span>
-        </>
-      );
-    }
-
     const directories = this.configStore.folders.map((folder, index) => {
-      let name = `${folder.volume}:${folder.path}`;
+      let name = folder.path;
       if (folder.name) {
         name = `${folder.name} (${name})`;
       }
@@ -543,16 +479,6 @@ class CtxOptionsDirs extends OptionsPage {
             <form onSubmit={this.handleSubmit} autoComplete="off">
               <span>{chrome.i18n.getMessage('addItem')}</span>:
               <div className="optionItem">
-                <span>{chrome.i18n.getMessage('dirList')}</span>
-                {' '}
-                <select ref={this.refDownloadDirSelect} name="volume" id="dirList" required={true}>
-                  {downloadDirs}
-                </select>
-                {downloadDirAvailable}
-                {' '}
-                <button onClick={this.handleUpdateDownloadDirs} type="button">{chrome.i18n.getMessage('update')}</button>
-              </div>
-              <div className="optionItem">
                 <span>{chrome.i18n.getMessage('subPath')}</span>
                 {' '}
                 <input name="path" type="text" required={true}/>
@@ -562,7 +488,7 @@ class CtxOptionsDirs extends OptionsPage {
                 {' '}
                 <input name="name" type="text"/>
                 {' '}
-                <button disabled={!downloadDirs.length} type="submit">{chrome.i18n.getMessage('add')}</button>
+                <button type="submit">{chrome.i18n.getMessage('add')}</button>
               </div>
             </form>
           </div>

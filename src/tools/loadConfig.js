@@ -192,9 +192,8 @@ function migrateConfig(oldConfig, config) {
   }
 
   function folderListToFolders(value) {
-    return value.map(([volume, path, label]) => {
+    return value.map(([path, label]) => {
       return {
-        volume: parseInt(volume, 10),
         path,
         label: label || ''
       };
