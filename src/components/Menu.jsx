@@ -87,7 +87,7 @@ class Menu extends React.Component {
 
   handleStartAll = (e) => {
     e.preventDefault();
-    const ids = this.rootStore.client.pausedTorrentIds;
+    const ids = this.rootStore.client.stoppedTorrentIds;
     this.rootStore.client.torrentsStart(ids);
   };
 

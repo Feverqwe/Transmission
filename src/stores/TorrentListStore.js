@@ -74,9 +74,6 @@ const TorrentListStore = types.compose('TorrentListStore', ListSelectStore, type
               break;
             }
           }
-        } else
-        if (torrent.label === filter.label) {
-          result.push(torrent);
         }
       }
 

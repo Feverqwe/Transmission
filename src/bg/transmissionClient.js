@@ -251,14 +251,6 @@ class TransmissionClient {
     });
   }
 
-  unpause(ids) {
-    throw new ErrorWithCode('Unsupported', 'IS_NOT_SUPPORTED')
-  }
-
-  pause(ids) {
-    throw new ErrorWithCode('Unsupported', 'IS_NOT_SUPPORTED')
-  }
-
   stop(ids) {
     return this.sendAction({
       method: 'torrent-stop',
@@ -534,19 +526,19 @@ class TransmissionClient {
 
   normalizeTorrent = (torrent) => {
     const id = torrent.id;
-    const {statusCode, statusText} = normalizeTorrentStatus(torrent);
-    const state = statusCode;
+    const statusCode = torrent.status;
+    const errorCode = torrent.error;
+    const errorString = torrent.errorString;
     const name = torrent.name;
     const size = torrent.totalSize;
-    const percentDone = torrent.percentDone || 0;
-    const progress = Math.trunc((torrent.recheckProgress || percentDone) * 1000);
+    const percentDone = torrent.percentDone;
+    const recheckProgress = torrent.recheckProgress;
     const downloaded = torrent.downloadedEver;
     const uploaded = torrent.uploadedEver;
     const shared = torrent.downloadedEver > 0 ? Math.round(torrent.uploadedEver / torrent.downloadedEver * 1000) : 0;
     const uploadSpeed = torrent.rateUpload;
     const downloadSpeed = torrent.rateDownload;
     const eta = torrent.eta < 0 ? 0 : torrent.eta;
-    const label = '';
 
     let _peers = 0;
     let _seeds = 0;
@@ -565,72 +557,20 @@ class TransmissionClient {
     const seeds = _seeds;
 
     const order = torrent.queuePosition;
-    const status = statusText;
     const addedTime = torrent.addedDate;
     const completedTime = torrent.doneDate;
     const directory = torrent.downloadDir;
     const magnetLink = torrent.magnetLink;
 
     return {
-      id, state, name, size, progress,
-      downloaded, uploaded, shared, uploadSpeed, downloadSpeed,
-      eta, label, activePeers, peers, activeSeeds,
-      seeds, order, status, addedTime,
-      completedTime, directory, magnetLink
+      id, statusCode, errorCode, errorString,
+      name, size, percentDone,
+      recheckProgress, downloaded, uploaded, shared,
+      uploadSpeed, downloadSpeed, eta,
+      activePeers, peers, activeSeeds, seeds,
+      order, addedTime, completedTime, directory,
+      magnetLink
     };
-
-    function normalizeTorrentStatus(torrent) {
-      let statusCode, statusText;
-      if (torrent.error > 0) {
-        statusCode = 144;
-        const errorString = torrent.errorString || 'Unknown error';
-        statusText = chrome.i18n.getMessage('OV_FL_ERROR') + ': ' + errorString;
-      } else {
-        switch (torrent.status) {
-          case 0: {
-            statusCode = 128;
-            statusText = 'Stopped';
-            break;
-          }
-          case 1: {
-            statusCode = 233;
-            statusText = 'Queued to check files';
-            break;
-          }
-          case 2: {
-            statusCode = 130;
-            statusText = 'Checking';
-            break;
-          }
-          case 3: {
-            statusCode = 200;
-            statusText = 'Queued to download';
-            break;
-          }
-          case 4: {
-            statusCode = 201;
-            statusText = 'Downloading';
-            break;
-          }
-          case 5: {
-            statusCode = 200;
-            statusText = 'Queued to seed';
-            break;
-          }
-          case 6: {
-            statusCode = 201;
-            statusText = 'Seeding';
-            break;
-          }
-          default: {
-            statusCode = 152;
-            statusText = 'Unknown';
-            break;
-          }
-        }
-      }
-      return {statusCode, statusText};
-    }
   };
 
   normalizeFiles = (torrent) => {

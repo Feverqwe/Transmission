@@ -12,7 +12,6 @@ import storageGet from "../tools/storageGet";
 import storageSet from "../tools/storageSet";
 import storageRemove from "../tools/storageRemove";
 import {migrateConfig} from "../tools/loadConfig";
-import formatBytes from "../tools/formatBytes";
 
 const logger = getLogger('Options');
 

@@ -1,7 +1,6 @@
 import React from "react";
 import {Item, Separator, Submenu} from "react-contexify";
 import {inject, observer} from "mobx-react";
-import PropTypes from "prop-types";
 import ContextMenuBody from "./ContextMenuBody";
 import {FixedMenu} from "./FixedReactContexify";
 

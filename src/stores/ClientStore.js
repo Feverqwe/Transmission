@@ -1,4 +1,4 @@
-import {getRoot, getSnapshot, types} from "mobx-state-tree";
+import {getSnapshot, types} from "mobx-state-tree";
 import SpeedRollStore from "./SpeedRollStore";
 import speedToStr from "../tools/speedToStr";
 import TorrentStore from "./TorrentStore";
@@ -76,7 +76,7 @@ const SettingsStore = types.model('SettingsStore', {
  * @property {function} setLastErrorMessage
  * @property {*} torrentIds
  * @property {*} downloadingTorrentIds
- * @property {*} pausedTorrentIds
+ * @property {*} stoppedTorrentIds
  * @property {*} activeTorrentIds
  * @property {*} activeCount
  * @property {*} currentSpeed
@@ -188,10 +188,10 @@ const ClientStore = types.model('ClientStore', {
       }
       return result;
     },
-    get pausedTorrentIds() {
+    get stoppedTorrentIds() {
       const result = [];
       for (const torrent of self.torrents.values()) {
-        if (torrent.isPaused) {
+        if (torrent.isStopped) {
           result.push(torrent.id);
         }
       }
