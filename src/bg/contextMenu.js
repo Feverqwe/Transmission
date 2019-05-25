@@ -44,7 +44,7 @@ class ContextMenu {
     }
   }
 
-  onSendLink(url, tabId, frameId, directory, label) {
+  onSendLink(url, tabId, frameId, directory) {
     return downloadFileFromTab(url, tabId, frameId).catch((err) => {
       if (err.code === 'FILE_SIZE_EXCEEDED') {
         this.bg.torrentErrorNotify(chrome.i18n.getMessage('fileSizeError'));
@@ -55,11 +55,12 @@ class ContextMenu {
       }
       return {url};
     }).then((data) => {
-      return this.bg.client.putTorrent(data, directory, label);
+      return this.bg.client.putTorrent(data, directory);
     }).then(() => {
       if (this.bgStore.config.selectDownloadCategoryAfterPutTorrentFromContextMenu) {
         this.bgStore.config.setSelectedLabel('DL', true);
       }
+      return this.bg.client.updateTorrents();
     }).catch((err) => {
       logger.error('onSendLink error', err);
     });

@@ -215,7 +215,7 @@ class TransmissionClient {
 
   putTorrent({blob, url}, directory) {
     return this.sendFile({blob, url}, directory).then((response) => {
-      const {'torrent-added': torrentAdded, 'torrent-duplicate': torrentDuplicate} = response;
+      const {'torrent-added': torrentAdded, 'torrent-duplicate': torrentDuplicate} = response.arguments;
       if (torrentAdded) {
         this.bg.torrentAddedNotify(torrentAdded);
       }
@@ -497,7 +497,9 @@ class TransmissionClient {
         logger.error('sendFile error', url, err);
         return {error: err};
       });
-    }));
+    })).then((result) => {
+      return this.bg.client.updateTorrents().then(() => result);
+    });
   }
 
   retryIfTokenInvalid(callback) {
