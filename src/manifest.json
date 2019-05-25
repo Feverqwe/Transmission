@@ -26,5 +26,5 @@
     "description": "__MSG_appDesc__",
     "default_locale": "en",
     "options_page": "options.html",
-    "version": "2.8.5"
+    "version": "2.9.0"
 }
