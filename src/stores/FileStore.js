@@ -6,6 +6,7 @@ const priorityLocaleMap = ['MF_DONT', 'MF_LOW', 'MF_NORMAL', 'MF_HIGH'];
 /**
  * @typedef {Object} FileStore
  * @property {string} name
+ * @property {string} shortName
  * @property {number} size
  * @property {number} downloaded
  * @property {number} priority
@@ -20,6 +21,7 @@ const priorityLocaleMap = ['MF_DONT', 'MF_LOW', 'MF_NORMAL', 'MF_HIGH'];
  */
 const FileStore = types.model('FileStore', {
   name: types.identifier,
+  shortName: types.string,
   size: types.number,
   downloaded: types.number,
   priority: types.number,
@@ -53,8 +55,8 @@ const FileStore = types.model('FileStore', {
       return rootStore.fileList.selectedIds.indexOf(self.name) !== -1;
     },
     get nameParts() {
-      if (cachedNamePartsName !== self.name) {
-        cachedNamePartsName = self.name;
+      if (cachedNamePartsName !== self.shortName) {
+        cachedNamePartsName = self.shortName;
         cachedNameParts = cachedNamePartsName.split(/[\\/]/);
       }
       return cachedNameParts;

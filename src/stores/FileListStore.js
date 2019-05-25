@@ -42,6 +42,7 @@ const FileListStore = types.compose('FileListStore', ListSelectStore, types.mode
   removeSelectOnHide: types.optional(types.boolean, false),
   state: types.optional(types.enumeration(['idle', 'pending', 'done', 'error']), 'idle'),
   files: types.array(FileStore),
+  directory: types.optional(types.string,''),
   isLoading: types.optional(types.boolean, true),
   filter: types.optional(types.string, ''),
   selectedIds: types.array(types.string),
@@ -52,8 +53,10 @@ const FileListStore = types.compose('FileListStore', ListSelectStore, types.mode
       self.state = 'pending';
       try {
         /**@type RootStore*/const rootStore = getRoot(self);
-         const files = yield rootStore.client.getTorrentFiles(self.id);
+         const _files = yield rootStore.client.getTorrentFiles(self.id);
+         const {dir, files} = setFilesShortName(_files);
          if (isAlive(self)) {
+           self.directory = dir;
            self.files = files;
            self.isLoading = false;
            self.state = 'done';
@@ -136,6 +139,18 @@ const FileListStore = types.compose('FileListStore', ListSelectStore, types.mode
       const filter = self.filter;
       return !filter ? 0 : filter.split(/[\\/]/).length;
     },
+    get joinedDirectory() {
+      const directory = self.torrent.directory;
+      if (directory) {
+        if (self.directory) {
+          const sep = /\//.test(directory) ? '/' : '\\';
+          return directory + sep + self.directory;
+        } else {
+          return directory;
+        }
+      }
+      return '';
+    },
     afterCreate() {
       self.startSortedIdsWatcher();
     },
@@ -149,5 +164,47 @@ const FileListStore = types.compose('FileListStore', ListSelectStore, types.mode
     }
   };
 });
+
+function setFilesShortName(files) {
+  let dir = null;
+  let sep = null;
+  const isEvery = files.every((file) => {
+    const name = file.name;
+
+    if (sep === null) {
+      if (/\//.test(name)) {
+        sep = '/';
+      } else
+      if (/\\/.test(name)) {
+        sep = '\\';
+      } else {
+        return false;
+      }
+    }
+
+    const pos = name.indexOf(sep);
+    if (pos === -1) {
+      return false;
+    }
+
+    if (dir === null) {
+      dir = name.substr(0, pos);
+    }
+
+    return dir === name.substr(0, pos);
+  });
+
+  if (dir === null) {
+    dir = '';
+  }
+
+  if (isEvery) {
+    files.forEach((file) => {
+      file.shortName = file.name.substr(dir.length + 1);
+    });
+  }
+
+  return {dir, files};
+}
 
 export default FileListStore;

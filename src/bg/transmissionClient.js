@@ -574,11 +574,12 @@ class TransmissionClient {
       const state = torrent.fileStats[index];
 
       const name = file.name;
+      const shortName = name;
       const size = file.length;
       const downloaded = file.bytesCompleted;
       const priority = !state.wanted ? 0 : state.priority + 2;
 
-      return {name, size, downloaded, priority};
+      return {name, shortName, size, downloaded, priority};
     });
   };
 

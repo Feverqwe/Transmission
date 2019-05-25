@@ -85,9 +85,9 @@ class FileListTable extends React.Component {
     }
 
     let directory = null;
-    if (torrent.directory) {
+    if (this.fileListStore.joinedDirectory) {
       directory = (
-        <input type="text" value={torrent.directory} readOnly="readonly"/>
+        <input type="text" value={this.fileListStore.joinedDirectory} readOnly="readonly"/>
       );
     }
 
