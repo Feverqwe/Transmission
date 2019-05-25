@@ -405,7 +405,6 @@ class CtxOptions extends OptionsPage {
           <input onChange={this.handleChange} defaultChecked={this.configStore.selectDownloadCategoryAfterPutTorrentFromContextMenu} type="checkbox" name="selectDownloadCategoryAfterPutTorrentFromContextMenu"/>
         </label>
         <CtxOptionsDirs/>
-        <CtxOptionsLabels/>
       </div>
     );
   }
@@ -579,81 +578,6 @@ class CtxOptionsDirs extends OptionsPage {
             {' '}
             <button type="button" onClick={this.handleMoveDown}>{chrome.i18n.getMessage('down')}</button>
           </div>
-        </div>
-      </>
-    );
-  }
-}
-
-@inject('rootStore')
-@observer
-class CtxOptionsLabels extends OptionsPage {
-  handleSubmit = (e) => {
-    e.preventDefault();
-    const form = e.currentTarget;
-
-    const label = form.elements.label.value.trim();
-    if (!label) return;
-
-    if (!this.configStore.hasLabel(label)) {
-      this.configStore.addLabel(label);
-      form.elements.label.value = '';
-    }
-  };
-
-  refLabelSelect = React.createRef();
-
-  get selectedLabels() {
-    return Array.from(this.refLabelSelect.current.selectedOptions).map((option) => {
-      return this.configStore.labels[parseInt(option.value, 10)];
-    });
-  }
-
-  handleRemove = (e) => {
-    e.preventDefault();
-    this.configStore.removeLabels(this.selectedLabels);
-  };
-
-  handleMoveUp = (e) => {
-    e.preventDefault();
-    this.configStore.moveLabels(this.selectedLabels, -1);
-  };
-
-  handleMoveDown = (e) => {
-    e.preventDefault();
-    this.configStore.moveLabels(this.selectedLabels, 1);
-  };
-
-  render() {
-    const labels = this.configStore.labels.map((label, index) => {
-      return (
-        <option key={label} value={index}>{label}</option>
-      );
-    });
-
-    return (
-      <>
-        <h3>{chrome.i18n.getMessage('labelList')}</h3>
-        <div className="optionItem">
-          <form onSubmit={this.handleSubmit} autoComplete="off">
-            <span>{chrome.i18n.getMessage('OV_COL_LABEL')}</span>
-            {' '}
-            <input name="label" type="text" required={true}/>
-            {' '}
-            <button type="submit">{chrome.i18n.getMessage('add')}</button>
-          </form>
-        </div>
-        <div className="optionItem">
-          <select ref={this.refLabelSelect} multiple id="labelList">
-            {labels}
-          </select>
-        </div>
-        <div className="optionItem">
-          <button type="button" onClick={this.handleRemove}>{chrome.i18n.getMessage('deleteSelected')}</button>
-          {' '}
-          <button type="button" onClick={this.handleMoveUp}>{chrome.i18n.getMessage('up')}</button>
-          {' '}
-          <button type="button" onClick={this.handleMoveDown}>{chrome.i18n.getMessage('down')}</button>
         </div>
       </>
     );

@@ -353,10 +353,6 @@ class TransmissionClient {
     });
   }
 
-  setLabel(ids, label = '') {
-    throw new ErrorWithCode('Unsupported', 'IS_NOT_SUPPORTED')
-  }
-
   setPriority(id, level, idxs) {
     return Promise.all(splitByPart(idxs, 250).map((idxs) => {
       const args = {

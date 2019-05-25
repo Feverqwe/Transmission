@@ -109,8 +109,6 @@ const SelectedLabelStore = types.model('SelectedLabelStore', {
  * @property {function} setKeyValue
  * @property {function} addFolder
  * @property {function} hasFolder
- * @property {function} addLabel
- * @property {function} hasLabel
  * @property {function} moveTorrensColumn
  * @property {function} saveTorrentsColumns
  * @property {function} moveFilesColumn
@@ -121,8 +119,6 @@ const SelectedLabelStore = types.model('SelectedLabelStore', {
  * @property {function} setOptions
  * @property {function} removeFolders
  * @property {function} moveFolders
- * @property {function} removeLabels
- * @property {function} moveLabels
  * @property {*} url
  * @property {*} webUiUrl
  * @property {*} visibleTorrentColumns
@@ -196,15 +192,6 @@ const ConfigStore = types.model('ConfigStore', {
     hasFolder(volume, path) {
       return self.folders.some((folder) => folder.volume === volume &&  folder.path === path);
     },
-    addLabel(label) {
-      self.labels.push(label);
-      return storageSet({
-        labels: self.labels
-      });
-    },
-    hasLabel(label) {
-      return self.labels.indexOf(label) !== -1;
-    },
     moveTorrensColumn(from, to) {
       const column = resolveIdentifier(TorrentsColumnStore, self, from);
       const columnTarget = resolveIdentifier(TorrentsColumnStore, self, to);
@@ -269,18 +256,6 @@ const ConfigStore = types.model('ConfigStore', {
       self.folders = moveItems(self.folders.slice(0), selectedFolders, index);
       return storageSet({
         folders: self.folders
-      });
-    },
-    removeLabels(selectedLabels) {
-      self.labels = removeItems(self.labels.slice(0), selectedLabels);
-      return storageSet({
-        labels: self.labels
-      });
-    },
-    moveLabels(selectedFolders, index) {
-      self.labels = moveItems(self.labels.slice(0), selectedFolders, index);
-      return storageSet({
-        labels: self.labels
       });
     },
   };

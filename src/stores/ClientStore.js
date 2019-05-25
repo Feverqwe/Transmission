@@ -61,7 +61,6 @@ const SettingsStore = types.model('SettingsStore', {
  * @property {function} sync
  * @property {function} syncChanges
  * @property {function} setTorrents
- * @property {function} setLabels
  * @property {function} setSettings
  * @property {function} setLastErrorMessage
  * @property {*} torrentIds
@@ -71,7 +70,6 @@ const SettingsStore = types.model('SettingsStore', {
  * @property {*} activeCount
  * @property {*} currentSpeed
  * @property {*} currentSpeedStr
- * @property {*} allLabels
  * @property {function} torrentsStart
  * @property {function} torrentsForceStart
  * @property {function} torrentsStop
@@ -93,7 +91,6 @@ const SettingsStore = types.model('SettingsStore', {
 const ClientStore = types.model('ClientStore', {
   torrents: types.map(TorrentStore),
   // files: types.map(types.array(FileStore)),
-  labels: types.maybe(types.array(LabelStore)),
   settings: types.maybe(SettingsStore),
   speedRoll: types.optional(SpeedRollStore, {}),
   lastErrorMessage: types.maybe(types.string),
@@ -131,9 +128,6 @@ const ClientStore = types.model('ClientStore', {
     },*/
     setTorrents(torrents) {
       self.torrents = torrents;
-    },
-    setLabels(labels) {
-      self.labels = labels;
     },
     setSettings(settings) {
       self.settings = settings;
@@ -218,18 +212,6 @@ const ClientStore = types.model('ClientStore', {
         uploadSpeedStr: speedToStr(uploadSpeed),
       };
     },
-    get allLabels() {
-      /**@type RootStore*/const rootStore = getRoot(self);
-      const result = rootStore.config.labels.slice(0);
-      if (self.labels) {
-        self.labels.forEach(({name}) => {
-          if (result.indexOf(name) === -1) {
-            result.push(name);
-          }
-        });
-      }
-      return result;
-    },
     torrentsStart(ids) {
       return callApi({action: 'start', ids: ids}).then(...exceptionLog()).then(syncUi);
     },
@@ -281,7 +263,6 @@ const ClientStore = types.model('ClientStore', {
     syncUiClient() {
       return callApi({action: 'updateTorrentList'}).then((client) => {
         self.setTorrents(client.torrents);
-        self.setLabels(client.labels);
         self.setSettings(client.settings);
         self.speedRoll.setData(client.speedRoll.data);
       }).then(...exceptionLog());

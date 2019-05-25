@@ -29,8 +29,6 @@ const TorrentListStore = types.compose('TorrentListStore', ListSelectStore, type
     get filters() {
       const result = [];
       customLabels.forEach(label => result.push({label, custom: true}));
-      /**@type RootStore*/const rootStore = getRoot(self);
-      rootStore.client.allLabels.forEach(label => result.push({label, custom: false}));
       return result;
     },
     get filteredTorrents() {

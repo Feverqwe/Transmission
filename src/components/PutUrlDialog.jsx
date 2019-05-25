@@ -30,14 +30,6 @@ class PutUrlDialog extends React.Component {
 
     const urls = [url];
 
-    let label = undefined;
-    if (form.elements.label) {
-      const labelIndex = parseInt(form.elements.label.value, 10);
-      if (labelIndex > -1) {
-        label = this.rootStore.client.allLabels[labelIndex];
-      }
-    }
-
     let directory = undefined;
     if (form.elements.directory) {
       const directoryIndex = parseInt(form.elements.directory.value, 10);
@@ -46,7 +38,7 @@ class PutUrlDialog extends React.Component {
       }
     }
 
-    this.rootStore.client.sendFiles(urls, directory, label);
+    this.rootStore.client.sendFiles(urls, directory);
 
     this.dialogStore.close();
   };
@@ -57,24 +49,6 @@ class PutUrlDialog extends React.Component {
   };
 
   render() {
-    let labelSelect = null;
-    const allLabels = this.rootStore.client.allLabels;
-    if (allLabels.length) {
-      labelSelect = (
-        <div className="nf-subItem">
-          <label>{chrome.i18n.getMessage('OV_COL_LABEL')}</label>
-          <select name="label">
-            <option value={-1}/>
-            {allLabels.map((label, index) => {
-              return (
-                <option key={`option-${index}`} value={index}>{label}</option>
-              );
-            })}
-          </select>
-        </div>
-      );
-    }
-
     let directorySelect = null;
     const folders = this.rootStore.config.folders;
     if (folders.length) {
@@ -101,7 +75,6 @@ class PutUrlDialog extends React.Component {
               <label>{chrome.i18n.getMessage('Paste_a_torrent_URL')}</label>
               <input type="text" name="url" autoFocus={true} required={true}/>
             </div>
-            {labelSelect}
             {directorySelect}
             <div className="nf-subItem">
               <input type="submit" value={chrome.i18n.getMessage('DLG_BTN_OK')}/>

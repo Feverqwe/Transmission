@@ -45,20 +45,6 @@ class ContextMenu {
     }
   }
 
-  onCreateLabel() {
-    if (isFirefox()) {
-      chrome.tabs.create({url: '/options.html#/ctx'});
-      return;
-    }
-
-    const label = prompt(chrome.i18n.getMessage('enterNewLabel'));
-    if (label) {
-      if (!this.bg.bgStore.config.hasLabel(label)) {
-        this.bg.bgStore.config.addLabel(label);
-      }
-    }
-  }
-
   onSendLink(url, tabId, frameId, directory, label) {
     return downloadFileFromTab(url, tabId, frameId).catch((err) => {
       if (err.code === 'FILE_SIZE_EXCEEDED') {

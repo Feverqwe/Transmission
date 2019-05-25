@@ -23,17 +23,9 @@ class PutFilesDialog extends React.Component {
 
   handleSubmit = (e) => {
     let directory = undefined;
-    let label = undefined;
     if (e) {
       e.preventDefault();
       const form = e.currentTarget;
-
-      if (form.elements.label) {
-        const labelIndex = parseInt(form.elements.label.value, 10);
-        if (labelIndex > -1) {
-          label = this.rootStore.client.allLabels[labelIndex];
-        }
-      }
 
       if (form.elements.directory) {
         const directoryIndex = parseInt(form.elements.directory.value, 10);
@@ -47,7 +39,7 @@ class PutFilesDialog extends React.Component {
 
     const urls = files.map(file => URL.createObjectURL(file));
 
-    this.rootStore.client.sendFiles(urls, directory, label);
+    this.rootStore.client.sendFiles(urls, directory);
 
     this.dialogStore.close();
   };
@@ -58,24 +50,6 @@ class PutFilesDialog extends React.Component {
   };
 
   render() {
-    let labelSelect = null;
-    const allLabels = this.rootStore.client.allLabels;
-    if (allLabels.length) {
-      labelSelect = (
-        <div className="nf-subItem">
-          <label>{chrome.i18n.getMessage('OV_COL_LABEL')}</label>
-          <select name="label">
-            <option value={-1}/>
-            {allLabels.map((label, index) => {
-              return (
-                <option key={`option-${index}`} value={index}>{label}</option>
-              );
-            })}
-          </select>
-        </div>
-      );
-    }
-
     let directorySelect = null;
     const folders = this.rootStore.config.folders;
     if (folders.length) {
@@ -95,7 +69,7 @@ class PutFilesDialog extends React.Component {
     }
 
     let submit = null;
-    if (!labelSelect || !directorySelect) {
+    if (!directorySelect) {
       submit = (
         <Submit onSubmit={this.handleSubmit}/>
       );
@@ -105,7 +79,6 @@ class PutFilesDialog extends React.Component {
       <Dialog onClose={this.handleClose}>
         <div className="nf-notifi">
           <form onSubmit={this.handleSubmit}>
-            {labelSelect}
             {directorySelect}
             {submit}
             <div className="nf-subItem">
