@@ -94,8 +94,6 @@ const SelectedLabelStore = types.model('SelectedLabelStore', {
  * @property {boolean} [putDefaultPathInContextMenu]
  * @property {string} [badgeColor]
  * @property {boolean} [showFreeSpace]
- * @property {boolean} [fixCyrillicTorrentName]
- * @property {boolean} [fixCyrillicDownloadPath]
  * @property {FolderStore[]} folders
  * @property {string[]} labels
  * @property {TorrentsColumnStore[]} torrentColumns
@@ -152,9 +150,6 @@ const ConfigStore = types.model('ConfigStore', {
   badgeColor: types.optional(types.string, '0,0,0,0.40'),
 
   showFreeSpace: types.optional(types.boolean, true),
-
-  fixCyrillicTorrentName: types.optional(types.boolean, false),
-  fixCyrillicDownloadPath: types.optional(types.boolean, false),
 
   folders: types.array(FolderStore),
 

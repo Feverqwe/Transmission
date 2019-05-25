@@ -66,9 +66,6 @@ const defaultConfig = {
 
   showFreeSpace: undefined,
 
-  fixCyrillicTorrentName: undefined,
-  fixCyrillicDownloadPath: undefined,
-
   folders: undefined,
 
   torrentColumns: defaultTorrentListColumnList,

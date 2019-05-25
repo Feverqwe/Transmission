@@ -50,7 +50,6 @@ class Bg {
           this.bgStore.config.hostname,
           this.bgStore.config.pathname,
           this.bgStore.config.authenticationRequired,
-          this.bgStore.config.fixCyrillicTorrentName
         ];
 
         if (dep.length) {
