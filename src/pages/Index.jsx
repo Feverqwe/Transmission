@@ -170,7 +170,9 @@ class SetPopupHeight extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    document.getElementById('root').style.minHeight = this.props.height + 'px';
+    const root = document.getElementById('root');
+    root.style.minHeight = this.props.height + 'px';
+    root.style.maxHeight = this.props.height + 'px';
   }
 
   render() {
