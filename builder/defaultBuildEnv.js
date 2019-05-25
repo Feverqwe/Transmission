@@ -19,7 +19,7 @@ if (browser === 'firefox') {
 }
 
 global.BUILD_ENV = {
-  distName: `uTiny-${browser}-${version}`,
+  distName: `transmissionEasyClient-${browser}-${version}`,
   outputPath: path.join(__dirname, `../dist/${browser}`),
   mode: mode,
   devtool: mode === 'development' ? 'inline-source-map' : 'none',
