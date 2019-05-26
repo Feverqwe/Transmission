@@ -120,7 +120,7 @@ class TransmissionClient {
     });
   }
 
-  getSettings() {
+  updateSettings() {
     return this.sendAction({method: 'session-get'}).then((response) => {
       this.bgStore.client.setSettings(this.normalizeSettings(response.arguments));
     });
@@ -382,7 +382,7 @@ class TransmissionClient {
         'speed-limit-down-enabled': enabled
       }
     }).then(() => {
-      return this.getSettings();
+      return this.updateSettings();
     });
   }
 
@@ -394,7 +394,7 @@ class TransmissionClient {
         'speed-limit-down': speed
       }
     }).then(() => {
-      return this.getSettings();
+      return this.updateSettings();
     });
   }
 
@@ -405,7 +405,7 @@ class TransmissionClient {
         'speed-limit-up-enabled': enabled
       }
     }).then(() => {
-      return this.getSettings();
+      return this.updateSettings();
     });
   }
 
@@ -417,7 +417,7 @@ class TransmissionClient {
         'speed-limit-up': speed
       }
     }).then(() => {
-      return this.getSettings();
+      return this.updateSettings();
     });
   }
 
@@ -428,7 +428,7 @@ class TransmissionClient {
         'alt-speed-enabled': enabled
       }
     }).then(() => {
-      return this.getSettings();
+      return this.updateSettings();
     });
   }
 
@@ -440,7 +440,7 @@ class TransmissionClient {
         'alt-speed-down': speed
       }
     }).then(() => {
-      return this.getSettings();
+      return this.updateSettings();
     });
   }
 
@@ -452,7 +452,7 @@ class TransmissionClient {
         'alt-speed-up': speed
       }
     }).then(() => {
-      return this.getSettings();
+      return this.updateSettings();
     });
   }
 

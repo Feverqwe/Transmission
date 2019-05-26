@@ -98,7 +98,7 @@ const SettingsStore = types.model('SettingsStore', {
  * @property {function} setAltDownloadSpeedLimit
  * @property {function} setAltUploadSpeedLimit
  * @property {function} getTorrentFiles
- * @property {function} getSettings
+ * @property {function} updateSettings
  * @property {function} sendFiles
  * @property {function} getFreeSpace
  * @property {function} reannounce
@@ -274,8 +274,8 @@ const ClientStore = types.model('ClientStore', {
     getTorrentFiles(id) {
       return callApi({action: 'getFileList', id: id}).then(...exceptionLog());
     },
-    getSettings() {
-      return callApi({action: 'getSettings'}).then(...exceptionLog()).then(fetchUi);
+    updateSettings() {
+      return callApi({action: 'updateSettings'}).then(...exceptionLog()).then(fetchUi);
     },
     sendFiles(urls, directory) {
       return callApi({action: 'sendFiles', urls, directory}).then(...exceptionLog()).then(syncUi);

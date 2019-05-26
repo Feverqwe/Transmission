@@ -55,8 +55,8 @@ class Bg {
         if (dep.length) {
           this.bgStore.flushClient();
           this.client = new TransmissionClient(this);
-          this.client.getSettings().catch((err) => {
-            logger.error('client', 'getSettings error', err);
+          this.client.updateSettings().catch((err) => {
+            logger.error('client', 'updateSettings error', err);
           });
           this.client.updateTorrents().catch((err) => {
             logger.error('client', 'updateTorrents error', err);
@@ -216,9 +216,9 @@ class Bg {
         });
         break;
       }
-      case 'getSettings': {
+      case 'updateSettings': {
         promise = this.whenReady().then(() => {
-          return this.client.getSettings();
+          return this.client.updateSettings();
         });
         break;
       }

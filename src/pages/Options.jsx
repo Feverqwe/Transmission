@@ -134,7 +134,7 @@ class ClientOptions extends React.Component {
       });
     }).then((() => {
       if (!this.refPage.current) return;
-      return this.rootStore.client.getSettings();
+      return this.rootStore.client.updateSettings();
     })).then(() => {
       if (!this.refPage.current) return;
       this.setState({

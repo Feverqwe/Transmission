@@ -47,8 +47,8 @@ class Index extends React.Component {
     this.rootStore.client.syncUiClient(true).catch((err) => {
       logger.error('onIntervalInit syncUiClient error', err);
     });
-    this.rootStore.client.getSettings().catch((err) => {
-      logger.error('onIntervalInit getSettings error', err);
+    this.rootStore.client.updateSettings().catch((err) => {
+      logger.error('onIntervalInit updateSettings error', err);
     });
   };
 
