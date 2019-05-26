@@ -626,6 +626,7 @@ class RestoreOptions extends React.Component {
     Promise.resolve().then(() => {
       const config = Object.assign({configVersion: 1}, JSON.parse(this.refData.current.value));
       if (config.configVersion !== 2) {
+        config.configVersion = 2;
         migrateConfig(config, config);
       }
       return storageSet(config);
