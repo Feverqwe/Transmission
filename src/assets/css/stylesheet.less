@@ -337,51 +337,53 @@ div.torrent-list-layer table td.actions div.btns > a:hover {
 div.torrent-list-layer table td.actions div.btns > a:active {
     opacity: 0.7 !important;
 }
-table.status-panel {
+.status-panel {
     border-top: 1px #c0c0c0 solid;
-}
-table.status-panel td {
     line-height: 16px;
-    padding-top: 2px;
-}
-table.status-panel td.status {
-    width: 34%;
-}
-table.status-panel td.status div {
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
-    max-width: 250px;
-}
-table.status-panel td.space {
-    padding-left: 18px;
-    background-repeat: no-repeat;
-    background-position: 0 2px;
-    width: 15%;
-    text-overflow: ellipsis;
-    cursor: pointer;
-    white-space: nowrap;
-    max-width: 160px;
-    overflow: hidden;
-}
-table.status-panel td.status img {
-    margin-bottom: -4px;
-}
-table.status-panel td.speed {
-    width: 25%;
-    padding-left: 14px;
-    background-repeat: no-repeat;
-    background-position-y: 3px;
-}
-table.status-panel td.download {
-    background-image: url(../img/arrowDown.svg);
-    background-position: left center;
-    background-size: 13px;
-}
-table.status-panel td.upload {
-    background-image: url(../img/arrowUp.svg);
-    background-position: left center;
-    background-size: 13px;
+
+    td {
+        &.status {
+            width: 34%;
+
+            div {
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                overflow: hidden;
+                max-width: 250px;
+            }
+        }
+
+        &.space {
+            padding-left: 18px;
+            background-repeat: no-repeat;
+            background-position: 0 center;
+            width: 15%;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            white-space: nowrap;
+            max-width: 160px;
+            overflow: hidden;
+        }
+
+        &.speed {
+            width: 25%;
+            padding-left: 14px;
+            background-repeat: no-repeat;
+            background-position: 0 center;
+        }
+
+        &.download {
+            background-image: url(../img/arrowDown.svg);
+            background-position: left center;
+            background-size: 13px;
+        }
+
+        &.upload {
+            background-image: url(../img/arrowUp.svg);
+            background-position: 0 center;
+            background-size: 13px;
+        }
+    }
 }
 ul.context-menu-list label {
     position: absolute;
@@ -434,7 +436,7 @@ table.fl-table-head {
 div.file-list {
     z-index: 4;
     margin-top: 33px;
-    margin-bottom: 19px;
+    margin-bottom: 17px;
     background: #fff;
     box-shadow: 0 0 10px rgba(0,0,0,0.5);
     border-bottom-right-radius: 4px;
@@ -601,8 +603,8 @@ table thead .sortUp .arrow {
     text-align: center;
 
     .nf-subItem {
-        padding-top: 5px;
-        padding-bottom: 5px;
+        margin-top: 5px;
+        margin-bottom: 5px;
 
         label {
             display: block;
@@ -614,7 +616,6 @@ table thead .sortUp .arrow {
         input,
         select {
             width: calc(100% - 6px);
-            margin: 1px 1px 2px 1px;
         }
 
         input[type="button"],
