@@ -270,39 +270,46 @@ table tbody tr.selected {
     background-color: #3875d7 !important;
     color: #fff;
 }
-table td.done, table th.done {
-    padding: 0;
-    position: relative;
-    padding-left: 2px;
-    padding-right: 2px;
-    overflow: hidden;
+
+table {
+    th.done,
+    td.done {
+        position: relative;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    td.done {
+        .progress_b {
+            display: flex;
+            flex-shrink: 0;
+            position: relative;
+            border: 1px solid #fff;
+            background-color: #dbdbdb;
+            border-radius: 3px;
+            color: #fff;
+            margin-top: 1px;
+            margin-bottom: 1px;
+
+            .val {
+                flex-grow: 1;
+                text-align: center;
+                z-index: 1;
+            }
+
+            .progress_b_i {
+                position: absolute;
+                top: 0;
+                left: 0;
+                height: 100%;
+                background-color: #3687ED;
+                border-radius: 3px;
+                z-index: 0;
+            }
+        }
+    }
 }
-table td.done div.progress_b {
-    width: 100%;
-    height: 14px;
-    border: 1px solid #fff;
-    background-color: #dbdbdb;
-    border-radius: 3px;
-    position: relative;
-    color: #fff;
-    margin-left: -1px;
-    text-align: center;
-}
-table td.done div.progress_b_i {
-    position: absolute;
-    height: 14px;
-    background-color: #3687ED;
-    border-radius: 3px;
-    z-index: 0;
-    top: 0;
-    left: 0;
-}
-table td.done div.val {
-    position: relative;
-    z-index: 1;
-    display: inline;
-    vertical-align: top;
-}
+
 div.torrent-list-layer table td.actions div.btns {
     height: 18px;
 }
