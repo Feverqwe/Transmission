@@ -109,17 +109,11 @@ class FileListTable extends React.Component {
               </table>
               <FileColumnMenu/>
             </div>
-            <ul className="bottom-menu">
-              <li className="path">
-                {directory}
-              </li>
-              <li className="btn">
-                <a onClick={this.handleClose} className="close" title={chrome.i18n.getMessage('DLG_BTN_CLOSE')}/>
-              </li>
-              <li className="btn">
-                <a onClick={this.handleUpdate} className="update" title={chrome.i18n.getMessage('refresh')}/>
-              </li>
-            </ul>
+            <div className="bottom-menu">
+              {directory}
+              <a onClick={this.handleUpdate} className="update" title={chrome.i18n.getMessage('refresh')}/>
+              <a onClick={this.handleClose} className="close" title={chrome.i18n.getMessage('DLG_BTN_CLOSE')}/>
+            </div>
           </div>
         </div>
         <div onClick={this.handleClose} className="file-list-layer-temp"/>

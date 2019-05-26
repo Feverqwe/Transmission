@@ -478,53 +478,51 @@ div.fl-layer td div {
     white-space: normal;
     word-wrap: break-word;
 }
-div.file-list ul.bottom-menu {
-    margin-top: 2px;
-}
-div.file-list ul.bottom-menu li {
-    display: inline-block;
-}
-div.file-list ul.bottom-menu li.btn {
-    float: right;
-    cursor: pointer;
-}
-div.file-list ul.bottom-menu a {
-    border: 1px solid #fff;
-    background-repeat: no-repeat;
-    background-position: center center;
-    width: 26px;
-    height: 26px;
-    display: inline-block;
-    border-radius: 3px;
-    border: 1px solid #fff;
-}
-div.file-list ul.bottom-menu a.update{
-    background-image: url("../img/refresh.svg");
-    background-size: 20px;
-}
-div.file-list ul.bottom-menu a.close{
-    background-image: url('../img/close.svg');
-    background-size: 20px;
-    margin-right:  2px;
-}
-div.file-list ul.bottom-menu a:hover {
-    border: 1px solid #a9acb1;
-}
-div.file-list ul.bottom-menu a:active {
-    opacity: 0.7;
-}
-div.file-list ul.bottom-menu li.path {
-    position: relative;
-    width: calc(100% - 70px);
-}
-div.file-list ul.bottom-menu li.path input {
-    font-size: 1em;
-    width: 100%;
-    margin-top: 5px;
+
+div.file-list div.bottom-menu {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
     padding-left: 6px;
-    border: 0;
-    color: #a2a2a2;
+    padding-right: 6px;
+
+    input {
+        font-size: 1em;
+        border: 0;
+        color: #a2a2a2;
+        flex-grow: 1;
+    }
+
+    a {
+        border: 1px solid #fff;
+        background-repeat: no-repeat;
+        background-position: center center;
+        width: 26px;
+        height: 26px;
+        display: inline-block;
+        border-radius: 3px;
+        margin: 1px;
+
+        &.update {
+            background-image: url("../img/refresh.svg");
+            background-size: 20px;
+        }
+
+        &.close {
+            background-image: url('../img/close.svg');
+            background-size: 20px;
+        }
+
+        &:hover {
+            border: 1px solid #a9acb1;
+        }
+
+        &:active {
+            opacity: 0.7;
+        }
+    }
 }
+
 div.fl-layer a.folder {
     background-color: #ebebeb;
     border-radius: 6px;
