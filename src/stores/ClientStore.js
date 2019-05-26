@@ -1,4 +1,4 @@
-import {getSnapshot, types} from "mobx-state-tree";
+import {types} from "mobx-state-tree";
 import SpeedRollStore from "./SpeedRollStore";
 import speedToStr from "../tools/speedToStr";
 import TorrentStore from "./TorrentStore";
@@ -104,7 +104,6 @@ const SettingsStore = types.model('SettingsStore', {
  * @property {function} reannounce
  * @property {function} rename
  * @property {function} torrentSetLocation
- * @property {function} getSnapshot
  * @property {function} updateTorrentList
  * @property {function} syncClient
  */
@@ -288,9 +287,6 @@ const ClientStore = types.model('ClientStore', {
     },
     torrentSetLocation(ids, location){
       return callApi({action: 'torrentSetLocation', ids: ids, location}).then(...exceptionLog()).then(thenSyncClient);
-    },
-    getSnapshot() {
-      return getSnapshot(self);
     },
     updateTorrentList(force) {
       return callApi({action: 'updateTorrentList', force}).then(...exceptionLog()).then(thenSyncClient);
