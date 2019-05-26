@@ -115,10 +115,12 @@ class ClientOptions extends React.Component {
     const form = e.currentTarget;
     const login = form.elements.login.value;
     const password = form.elements.password.value;
-    const hostname = form.elements.hostname.value;
+    const hostname = form.elements.hostname.value.trim();
     const port = parseInt(form.elements.port.value, 10);
     const ssl = form.elements.ssl.checked;
-    const pathname = form.elements.pathname.value;
+    const pathname = form.elements.pathname.value.trim();
+    const webPathname = form.elements.webPathname.value.trim();
+    const authenticationRequired = form.elements.authenticationRequired.checked;
 
     this.setState({
       clientStatus: 'pending'
@@ -128,7 +130,7 @@ class ClientOptions extends React.Component {
         throw new Error('Port is incorrect');
       }
       return this.rootStore.config.setOptions({
-        login, password, hostname, port, ssl, pathname
+        login, password, hostname, port, ssl, pathname, webPathname, authenticationRequired
       });
     }).then((() => {
       if (!this.refPage.current) return;

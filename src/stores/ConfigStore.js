@@ -308,7 +308,7 @@ const ConfigStore = types.model('ConfigStore', {
         protocol: self.ssl ? 'https' : 'http',
         port: self.port,
         hostname: self.hostname,
-        pathname: self.pathname,
+        pathname: self.webPathname,
       };
       if (self.authenticationRequired) {
         urlObject.auth = [self.login, self.password].join(':');
