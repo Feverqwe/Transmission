@@ -111,6 +111,7 @@ class FileListTable extends React.Component {
             </div>
             <div className="bottom-menu">
               {directory}
+              <div className="space"/>
               <a onClick={this.handleUpdate} className="update" title={chrome.i18n.getMessage('refresh')}/>
               <a onClick={this.handleClose} className="close" title={chrome.i18n.getMessage('DLG_BTN_CLOSE')}/>
             </div>
