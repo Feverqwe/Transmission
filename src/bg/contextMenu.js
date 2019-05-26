@@ -2,6 +2,7 @@ import "whatwg-fetch";
 import getLogger from "../tools/getLogger";
 import downloadFileFromTab from "../tools/downloadFileFromTab";
 import isFirefox from "../tools/isFirefox";
+import downloadFileFromUrl from "../tools/downloadFileFromUrl";
 
 const path = require('path');
 const promiseLimit = require('promise-limit');
@@ -46,12 +47,18 @@ class ContextMenu {
 
   onSendLink(url, tabId, frameId, directory) {
     return downloadFileFromTab(url, tabId, frameId).catch((err) => {
+      if (['FILE_SIZE_EXCEEDED', 'LINK_IS_NOT_SUPPORTED'].indexOf(err.code) === -1) {
+        logger.error('onSendLink: downloadFileFromTab error, fallback to downloadFileFromUrl', err);
+        return downloadFileFromUrl(url);
+      }
+      throw err;
+    }).catch((err) => {
       if (err.code === 'FILE_SIZE_EXCEEDED') {
         this.bg.torrentErrorNotify(chrome.i18n.getMessage('fileSizeError'));
         throw err;
       }
       if (err.code !== 'LINK_IS_NOT_SUPPORTED') {
-        logger.error('downloadFileFromTab error, fallback to url', err);
+        logger.error('onSendLink: downloadFileFromUrl error, fallback to url', err);
       }
       return {url};
     }).then((data) => {

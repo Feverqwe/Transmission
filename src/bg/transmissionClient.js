@@ -5,6 +5,7 @@ import readBlobAsArrayBuffer from "../tools/readBlobAsArrayBuffer";
 import arrayBufferToBase64 from "../tools/arrayBufferToBase64";
 import arrayDifferent from "../tools/arrayDifferent";
 import splitByPart from "../tools/splitByPart";
+import downloadFileFromUrl from "../tools/downloadFileFromUrl";
 
 const logger = getLogger('TransmissionClient');
 
@@ -457,38 +458,19 @@ class TransmissionClient {
 
   sendFiles(urls, directory) {
     return Promise.all(urls.map((url) => {
-      return Promise.resolve().then(() => {
-        if (!/^(blob|https?):/.test(url)) {
-          return {url};
+      return downloadFileFromUrl(url).catch((err) => {
+        if (err.code === 'FILE_SIZE_EXCEEDED') {
+          this.bg.torrentErrorNotify(chrome.i18n.getMessage('fileSizeError'));
+          throw err;
         }
-
-        return fetch(url).then(response => {
-          if (!response.ok) {
-            throw new ErrorWithCode(`${response.status}: ${response.statusText}`, `RESPONSE_IS_NOT_OK`);
-          }
-
-          if (response.headers.get('Content-Length') > 1024 * 1024 * 10) {
-            throw new ErrorWithCode(`Size is more then 10mb`, 'FILE_SIZE_EXCEEDED');
-          }
-
-          return response.blob();
-        }).then((blob) => {
-          if (/^blob:/.test(url)) {
-            URL.revokeObjectURL(url);
-          }
-          return {blob};
-        }, (err) => {
-          if (err.code === 'FILE_SIZE_EXCEEDED') {
-            this.bg.torrentErrorNotify(chrome.i18n.getMessage('fileSizeError'));
-            throw err;
-          }
-          if (!/^https?:/.test(url)) {
-            this.bg.torrentErrorNotify(chrome.i18n.getMessage('unexpectedError'));
-            throw err;
-          }
-          logger.error('download url error, fallback to url', err);
-          return {url};
-        });
+        if (!/^https?:/.test(url)) {
+          this.bg.torrentErrorNotify(chrome.i18n.getMessage('unexpectedError'));
+          throw err;
+        }
+        if (err.code !== 'LINK_IS_NOT_SUPPORTED') {
+          logger.error('sendFiles: downloadFileFromUrl error, fallback to url', err);
+        }
+        return {url};
       }).then((data) => {
         return this.putTorrent(data, directory);
       }).then(() => {
