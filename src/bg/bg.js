@@ -272,13 +272,13 @@ class Bg {
   torrentAddedNotify(torrent) {
     const icon = notificationIcons.add;
     const statusText = chrome.i18n.getMessage('torrentAdded');
-    showNotification('' + torrent.id, icon, torrent.name, statusText);
+    showNotification('added-' + torrent.id, icon, torrent.name, statusText);
   }
 
   torrentIsExistsNotify(torrent) {
     const icon = notificationIcons.error;
     const title = chrome.i18n.getMessage('torrentFileIsExists');
-    showNotification('' + torrent.id, icon, torrent.name, title);
+    showNotification('exists-' + torrent.id, icon, torrent.name, title);
   }
 
   torrentExistsNotify() {
@@ -293,7 +293,7 @@ class Bg {
     if (torrent.stateText) {
       statusText = chrome.i18n.getMessage('OV_COL_STATUS') + ': ' + torrent.stateText;
     }
-    showNotification('' + torrent.id, icon, torrent.name, statusText);
+    showNotification('complete-' + torrent.id, icon, torrent.name, statusText);
   }
 
   torrentErrorNotify(message) {
