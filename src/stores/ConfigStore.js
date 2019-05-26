@@ -4,13 +4,13 @@ import storageSet from "../tools/storageSet";
 const url = require('url');
 
 const defaultTorrentListColumnList = [
-  {column: 'checkbox', display: 1, order: 0, width: 22, lang: 'selectAll'},
+  {column: 'checkbox', display: 1, order: 0, width: 18, lang: 'selectAll'},
   {column: 'name', display: 1, order: 1, width: 204, lang: 'OV_COL_NAME'},
   {column: 'order', display: 0, order: 1, width: 24, lang: 'OV_COL_ORDER'},
-  {column: 'size', display: 1, order: 1, width: 64, lang: 'OV_COL_SIZE'},
+  {column: 'size', display: 1, order: 1, width: 68, lang: 'OV_COL_SIZE'},
   {column: 'remaining', display: 0, order: 1, width: 64, lang: 'OV_COL_REMAINING'},
-  {column: 'done', display: 1, order: 1, width: 74, lang: 'OV_COL_DONE'},
-  {column: 'status', display: 1, order: 1, width: 74, lang: 'OV_COL_STATUS'},
+  {column: 'done', display: 1, order: 1, width: 84, lang: 'OV_COL_DONE'},
+  {column: 'status', display: 1, order: 1, width: 86, lang: 'OV_COL_STATUS'},
   {column: 'seeds', display: 0, order: 1, width: 34, lang: 'OV_COL_SEEDS'},
   {column: 'peers', display: 0, order: 1, width: 34, lang: 'OV_COL_PEERS'},
   {column: 'seeds_peers', display: 1, order: 1, width: 44, lang: 'OV_COL_SEEDS_PEERS'},
@@ -22,17 +22,17 @@ const defaultTorrentListColumnList = [
   {column: 'shared', display: 0, order: 1, width: 64, lang: 'OV_COL_SHARED'},
   // {column: 'avail', display: 0, order: 1, width: 60, lang: 'OV_COL_AVAIL'},
   // {column: 'label', display: 0, order: 1, width: 100, lang: 'OV_COL_LABEL'},
-  {column: 'added', display: 0, order: 1, width: 124, lang: 'OV_COL_DATE_ADDED'},
-  {column: 'completed', display: 0, order: 1, width: 124, lang: 'OV_COL_DATE_COMPLETED'},
+  {column: 'added', display: 0, order: 1, width: 130, lang: 'OV_COL_DATE_ADDED'},
+  {column: 'completed', display: 0, order: 1, width: 130, lang: 'OV_COL_DATE_COMPLETED'},
   {column: 'actions', display: 1, order: 0, width: 40, lang: 'Actions'}
 ];
 
 const defaultFileListColumnList = [
-  {column: 'checkbox', display: 1, order: 0, width: 23, lang: 'selectAll'},
+  {column: 'checkbox', display: 1, order: 0, width: 18, lang: 'selectAll'},
   {column: 'name', display: 1, order: 1, width: 304, lang: 'FI_COL_NAME'},
-  {column: 'size', display: 1, order: 1, width: 64, lang: 'FI_COL_SIZE'},
-  {column: 'downloaded', display: 1, order: 1, width: 64, lang: 'OV_COL_DOWNLOADED'},
-  {column: 'done', display: 1, order: 1, width: 74, lang: 'OV_COL_DONE'},
+  {column: 'size', display: 1, order: 1, width: 68, lang: 'FI_COL_SIZE'},
+  {column: 'downloaded', display: 1, order: 1, width: 66, lang: 'OV_COL_DOWNLOADED'},
+  {column: 'done', display: 1, order: 1, width: 84, lang: 'OV_COL_DONE'},
   {column: 'prio', display: 1, order: 1, width: 78, lang: 'FI_COL_PRIO'}
 ];
 
