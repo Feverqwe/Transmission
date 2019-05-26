@@ -174,6 +174,10 @@ const ClientStore = types.model('ClientStore', {
     return self.syncUiClient().then(() => result);
   };
 
+  const fetchUi = (result) => {
+    return self.fetchUiClient().then(() => result);
+  };
+
   return {
     get torrentIds() {
       const result = [];
@@ -247,31 +251,31 @@ const ClientStore = types.model('ClientStore', {
       return callApi({action: 'setPriority', level, id: id, fileIdxs}).then(...exceptionLog());
     },
     setDownloadSpeedLimitEnabled(enabled) {
-      return callApi({action: 'setDownloadSpeedLimitEnabled', enabled}).then(...exceptionLog()).then(syncUi);
+      return callApi({action: 'setDownloadSpeedLimitEnabled', enabled}).then(...exceptionLog()).then(fetchUi);
     },
     setDownloadSpeedLimit(speed) {
-      return callApi({action: 'setDownloadSpeedLimit', speed}).then(...exceptionLog()).then(syncUi);
+      return callApi({action: 'setDownloadSpeedLimit', speed}).then(...exceptionLog()).then(fetchUi);
     },
     setUploadSpeedLimitEnabled(enabled) {
-      return callApi({action: 'setUploadSpeedLimitEnabled', enabled}).then(...exceptionLog()).then(syncUi);
+      return callApi({action: 'setUploadSpeedLimitEnabled', enabled}).then(...exceptionLog()).then(fetchUi);
     },
     setUploadSpeedLimit(speed) {
-      return callApi({action: 'setUploadSpeedLimit', speed}).then(...exceptionLog()).then(syncUi);
+      return callApi({action: 'setUploadSpeedLimit', speed}).then(...exceptionLog()).then(fetchUi);
     },
     setAltSpeedEnabled(enabled) {
-      return callApi({action: 'setAltSpeedEnabled', enabled}).then(...exceptionLog()).then(syncUi);
+      return callApi({action: 'setAltSpeedEnabled', enabled}).then(...exceptionLog()).then(fetchUi);
     },
     setAltDownloadSpeedLimit(speed) {
-      return callApi({action: 'setAltDownloadSpeedLimit', speed}).then(...exceptionLog()).then(syncUi);
+      return callApi({action: 'setAltDownloadSpeedLimit', speed}).then(...exceptionLog()).then(fetchUi);
     },
     setAltUploadSpeedLimit(speed) {
-      return callApi({action: 'setAltUploadSpeedLimit', speed}).then(...exceptionLog()).then(syncUi);
+      return callApi({action: 'setAltUploadSpeedLimit', speed}).then(...exceptionLog()).then(fetchUi);
     },
     getTorrentFiles(id) {
       return callApi({action: 'getFileList', id: id}).then(...exceptionLog());
     },
     getSettings() {
-      return callApi({action: 'getSettings'}).then(...exceptionLog()).then(syncUi);
+      return callApi({action: 'getSettings'}).then(...exceptionLog()).then(fetchUi);
     },
     sendFiles(urls, directory) {
       return callApi({action: 'sendFiles', urls, directory}).then(...exceptionLog()).then(syncUi);
@@ -297,7 +301,14 @@ const ClientStore = types.model('ClientStore', {
         self.setSettings(client.settings);
         self.speedRoll.setData(client.speedRoll.data);
       }).then(...exceptionLog());
-    }
+    },
+    fetchUiClient() {
+      return callApi({action: 'getClientStore'}).then((client) => {
+        self.setTorrents(client.torrents);
+        self.setSettings(client.settings);
+        self.speedRoll.setData(client.speedRoll.data);
+      }).then(...exceptionLog());
+    },
   };
 });
 
