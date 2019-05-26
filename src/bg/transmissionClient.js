@@ -25,6 +25,10 @@ class TransmissionClient {
     return this.bg.bgStore;
   }
 
+  thenUpdateTorrents = (result) => {
+    return this.updateTorrents().then(() => result);
+  };
+
   updateTorrents(force) {
     const now = Math.trunc(Date.now() / 1000);
 
@@ -119,6 +123,10 @@ class TransmissionClient {
       return files;
     });
   }
+
+  thenUpdateSettings = (result) => {
+    return this.updateSettings().then(() => result);
+  };
 
   updateSettings() {
     return this.sendAction({method: 'session-get'}).then((response) => {
@@ -240,7 +248,7 @@ class TransmissionClient {
       arguments: {
         ids,
       }
-    });
+    }).then(this.thenUpdateTorrents);
   }
 
   forcestart(ids) {
@@ -249,7 +257,7 @@ class TransmissionClient {
       arguments: {
         ids,
       }
-    });
+    }).then(this.thenUpdateTorrents);
   }
 
   stop(ids) {
@@ -258,7 +266,7 @@ class TransmissionClient {
       arguments: {
         ids,
       }
-    });
+    }).then(this.thenUpdateTorrents);
   }
 
   recheck(ids) {
@@ -267,7 +275,7 @@ class TransmissionClient {
       arguments: {
         ids,
       }
-    });
+    }).then(this.thenUpdateTorrents);
   }
 
   removetorrent(ids) {
@@ -276,7 +284,7 @@ class TransmissionClient {
       arguments: {
         ids,
       }
-    });
+    }).then(this.thenUpdateTorrents);
   }
 
   removedatatorrent(ids) {
@@ -286,14 +294,14 @@ class TransmissionClient {
         ids,
         'delete-local-data': true
       }
-    });
+    }).then(this.thenUpdateTorrents);
   }
 
   rename(ids, path, name) {
     return this.sendAction({
       method: 'torrent-rename-path',
       arguments: {ids, path, name}
-    });
+    }).then(this.thenUpdateTorrents);
   }
 
   torrentSetLocation(ids, location) {
@@ -304,7 +312,7 @@ class TransmissionClient {
         location,
         move: true
       }
-    });
+    }).then(this.thenUpdateTorrents);
   }
 
   reannounce(ids) {
@@ -318,28 +326,28 @@ class TransmissionClient {
     return this.sendAction({
       method: 'queue-move-top',
       arguments: {ids}
-    });
+    }).then(this.thenUpdateTorrents);
   }
 
   queueUp(ids) {
     return this.sendAction({
       method: 'queue-move-up',
       arguments: {ids}
-    });
+    }).then(this.thenUpdateTorrents);
   }
 
   queueDown(ids) {
     return this.sendAction({
       method: 'queue-move-down',
       arguments: {ids}
-    });
+    }).then(this.thenUpdateTorrents);
   }
 
   queueBottom(ids) {
     return this.sendAction({
       method: 'queue-move-bottom',
       arguments: {ids}
-    });
+    }).then(this.thenUpdateTorrents);
   }
 
   setPriority(id, level, idxs) {
@@ -381,9 +389,7 @@ class TransmissionClient {
       arguments: {
         'speed-limit-down-enabled': enabled
       }
-    }).then(() => {
-      return this.updateSettings();
-    });
+    }).then(this.thenUpdateSettings);
   }
 
   setDownloadSpeedLimit(speed) {
@@ -393,9 +399,7 @@ class TransmissionClient {
         'speed-limit-down-enabled': true,
         'speed-limit-down': speed
       }
-    }).then(() => {
-      return this.updateSettings();
-    });
+    }).then(this.thenUpdateSettings);
   }
 
   setUploadSpeedLimitEnabled(enabled) {
@@ -404,9 +408,7 @@ class TransmissionClient {
       arguments: {
         'speed-limit-up-enabled': enabled
       }
-    }).then(() => {
-      return this.updateSettings();
-    });
+    }).then(this.thenUpdateSettings);
   }
 
   setUploadSpeedLimit(speed) {
@@ -416,9 +418,7 @@ class TransmissionClient {
         'speed-limit-up-enabled': true,
         'speed-limit-up': speed
       }
-    }).then(() => {
-      return this.updateSettings();
-    });
+    }).then(this.thenUpdateSettings);
   }
 
   setAltSpeedEnabled(enabled) {
@@ -427,9 +427,7 @@ class TransmissionClient {
       arguments: {
         'alt-speed-enabled': enabled
       }
-    }).then(() => {
-      return this.updateSettings();
-    });
+    }).then(this.thenUpdateSettings);
   }
 
   setAltDownloadSpeedLimit(speed) {
@@ -439,9 +437,7 @@ class TransmissionClient {
         'alt-speed-enabled': true,
         'alt-speed-down': speed
       }
-    }).then(() => {
-      return this.updateSettings();
-    });
+    }).then(this.thenUpdateSettings);
   }
 
   setAltUploadSpeedLimit(speed) {
@@ -451,9 +447,7 @@ class TransmissionClient {
         'alt-speed-enabled': true,
         'alt-speed-up': speed
       }
-    }).then(() => {
-      return this.updateSettings();
-    });
+    }).then(this.thenUpdateSettings);
   }
 
   sendFiles(urls, directory) {
@@ -479,7 +473,7 @@ class TransmissionClient {
         logger.error('sendFile error', url, err);
         return {error: err};
       });
-    }));
+    })).then(this.thenUpdateTorrents);
   }
 
   retryIfTokenInvalid(callback) {

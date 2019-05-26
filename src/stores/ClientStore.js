@@ -105,7 +105,8 @@ const SettingsStore = types.model('SettingsStore', {
  * @property {function} rename
  * @property {function} torrentSetLocation
  * @property {function} getSnapshot
- * @property {function} syncUiClient
+ * @property {function} updateTorrentList
+ * @property {function} syncClient
  */
 const ClientStore = types.model('ClientStore', {
   torrents: types.map(TorrentStore),
@@ -170,12 +171,8 @@ const ClientStore = types.model('ClientStore', {
     ];
   };
 
-  const syncUi = (result) => {
-    return self.syncUiClient().then(() => result);
-  };
-
-  const fetchUi = (result) => {
-    return self.fetchUiClient().then(() => result);
+  const thenSyncClient = (result) => {
+    return self.syncClient().then(() => result);
   };
 
   return {
@@ -218,67 +215,67 @@ const ClientStore = types.model('ClientStore', {
       };
     },
     torrentsStart(ids) {
-      return callApi({action: 'start', ids: ids}).then(...exceptionLog()).then(syncUi);
+      return callApi({action: 'start', ids: ids}).then(...exceptionLog()).then(thenSyncClient);
     },
     torrentsForceStart(ids) {
-      return callApi({action: 'forcestart', ids: ids}).then(...exceptionLog()).then(syncUi);
+      return callApi({action: 'forcestart', ids: ids}).then(...exceptionLog()).then(thenSyncClient);
     },
     torrentsStop(ids) {
-      return callApi({action: 'stop', ids: ids}).then(...exceptionLog()).then(syncUi);
+      return callApi({action: 'stop', ids: ids}).then(...exceptionLog()).then(thenSyncClient);
     },
     torrentsRecheck(ids) {
-      return callApi({action: 'recheck', ids: ids}).then(...exceptionLog()).then(syncUi);
+      return callApi({action: 'recheck', ids: ids}).then(...exceptionLog()).then(thenSyncClient);
     },
     torrentsRemoveTorrent(ids) {
-      return callApi({action: 'removetorrent', ids: ids}).then(...exceptionLog()).then(syncUi);
+      return callApi({action: 'removetorrent', ids: ids}).then(...exceptionLog()).then(thenSyncClient);
     },
     torrentsRemoveTorrentFiles(ids) {
-      return callApi({action: 'removedatatorrent', ids: ids}).then(...exceptionLog()).then(syncUi);
+      return callApi({action: 'removedatatorrent', ids: ids}).then(...exceptionLog()).then(thenSyncClient);
     },
     torrentsQueueTop(ids) {
-      return callApi({action: 'queueTop', ids: ids}).then(...exceptionLog()).then(syncUi);
+      return callApi({action: 'queueTop', ids: ids}).then(...exceptionLog()).then(thenSyncClient);
     },
     torrentsQueueUp(ids) {
-      return callApi({action: 'queueUp', ids: ids}).then(...exceptionLog()).then(syncUi);
+      return callApi({action: 'queueUp', ids: ids}).then(...exceptionLog()).then(thenSyncClient);
     },
     torrentsQueueDown(ids) {
-      return callApi({action: 'queueDown', ids: ids}).then(...exceptionLog()).then(syncUi);
+      return callApi({action: 'queueDown', ids: ids}).then(...exceptionLog()).then(thenSyncClient);
     },
     torrentsQueueBottom(ids) {
-      return callApi({action: 'queueBottom', ids: ids}).then(...exceptionLog()).then(syncUi);
+      return callApi({action: 'queueBottom', ids: ids}).then(...exceptionLog()).then(thenSyncClient);
     },
     filesSetPriority(id, fileIdxs, level) {
       return callApi({action: 'setPriority', level, id: id, fileIdxs}).then(...exceptionLog());
     },
     setDownloadSpeedLimitEnabled(enabled) {
-      return callApi({action: 'setDownloadSpeedLimitEnabled', enabled}).then(...exceptionLog()).then(fetchUi);
+      return callApi({action: 'setDownloadSpeedLimitEnabled', enabled}).then(...exceptionLog()).then(thenSyncClient);
     },
     setDownloadSpeedLimit(speed) {
-      return callApi({action: 'setDownloadSpeedLimit', speed}).then(...exceptionLog()).then(fetchUi);
+      return callApi({action: 'setDownloadSpeedLimit', speed}).then(...exceptionLog()).then(thenSyncClient);
     },
     setUploadSpeedLimitEnabled(enabled) {
-      return callApi({action: 'setUploadSpeedLimitEnabled', enabled}).then(...exceptionLog()).then(fetchUi);
+      return callApi({action: 'setUploadSpeedLimitEnabled', enabled}).then(...exceptionLog()).then(thenSyncClient);
     },
     setUploadSpeedLimit(speed) {
-      return callApi({action: 'setUploadSpeedLimit', speed}).then(...exceptionLog()).then(fetchUi);
+      return callApi({action: 'setUploadSpeedLimit', speed}).then(...exceptionLog()).then(thenSyncClient);
     },
     setAltSpeedEnabled(enabled) {
-      return callApi({action: 'setAltSpeedEnabled', enabled}).then(...exceptionLog()).then(fetchUi);
+      return callApi({action: 'setAltSpeedEnabled', enabled}).then(...exceptionLog()).then(thenSyncClient);
     },
     setAltDownloadSpeedLimit(speed) {
-      return callApi({action: 'setAltDownloadSpeedLimit', speed}).then(...exceptionLog()).then(fetchUi);
+      return callApi({action: 'setAltDownloadSpeedLimit', speed}).then(...exceptionLog()).then(thenSyncClient);
     },
     setAltUploadSpeedLimit(speed) {
-      return callApi({action: 'setAltUploadSpeedLimit', speed}).then(...exceptionLog()).then(fetchUi);
+      return callApi({action: 'setAltUploadSpeedLimit', speed}).then(...exceptionLog()).then(thenSyncClient);
     },
     getTorrentFiles(id) {
       return callApi({action: 'getFileList', id: id}).then(...exceptionLog());
     },
     updateSettings() {
-      return callApi({action: 'updateSettings'}).then(...exceptionLog()).then(fetchUi);
+      return callApi({action: 'updateSettings'}).then(...exceptionLog()).then(thenSyncClient);
     },
     sendFiles(urls, directory) {
-      return callApi({action: 'sendFiles', urls, directory}).then(...exceptionLog()).then(syncUi);
+      return callApi({action: 'sendFiles', urls, directory}).then(...exceptionLog()).then(thenSyncClient);
     },
     getFreeSpace(path) {
       return callApi({action: 'getFreeSpace', path}).then(...exceptionLog());
@@ -287,22 +284,18 @@ const ClientStore = types.model('ClientStore', {
       return callApi({action: 'reannounce', ids: ids}).then(...exceptionLog());
     },
     rename(ids, path, name){
-      return callApi({action: 'rename', ids: ids, path, name}).then(...exceptionLog()).then(syncUi);
+      return callApi({action: 'rename', ids: ids, path, name}).then(...exceptionLog()).then(thenSyncClient);
     },
     torrentSetLocation(ids, location){
-      return callApi({action: 'torrentSetLocation', ids: ids, location}).then(...exceptionLog()).then(syncUi);
+      return callApi({action: 'torrentSetLocation', ids: ids, location}).then(...exceptionLog()).then(thenSyncClient);
     },
     getSnapshot() {
       return getSnapshot(self);
     },
-    syncUiClient(force) {
-      return callApi({action: 'updateTorrentList', force}).then((client) => {
-        self.setTorrents(client.torrents);
-        self.setSettings(client.settings);
-        self.speedRoll.setData(client.speedRoll.data);
-      }).then(...exceptionLog());
+    updateTorrentList(force) {
+      return callApi({action: 'updateTorrentList', force}).then(...exceptionLog()).then(thenSyncClient);
     },
-    fetchUiClient() {
+    syncClient() {
       return callApi({action: 'getClientStore'}).then((client) => {
         self.setTorrents(client.torrents);
         self.setSettings(client.settings);

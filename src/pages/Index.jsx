@@ -44,8 +44,8 @@ class Index extends React.Component {
   }
 
   onIntervalInit = () => {
-    this.rootStore.client.syncUiClient(true).catch((err) => {
-      logger.error('onIntervalInit syncUiClient error', err);
+    this.rootStore.client.updateTorrentList(true).catch((err) => {
+      logger.error('onIntervalInit updateTorrentList error', err);
     });
     this.rootStore.client.updateSettings().catch((err) => {
       logger.error('onIntervalInit updateSettings error', err);
@@ -53,8 +53,8 @@ class Index extends React.Component {
   };
 
   onIntervalFire = () => {
-    this.rootStore.client.syncUiClient().catch((err) => {
-      logger.error('onIntervalFire syncUiClient error', err);
+    this.rootStore.client.updateTorrentList().catch((err) => {
+      logger.error('onIntervalFire updateTorrentList error', err);
     });
   };
 

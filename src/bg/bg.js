@@ -120,9 +120,7 @@ class Bg {
       }
       case 'updateTorrentList': {
         promise = this.whenReady().then(() => {
-          return this.client.updateTorrents(message.force).then(() => {
-            return this.bgStore.client.getSnapshot();
-          });
+          return this.client.updateTorrents(message.force);
         });
         break;
       }
@@ -235,21 +233,15 @@ class Bg {
         break;
       }
       case 'reannounce': {
-        promise = this.whenReady().then(() => {
-          return this.client.reannounce(message.ids);
-        });
+        promise = this.client.reannounce(message.ids);
         break;
       }
       case 'rename': {
-        promise = this.whenReady().then(() => {
-          return this.client.rename(message.ids, message.path, message.name);
-        });
+        promise = this.client.rename(message.ids, message.path, message.name);
         break;
       }
       case 'torrentSetLocation': {
-        promise = this.whenReady().then(() => {
-          return this.client.torrentSetLocation(message.ids, message.location);
-        });
+        promise = this.client.torrentSetLocation(message.ids, message.location);
         break;
       }
       default: {
