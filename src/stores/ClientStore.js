@@ -244,7 +244,7 @@ const ClientStore = types.model('ClientStore', {
       return callApi({action: 'queueBottom', ids: ids}).then(...exceptionLog()).then(syncUi);
     },
     filesSetPriority(id, fileIdxs, level) {
-      return callApi({action: 'setPriority', level, id: id, fileIdxs}).then(...exceptionLog()).then(syncUi);
+      return callApi({action: 'setPriority', level, id: id, fileIdxs}).then(...exceptionLog());
     },
     setDownloadSpeedLimitEnabled(enabled) {
       return callApi({action: 'setDownloadSpeedLimitEnabled', enabled}).then(...exceptionLog()).then(syncUi);
@@ -277,10 +277,10 @@ const ClientStore = types.model('ClientStore', {
       return callApi({action: 'sendFiles', urls, directory}).then(...exceptionLog()).then(syncUi);
     },
     getFreeSpace(path) {
-      return callApi({action: 'getFreeSpace', path}).then(...exceptionLog()).then(syncUi);
+      return callApi({action: 'getFreeSpace', path}).then(...exceptionLog());
     },
     reannounce(ids) {
-      return callApi({action: 'reannounce', ids: ids}).then(...exceptionLog()).then(syncUi);
+      return callApi({action: 'reannounce', ids: ids}).then(...exceptionLog());
     },
     rename(ids, path, name){
       return callApi({action: 'rename', ids: ids, path, name}).then(...exceptionLog()).then(syncUi);

@@ -6,15 +6,6 @@ async function downloadFileFromTab(url, tabId, frameId) {
     throw new ErrorWithCode('Link is not supported', 'LINK_IS_NOT_SUPPORTED');
   }
 
-  const permissions = {
-    permissions: ['tabs'],
-  };
-
-  const hasPermissions = await containsPermissions(permissions);
-  if (!hasPermissions) {
-    await requestPermissions(permissions);
-  }
-
   await executeScriptPromise(tabId, {
     file: 'tabUrlFetch.js',
     frameId: frameId
@@ -50,28 +41,6 @@ const executeScriptPromise = (tabId, options) => {
       const err = chrome.runtime.lastError;
       err ? reject(err) : resolve(results);
     });
-  });
-};
-
-const containsPermissions = (permissions) => {
-  return new Promise((resolve, reject) => {
-    chrome.permissions.contains(permissions, (result) => {
-      const err = chrome.runtime.lastError;
-      err ? reject(err) : resolve(result);
-    });
-  });
-};
-
-const requestPermissions = (permissions) => {
-  return new Promise((resolve, reject) => {
-    chrome.permissions.request(permissions, (result) => {
-      const err = chrome.runtime.lastError;
-      err ? reject(err) : resolve(result);
-    });
-  }).then((granted) => {
-    if (!granted) {
-      throw new Error('Permissions is not granted');
-    }
   });
 };
 

@@ -479,9 +479,7 @@ class TransmissionClient {
         logger.error('sendFile error', url, err);
         return {error: err};
       });
-    })).then((result) => {
-      return this.bg.client.updateTorrents().then(() => result);
-    });
+    }));
   }
 
   retryIfTokenInvalid(callback) {
