@@ -30,7 +30,7 @@ const SpeedRollStore = types.model('SpeedRollStore', {
     },
 
     clean() {
-      const oldestTime = Date.now() - 60 * 1000;
+      const oldestTime = Date.now() - 5 * 60 * 1000;
       while (self.data.length && self.data[0].time < oldestTime) {
         self.data.shift();
       }
