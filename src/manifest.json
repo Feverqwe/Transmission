@@ -8,7 +8,7 @@
             "32": "assets/icons/icon_32.png"
         },
         "default_popup": "index.html#popup",
-        "default_title": "Transmission easy client"
+        "default_title": "__MSG_appName__"
     },
     "background": {
         "scripts": [
@@ -22,7 +22,7 @@
         "128": "assets/icons/icon_128.png"
     },
     "permissions": [ "http://*/*", "https://*/*", "storage", "notifications", "tabs", "contextMenus" ],
-    "name": "Transmission easy client",
+    "name": "__MSG_appName__",
     "description": "__MSG_appDesc__",
     "default_locale": "en",
     "options_page": "options.html",

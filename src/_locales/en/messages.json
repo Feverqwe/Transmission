@@ -1,4 +1,7 @@
 {
+    "appName": {
+        "message": "Transmission easy client"
+    },
     "appDesc": {
         "message": "Extension add Transmission web GUI in your web browser"
     },

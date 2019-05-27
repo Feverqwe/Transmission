@@ -2,6 +2,7 @@ import "whatwg-fetch";
 import arrayBufferToBase64 from "./tools/arrayBufferToBase64";
 import getLogger from "./tools/getLogger";
 import ErrorWithCode from "./tools/errorWithCode";
+import promiseFinally from "./tools/promiseFinally";
 
 const serializeError = require('serialize-error');
 
@@ -15,7 +16,7 @@ const logger = getLogger('tabUrlFetch');
 
     switch (message && message.action) {
       case 'fetchUrl': {
-        promise = fetchUrl(message.url);
+        promise = closeLockWrap(fetchUrl(message.url));
         break;
       }
       default: {
@@ -52,5 +53,16 @@ const logger = getLogger('tabUrlFetch');
         return {response: safeResponse, base64: arrayBufferToBase64(arrayBuffer)};
       });
     });
+  }
+
+  let lockCount = 0;
+  function closeLockWrap(promise) {
+    if (++lockCount !== 1) return promise;
+    window.onbeforeunload = () => true;
+    return promise.then(...promiseFinally(() => {
+      if (--lockCount === 0) {
+        window.onbeforeunload = null;
+      }
+    }));
   }
 })();
