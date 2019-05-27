@@ -4,7 +4,7 @@ import {getRoot, types} from "mobx-state-tree";
  * @typedef {Object} RemoveConfirmDialogStore
  * @property {string} id
  * @property {string} type
- * @property {string[]} torrentIds
+ * @property {number[]} torrentIds
  * @property {function} close
  */
 const RemoveConfirmDialogStore = types.model('RemoveConfirmDialogStore', {
