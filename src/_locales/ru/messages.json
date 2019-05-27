@@ -1,4 +1,7 @@
 {
+    "appName": {
+        "message": "Transmission easy client"
+    },
     "appDesc": {
         "message": "Расширение добавит Web-интерфейс Transmission в ваш браузер"
     },

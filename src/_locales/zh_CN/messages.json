@@ -1,4 +1,7 @@
 {
+    "appName": {
+        "message": "Transmission easy client"
+    },
     "appDesc": {
         "message": "扩展添加Transmission的网页图形用户界面在网页浏览器"
     },
