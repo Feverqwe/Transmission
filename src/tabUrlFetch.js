@@ -57,8 +57,9 @@ const logger = getLogger('tabUrlFetch');
 
   let lockCount = 0;
   function closeLockWrap(promise) {
-    if (++lockCount !== 1) return promise;
-    window.onbeforeunload = () => true;
+    if (++lockCount === 1) {
+      window.onbeforeunload = () => true;
+    }
     return promise.then(...promiseFinally(() => {
       if (--lockCount === 0) {
         window.onbeforeunload = null;
