@@ -191,7 +191,7 @@ class FileName extends React.Component {
     }
 
     return (
-      <div>
+      <div title={this.fileStore.shortName}>
         <span>{links}{filename}</span>
       </div>
     );

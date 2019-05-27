@@ -388,7 +388,7 @@ class TorrentName extends React.PureComponent {
 
     return (
       <div className={classList.join(' ')}>
-        <span ref={this.refSpan} onMouseEnter={onMouseEnter}>{this.props.name}</span>
+        <span ref={this.refSpan} onMouseEnter={onMouseEnter} title={this.props.name}>{this.props.name}</span>
       </div>
     );
   }
