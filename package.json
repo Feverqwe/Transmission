@@ -4,12 +4,13 @@
   "scripts": {
     "watch": "webpack --mode development --watch --config webpack.config.js",
     "watchFirfox": "npm run watch -- --BROWSER firefox",
-    "release": "npm run releaseCh && npm run releaseFf",
+    "release": "npm run releaseCh && npm run releaseFf && npm run releaseOp",
     "compress": "node ./builder/compressDist",
     "compressSource": "node ./builder/compressSource",
     "build": "webpack --mode production --config webpack.config.js",
     "releaseCh": "npm run build -- --BROWSER chrome && npm run compress -- --BROWSER chrome",
-    "releaseFf": "npm run build -- --BROWSER firefox && npm run compress -- --BROWSER firefox && npm run compressSource -- --BROWSER firefox"
+    "releaseFf": "npm run build -- --BROWSER firefox && npm run compress -- --BROWSER firefox && npm run compressSource -- --BROWSER firefox",
+    "releaseOp": "npm run build -- --BROWSER opera && npm run compress -- --BROWSER opera && npm run compressSource -- --BROWSER opera"
   },
   "dependencies": {
     "babel-polyfill": "^6.26.0",
