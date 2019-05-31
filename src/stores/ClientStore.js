@@ -209,8 +209,8 @@ const ClientStore = types.model('ClientStore', {
     get currentSpeedStr() {
       const {downloadSpeed, uploadSpeed} = self.currentSpeed;
       return {
-        downloadSpeedStr: speedToStr(downloadSpeed),
-        uploadSpeedStr: speedToStr(uploadSpeed),
+        downloadSpeedStr: downloadSpeed === 0 ? '-' : speedToStr(downloadSpeed),
+        uploadSpeedStr: uploadSpeed === 0 ? '-' : speedToStr(uploadSpeed),
       };
     },
     torrentsStart(ids) {

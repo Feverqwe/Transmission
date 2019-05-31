@@ -123,10 +123,18 @@ const TorrentStore = types.model('TorrentStore', {
       return (self.recheckProgress * 100).toFixed(1) + '%';
     },
     get uploadSpeedStr() {
-      return speedToStr(self.uploadSpeed);
+      if (self.uploadSpeed === 0) {
+        return '';
+      } else {
+        return speedToStr(self.uploadSpeed);
+      }
     },
     get downloadSpeedStr() {
-      return speedToStr(self.downloadSpeed);
+      if (self.downloadSpeed === 0) {
+        return '';
+      } else {
+        return speedToStr(self.downloadSpeed);
+      }
     },
     get etaStr() {
       return getEta(self.eta);
