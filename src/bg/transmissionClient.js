@@ -480,6 +480,7 @@ class TransmissionClient {
     return Promise.resolve(callback()).catch((err) => {
       if (err.code === 'INVALID_TOKEN') {
         this.token = err.token;
+        this.torrentsResponseTime = 0;
         return callback();
       }
       throw err;
