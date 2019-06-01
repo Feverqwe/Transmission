@@ -15,6 +15,10 @@ const RenameDialogStore = types.model('RenameDialogStore', {
   torrentIds: types.array(types.number)
 }).views((self) => {
   return {
+    get name() {
+      const parts = self.path.split(/[\\/]/);
+      return parts.pop();
+    },
     close() {
       /**@type RootStore*/const rootStore = getRoot(self);
       rootStore.destroyDialog(self.id);

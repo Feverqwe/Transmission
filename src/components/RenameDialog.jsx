@@ -25,9 +25,9 @@ class RenameDialog extends React.Component {
     e.preventDefault();
     const form = e.currentTarget;
 
-    const path = form.elements.path.value.trim();
+    const name = form.elements.name.value.trim();
 
-    this.rootStore.client.rename(this.dialogStore.torrentIds, this.dialogStore.path, path);
+    this.rootStore.client.rename(this.dialogStore.torrentIds, this.dialogStore.path, name);
 
     this.dialogStore.close();
   };
@@ -44,7 +44,7 @@ class RenameDialog extends React.Component {
           <form onSubmit={this.handleSubmit}>
             <div className="nf-subItem">
               <label>{chrome.i18n.getMessage('renameText')}</label>
-              <input type="text" name="path" defaultValue={this.dialogStore.path} autoFocus={true}/>
+              <input type="text" name="name" defaultValue={this.dialogStore.name} autoFocus={true}/>
             </div>
             <div className="nf-subItem">
               <input type="submit" value={chrome.i18n.getMessage('DLG_BTN_APPLY')}/>
