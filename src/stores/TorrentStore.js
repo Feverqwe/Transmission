@@ -103,7 +103,7 @@ const TorrentStore = types.model('TorrentStore', {
       return formatBytes(self.remaining);
     },
     get isCompleted() {
-      return self.progress === 1000 || !!self.completedTime;
+      return self.percentDone === 1 && !!self.completedTime;
     },
     get sizeStr() {
       return formatBytes(self.size);
@@ -173,7 +173,7 @@ const TorrentStore = types.model('TorrentStore', {
 
       switch (self.statusCode) {
         case 0: {
-          if (self.progress === 1000) {
+          if (self.percentDone === 1) {
             return chrome.i18n.getMessage('OV_FL_FINISHED');
           } else {
             return chrome.i18n.getMessage('OV_FL_STOPPED');
@@ -245,7 +245,7 @@ const TorrentStore = types.model('TorrentStore', {
       return actions;
     },
     get isFinished() {
-      return !!(self.progress === 1000 && self.isStopped);
+      return self.percentDone === 1 && self.isStopped;
     },
     get isActive() {
       return !!(self.downloadSpeed || self.uploadSpeed);
