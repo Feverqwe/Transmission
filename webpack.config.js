@@ -129,12 +129,28 @@ const config = {
     new HtmlWebpackPlugin({
       filename: 'index.html',
       template: './src/templates/index.html',
-      chunks: ['commons', 'commons-ui', 'index']
+      chunks: ['commons', 'commons-ui', 'index'],
+      minify: {
+        collapseWhitespace: true,
+        removeComments: true,
+        removeRedundantAttributes: true,
+        removeScriptTypeAttributes: true,
+        removeStyleLinkTypeAttributes: true,
+        useShortDoctype: true,
+      },
     }),
     new HtmlWebpackPlugin({
       filename: 'options.html',
       template: './src/templates/options.html',
-      chunks: ['commons', 'commons-ui', 'options']
+      chunks: ['commons', 'commons-ui', 'options'],
+      minify: {
+        collapseWhitespace: true,
+        removeComments: true,
+        removeRedundantAttributes: true,
+        removeScriptTypeAttributes: true,
+        removeStyleLinkTypeAttributes: true,
+        useShortDoctype: true,
+      },
     }),
     new DefinePlugin({
       'BUILD_ENV': Object.entries(BUILD_ENV).reduce((obj, [key, value]) => {
