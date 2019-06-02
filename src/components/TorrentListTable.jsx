@@ -157,7 +157,7 @@ class TorrentListTableHeadColumn extends TableHeadColumn {
       const styleText = `.torrent-list-layer th.${column.column}, .torrent-list-layer td.${column.column} {
         min-width: ${column.width}px;
         max-width: ${column.width}px;
-      }`;
+      }`.split(/\r?\n/).map(line => line.trim()).join('');
       style = (
         <style>{styleText}</style>
       );
