@@ -42,7 +42,7 @@ class MobxPatchLine {
       if (id !== this.id) {
         throw new ErrorWithCode('ID_IS_NOT_EQUAL', 'ID_IS_NOT_EQUAL');
       }
-      return {id: this.id, patchId, type: 'patch', result: this.getPatchFromId(fromPatchId)};
+      return {id: this.id, patchId, type: 'patch', result: this.getPatchAfterId(fromPatchId)};
     } catch (err) {
       if (['ID_IS_NOT_EQUAL', 'PATCH_ID_IS_NOT_FOUND'].indexOf(err.code) !== -1) {
         return {id: this.id, patchId, type: 'snapshot', result: this.getSnapshot()};
@@ -55,7 +55,7 @@ class MobxPatchLine {
     return this.store.toJSON();
   }
 
-  getPatchFromId(id) {
+  getPatchAfterId(id) {
     const pos = this.idLine.indexOf(id);
     if (pos === -1) {
       throw new ErrorWithCode('PATCH_ID_IS_NOT_FOUND', 'PATCH_ID_IS_NOT_FOUND');
