@@ -1,4 +1,4 @@
-import {flow, types} from "mobx-state-tree";
+import {flow, types, applyPatch} from "mobx-state-tree";
 import ConfigStore from "./ConfigStore";
 import getLogger from "../tools/getLogger";
 import ClientStore from "./ClientStore";
@@ -22,11 +22,14 @@ let dialogIndex = 0;
  * @property {string} [state]
  * @property {ConfigStore|undefined} config
  * @property {ClientStore|undefined} client
+ * @property {number|undefined} clientPatchId
+ * @property {string|undefined} clientId
  * @property {TorrentListStore} [torrentList]
  * @property {FileListStore|undefined} fileList
  * @property {SpaceWatcherStore|undefined} spaceWatcher
  * @property {Map<*,*>} dialogs
  * @property {function:Promise} init
+ * @property {function:Promise} syncClient
  * @property {function} flushTorrentList
  * @property {function} createFileList
  * @property {function} destroyFileList
@@ -40,6 +43,8 @@ const RootStore = types.model('RootStore', {
   state: types.optional(types.enumeration(['idle', 'pending', 'done', 'error']), 'idle'),
   config: types.maybe(ConfigStore),
   client: types.maybe(ClientStore),
+  clientPatchId: types.maybe(types.number),
+  clientId: types.maybe(types.string),
   torrentList: types.optional(TorrentListStore, {}),
   fileList: types.maybe(FileListStore),
   spaceWatcher: types.maybe(SpaceWatcherStore),
@@ -48,17 +53,43 @@ const RootStore = types.model('RootStore', {
     RenameDialogStore, CopyMagnetUrlDialogStore, MoveDialogStore
   )),
 }).actions((self) => {
+  let syncClientSessionId = null;
+
   return {
     init: flow(function* () {
       if (self.state === 'pending') return;
       self.state = 'pending';
       try {
         self.config = yield fetchConfig();
-        self.client = yield fetchClient();
+        yield self.syncClient();
         self.state = 'done';
       } catch (err) {
         logger.error('init error', err);
         self.state = 'error';
+      }
+    }),
+    syncClient: flow(function* () {
+      let sessionId = syncClientSessionId = {};
+      const response = yield fetchClientDelta(self.clientId, self.clientPatchId);
+      if (sessionId !== syncClientSessionId) return;
+
+      // logger.log('response', response);
+
+      const {id, type, patchId, result} = response;
+      switch (type) {
+        case 'snapshot': {
+          self.client = result;
+          self.clientPatchId = patchId;
+          self.clientId = id;
+          break;
+        }
+        case 'patch': {
+          if (id === self.clientId && patchId !== self.clientPatchId) {
+            applyPatch(self.client, result);
+            self.clientPatchId = patchId;
+          }
+          break;
+        }
       }
     }),
     flushTorrentList() {
@@ -93,10 +124,8 @@ const RootStore = types.model('RootStore', {
   };
 });
 
-const fetchClient = () => {
-  return callApi({
-    action: 'getClientStore'
-  });
+const fetchClientDelta = (id, patchId) => {
+  return callApi({action: 'getClientStoreDelta', id, patchId});
 };
 
 const fetchConfig = () => {

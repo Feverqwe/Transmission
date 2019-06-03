@@ -1,4 +1,4 @@
-import {types} from "mobx-state-tree";
+import {getRoot, types} from "mobx-state-tree";
 import SpeedRollStore from "./SpeedRollStore";
 import speedToStr from "../tools/speedToStr";
 import TorrentStore from "./TorrentStore";
@@ -292,11 +292,8 @@ const ClientStore = types.model('ClientStore', {
       return callApi({action: 'updateTorrentList', force}).then(...exceptionLog()).then(thenSyncClient);
     },
     syncClient() {
-      return callApi({action: 'getClientStore'}).then((client) => {
-        self.setTorrents(client.torrents);
-        self.setSettings(client.settings);
-        self.speedRoll.setData(client.speedRoll.data);
-      }).then(...exceptionLog());
+      const rootStore = getRoot(self);
+      return rootStore.syncClient().then(...exceptionLog());
     },
   };
 });

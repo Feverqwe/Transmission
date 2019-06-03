@@ -4,6 +4,7 @@ import getLogger from "../tools/getLogger";
 import loadConfig from "../tools/loadConfig";
 import ClientStore from "./ClientStore";
 import mergeColumns from "../tools/mergeColumns";
+import MobxPatchLine from "../tools/mobxPatchLine";
 
 const logger = getLogger('BgStore');
 
@@ -13,6 +14,9 @@ const logger = getLogger('BgStore');
  * @property {ClientStore} [client]
  * @property {function:Promise} fetchConfig
  * @property {function} flushClient
+ * @property {function} createPatchLine
+ * @property {*} clientPatchLine
+ * @property {function} afterCreate
  */
 const BgStore = types.model('BgStore', {
   config: types.maybe(ConfigStore),
@@ -50,10 +54,26 @@ const BgStore = types.model('BgStore', {
     }),
     flushClient() {
       self.client = ClientStore.create();
+      self.createPatchLine();
     }
   };
 }).views((self) => {
-  return {};
+  let clientPatchLine = null;
+
+  return {
+    createPatchLine() {
+      if (clientPatchLine) {
+        clientPatchLine.destroy();
+      }
+      clientPatchLine = new MobxPatchLine(self.client);
+    },
+    get clientPatchLine() {
+      return clientPatchLine;
+    },
+    afterCreate() {
+      self.createPatchLine();
+    }
+  };
 });
 
 export default BgStore;
