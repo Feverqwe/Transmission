@@ -13,6 +13,8 @@ import RenameDialogStore from "./RenameDialogStore";
 import CopyMagnetUrlDialogStore from "./CopyMagnetUrlDialogStore";
 import MoveDialogStore from "./MoveDialogStore";
 
+const promiseLimit = require('promise-limit');
+
 const logger = getLogger('RootStore');
 
 let dialogIndex = 0;
@@ -30,6 +32,7 @@ let dialogIndex = 0;
  * @property {Map<*,*>} dialogs
  * @property {function:Promise} init
  * @property {function:Promise} syncClient
+ * @property {function:Promise} _syncClient
  * @property {function} flushTorrentList
  * @property {function} createFileList
  * @property {function} destroyFileList
@@ -53,7 +56,7 @@ const RootStore = types.model('RootStore', {
     RenameDialogStore, CopyMagnetUrlDialogStore, MoveDialogStore
   )),
 }).actions((self) => {
-  let syncClientSessionId = null;
+  const oneLimit = promiseLimit(1);
 
   return {
     init: flow(function* () {
@@ -69,11 +72,12 @@ const RootStore = types.model('RootStore', {
       }
     }),
     syncClient: flow(function* () {
-      let sessionId = syncClientSessionId = {};
+      return yield oneLimit(() => self._syncClient());
+    }),
+    _syncClient: flow(function* () {
       const response = yield fetchClientDelta(self.clientId, self.clientPatchId);
-      if (sessionId !== syncClientSessionId) return;
 
-      // logger.log('response', response);
+      // logger.log('response', self.clientPatchId, response);
 
       const {id, type, patchId, result} = response;
       switch (type) {
