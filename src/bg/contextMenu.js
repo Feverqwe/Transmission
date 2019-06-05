@@ -122,14 +122,14 @@ class ContextMenu {
   async createFolderMenu(parentId) {
     const folders = this.bgStore.config.folders;
     if (this.bgStore.config.treeViewContextMenu) {
-      await Promise.all(transformFoldersToTree(folders).map((folder) => {
-        let name = folder.name;
+      await Promise.all(transformFoldersToTree(folders).map((menuItem) => {
+        let name = menuItem.name;
         if (name === './') {
           name = chrome.i18n.getMessage('currentDirectory');
         }
         return contextMenusCreate({
-          id: folder.id,
-          parentId: folder.parentId || parentId,
+          id: menuItem.id,
+          parentId: menuItem.parentId || parentId,
           title: name,
           contexts: ['link']
         });
@@ -264,11 +264,11 @@ function transformFoldersToTree(folders) {
         const place = item;
         const folder = placeFolderMap[place];
         const id = JSON.stringify({type: 'folder', index: folders.indexOf(folder)});
-        menus.push(Object.assign({}, folder, {
+        menus.push({
           name,
           id,
           parentId
-        }));
+        });
       }
     });
   };
