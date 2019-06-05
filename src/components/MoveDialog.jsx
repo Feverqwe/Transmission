@@ -37,7 +37,7 @@ class MoveDialog extends React.Component {
         if (directoryIndex === -1) {
           location = this.rootStore.client.settings.downloadDir;
         } else {
-          location = this.rootStore.config.folders[directoryIndex];
+          location = this.rootStore.config.folders[directoryIndex].path;
         }
       }
     }
