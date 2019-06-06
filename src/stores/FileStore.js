@@ -31,6 +31,7 @@ const FileStore = types.model('FileStore', {
 
   return {
     get progress() {
+      if (self.size === 0) return 100;
       return Math.round((self.downloaded * 100 / self.size) * 10) / 10;
     },
     get progressStr() {
