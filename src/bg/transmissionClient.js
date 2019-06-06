@@ -1,4 +1,4 @@
-import {fetch as fetchPolyfill} from "whatwg-fetch";
+import {fetch as fetchPolyfill, Headers as HeadersPolyfill} from "whatwg-fetch";
 import getLogger from "../tools/getLogger";
 import ErrorWithCode from "../tools/errorWithCode";
 import readBlobAsArrayBuffer from "../tools/readBlobAsArrayBuffer";
@@ -8,6 +8,20 @@ import splitByPart from "../tools/splitByPart";
 import downloadFileFromUrl from "../tools/downloadFileFromUrl";
 
 const logger = getLogger('TransmissionClient');
+
+HeadersPolyfill.prototype.append = ((append) => {
+  return function (name, value) {
+    try {
+      return append.apply(this, arguments);
+    } catch (err) {
+      if (err.message === 'Invalid character in header field name') {
+        logger.warn('Skip invalid header field name', JSON.stringify(name));
+      } else {
+        throw err;
+      }
+    }
+  };
+})(HeadersPolyfill.prototype.append);
 
 class TransmissionClient {
   constructor(/**Bg*/bg) {
