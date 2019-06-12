@@ -160,7 +160,7 @@ const TorrentStore = types.model('TorrentStore', {
       }
     },
     get stateText() {
-      if (self.errorCode > 0) {
+      if (self.errorCode > 0 && [1, 2].indexOf(self.statusCode) === -1) {
         let errorString = self.errorString;
         if (/^Error: /.test(errorString)) {
           errorString = errorString.substr(7);
@@ -172,27 +172,27 @@ const TorrentStore = types.model('TorrentStore', {
       }
 
       switch (self.statusCode) {
-        case 0: {
+        case 0: { // StatusStopped
           if (self.percentDone === 1) {
             return chrome.i18n.getMessage('OV_FL_FINISHED');
           } else {
             return chrome.i18n.getMessage('OV_FL_STOPPED');
           }
         }
-        case 1:   // Queued to check files
-        case 3: { // Queued to download
+        case 1:   // StatusCheckWait
+        case 3: { // StatusDownloadWait
           return chrome.i18n.getMessage('OV_FL_QUEUED');
         }
-        case 2: {
+        case 2: { // StatusCheck
           return chrome.i18n.getMessage('OV_FL_CHECKED') + ' ' + self.recheckProgressStr;
         }
-        case 4: {
+        case 4: { // StatusDownload
           return chrome.i18n.getMessage('OV_FL_DOWNLOADING');
         }
-        case 5: {
+        case 5: { // StatusSeedWait
           return chrome.i18n.getMessage('OV_FL_QUEUED_SEED');
         }
-        case 6: {
+        case 6: { // StatusSeed
           return chrome.i18n.getMessage('OV_FL_SEEDING');
         }
         default: {

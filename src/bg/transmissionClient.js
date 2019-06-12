@@ -513,7 +513,20 @@ class TransmissionClient {
 
   normalizeTorrent = (torrent) => {
     const id = torrent.id;
+
+    // StatusStopped = 0;
+    // StatusCheckWait = 1;
+    // StatusCheck = 2;
+    // StatusDownloadWait = 3;
+    // StatusDownload = 4;
+    // StatusSeedWait = 5;
+    // StatusSeed = 6;
     const statusCode = torrent.status;
+
+    // ErrNone = 0;
+    // ErrTrackerWarning = 1;
+    // ErrTrackerError = 2;
+    // ErrLocalError = 3;
     const errorCode = torrent.error;
     const errorString = torrent.errorString;
     const name = torrent.name;
