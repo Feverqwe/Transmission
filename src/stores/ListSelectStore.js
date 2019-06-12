@@ -9,6 +9,7 @@ import {autorun} from "mobx";
  * @property {function} removeSelectedId
  * @property {function} addMultipleSelectedId
  * @property {function} toggleSelectAll
+ * @property {function} resetSelectedIds
  * @property {function} syncSelectedIds
  * @property {*} _sortedIds
  * @property {*} isSelectedAll
@@ -62,6 +63,9 @@ const ListSelectStore = types.model('ListSelectStore', {
       } else {
         self.selectedIds = self._sortedIds.slice(0);
       }
+    },
+    resetSelectedIds() {
+      self.selectedIds = [];
     },
     syncSelectedIds() {
       self.selectedIds = self.selectedIds.filter(id => self._sortedIds.indexOf(id) !== -1);

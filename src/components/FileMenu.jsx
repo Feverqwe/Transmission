@@ -43,6 +43,7 @@ class FileMenuBody extends ContextMenuBody {
     const id = this.fileListStore.id;
     const selectedIndexes = this.fileListStore.selectedIndexes;
     this.rootStore.client.filesSetPriority(id, selectedIndexes, priority);
+    this.fileListStore.resetSelectedIds();
   };
 
   handleRename = ({event: e, props}) => {
@@ -55,6 +56,7 @@ class FileMenuBody extends ContextMenuBody {
       path: file.name,
       torrentIds: [id]
     });
+    this.fileListStore.resetSelectedIds();
   };
 
   render() {

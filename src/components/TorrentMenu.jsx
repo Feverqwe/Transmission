@@ -42,18 +42,22 @@ class TorrentMenuBody extends ContextMenuBody {
 
   handleStart = ({event: e, props}) => {
     this.rootStore.client.torrentsStart(this.torrentListStore.selectedIds);
+    this.torrentListStore.resetSelectedIds();
   };
 
   handleForceStart = ({event: e, props}) => {
     this.rootStore.client.torrentsForceStart(this.torrentListStore.selectedIds);
+    this.torrentListStore.resetSelectedIds();
   };
 
   handleStop = ({event: e, props}) => {
     this.rootStore.client.torrentsStop(this.torrentListStore.selectedIds);
+    this.torrentListStore.resetSelectedIds();
   };
 
   handleRecheck = ({event: e, props}) => {
     this.rootStore.client.torrentsRecheck(this.torrentListStore.selectedIds);
+    this.torrentListStore.resetSelectedIds();
   };
 
   handleRemove = ({event: e, props}) => {
@@ -61,14 +65,17 @@ class TorrentMenuBody extends ContextMenuBody {
       type: 'removeConfirm',
       torrentIds: this.torrentListStore.selectedIds.slice(0)
     });
+    this.torrentListStore.resetSelectedIds();
   };
 
   handleRemoveTorrent = ({event: e, props}) => {
     this.rootStore.client.torrentsRemoveTorrent(this.torrentListStore.selectedIds);
+    this.torrentListStore.resetSelectedIds();
   };
 
   handleRemoveTorrentFiles = ({event: e, props}) => {
     this.rootStore.client.torrentsRemoveTorrentFiles(this.torrentListStore.selectedIds);
+    this.torrentListStore.resetSelectedIds();
   };
 
   handleRename = ({event: e, props}) => {
@@ -80,6 +87,7 @@ class TorrentMenuBody extends ContextMenuBody {
       path: torrent.name,
       torrentIds: this.torrentListStore.selectedIds.slice(0)
     });
+    this.torrentListStore.resetSelectedIds();
   };
 
   handleCopyMagnetUrl = ({event: e, props}) => {
@@ -91,6 +99,7 @@ class TorrentMenuBody extends ContextMenuBody {
       magnetLink: torrent.magnetLink,
       torrentIds: this.torrentListStore.selectedIds.slice(0)
     });
+    this.torrentListStore.resetSelectedIds();
   };
 
   handleMove = ({event: e, props}) => {
@@ -102,32 +111,42 @@ class TorrentMenuBody extends ContextMenuBody {
       directory: torrent.directory,
       torrentIds: this.torrentListStore.selectedIds.slice(0)
     });
+    this.torrentListStore.resetSelectedIds();
   };
 
   handleReannounce = ({event: e, props}) => {
     this.rootStore.client.reannounce(this.torrentListStore.selectedIds);
+    this.torrentListStore.resetSelectedIds();
   };
 
   handleQueueTop = ({event: e, props}) => {
     this.rootStore.client.torrentsQueueTop(this.torrentListStore.selectedIds);
+    this.torrentListStore.resetSelectedIds();
   };
 
   handleQueueUp = ({event: e, props}) => {
     this.rootStore.client.torrentsQueueUp(this.torrentListStore.selectedIds);
+    this.torrentListStore.resetSelectedIds();
   };
 
   handleQueueDown = ({event: e, props}) => {
     this.rootStore.client.torrentsQueueDown(this.torrentListStore.selectedIds);
+    this.torrentListStore.resetSelectedIds();
   };
 
   handleQueueBottom = ({event: e, props}) => {
     this.rootStore.client.torrentsQueueBottom(this.torrentListStore.selectedIds);
+    this.torrentListStore.resetSelectedIds();
   };
 
   handleShowFiles = ({event: e, props}) => {
     if (this.torrentListStore.selectedIds.length) {
       const id = this.torrentListStore.selectedIds[0];
       this.rootStore.createFileList(id);
+      if (this.state.onHide) {
+        this.rootStore.fileList.setRemoveSelectOnHide(true);
+      }
+      this.state.onHide = null;
     }
   };
 
