@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import Select, {Option} from "rc-select";
 import ComponentLoader from "./ComponentLoader";
 import getLogger from "../tools/getLogger";
+import VisiblePage from "./VisiblePage";
 
 const logger = getLogger('Menu');
 
@@ -138,7 +139,9 @@ class Menu extends React.Component {
     let graph = null;
     if (this.rootStore.config.showSpeedGraph) {
       graph = (
-        <ComponentLoader load-page={'graph'}/>
+        <VisiblePage>
+          <ComponentLoader load-page={'graph'}/>
+        </VisiblePage>
       );
     }
 
