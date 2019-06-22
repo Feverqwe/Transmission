@@ -120,10 +120,7 @@ table.status-panel td.space.disk {
     background-size: 16px;
 }
 
-@media
-only screen and (        min-device-pixel-ratio: 2),
-only screen and (                min-resolution: 192dpi),
-only screen and (                min-resolution: 2dppx) {
+@media only screen and (min-resolution: 100dpi) {
     .menu {
         a.wui{
             background-image: url("../img/wui@2x.png");
@@ -333,7 +330,7 @@ table {
                 left: 0;
                 height: 100%;
                 background-color: #3687ED;
-                border-radius: 3px;
+                border-radius: 2px;
                 z-index: 0;
             }
         }
@@ -898,8 +895,8 @@ tr > th {
             }
 
             &:last-child {
-                border-bottom-left-radius: 5px;
-                border-bottom-right-radius: 5px;
+                border-bottom-left-radius: 4px;
+                border-bottom-right-radius: 4px;
             }
         }
     }
