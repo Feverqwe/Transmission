@@ -50,7 +50,7 @@ const BgStore = types.model('BgStore', {
       }
     }),
     flushClient() {
-      self.client = ClientStore.create();
+      self.client = undefined;
     }
   };
 });
