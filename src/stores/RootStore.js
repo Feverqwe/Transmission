@@ -1,4 +1,4 @@
-import {flow, types, applyPatch} from "mobx-state-tree";
+import {flow, types} from "mobx-state-tree";
 import ConfigStore from "./ConfigStore";
 import getLogger from "../tools/getLogger";
 import ClientStore from "./ClientStore";
@@ -12,6 +12,7 @@ import SpaceWatcherStore from "./SpaceWatcherStore";
 import RenameDialogStore from "./RenameDialogStore";
 import CopyMagnetUrlDialogStore from "./CopyMagnetUrlDialogStore";
 import MoveDialogStore from "./MoveDialogStore";
+import mobxApplyPatchLine from "../tools/mobxApplyPatchLine";
 
 const promiseLimit = require('promise-limit');
 
@@ -24,8 +25,6 @@ let dialogIndex = 0;
  * @property {string} [state]
  * @property {ConfigStore|undefined} config
  * @property {ClientStore|undefined} client
- * @property {number|undefined} clientPatchId
- * @property {string|undefined} clientId
  * @property {TorrentListStore} [torrentList]
  * @property {FileListStore|undefined} fileList
  * @property {SpaceWatcherStore|undefined} spaceWatcher
@@ -46,8 +45,6 @@ const RootStore = types.model('RootStore', {
   state: types.optional(types.enumeration(['idle', 'pending', 'done', 'error']), 'idle'),
   config: types.maybe(ConfigStore),
   client: types.maybe(ClientStore),
-  clientPatchId: types.maybe(types.number),
-  clientId: types.maybe(types.string),
   torrentList: types.optional(TorrentListStore, {}),
   fileList: types.maybe(FileListStore),
   spaceWatcher: types.maybe(SpaceWatcherStore),
@@ -57,6 +54,11 @@ const RootStore = types.model('RootStore', {
   )),
 }).actions((self) => {
   const oneLimit = promiseLimit(1);
+
+  const bgStoreSession = {
+    id: null,
+    patchId: null
+  };
 
   return {
     init: flow(function* () {
@@ -71,28 +73,17 @@ const RootStore = types.model('RootStore', {
         self.state = 'error';
       }
     }),
-    syncClient: flow(function* () {
-      return yield oneLimit(() => self._syncClient());
+    syncClient: flow(function* (isForce) {
+      return yield oneLimit(() => self._syncClient(isForce));
     }),
-    _syncClient: flow(function* () {
-      const response = yield fetchClientDelta(self.clientId, self.clientPatchId);
-
-      // logger.log('response', self.clientPatchId, response);
-
-      const {id, type, patchId, result} = response;
-      switch (type) {
-        case 'snapshot': {
-          self.client = result;
-          self.clientPatchId = patchId;
-          self.clientId = id;
-          break;
-        }
-        case 'patch': {
-          if (id === self.clientId && patchId !== self.clientPatchId) {
-            applyPatch(self.client, result);
-            self.clientPatchId = patchId;
-          }
-          break;
+    _syncClient: flow(function* (isForce) {
+      try {
+        const response = yield fetchBgStoreDelta(bgStoreSession);
+        mobxApplyPatchLine(self, bgStoreSession, response);
+      } catch (err) {
+        logger.error('_syncClient error', err);
+        if (err.code === 'APPLY_PATH_ERROR' && !isForce) {
+          self.syncClient(true);
         }
       }
     }),
@@ -128,8 +119,8 @@ const RootStore = types.model('RootStore', {
   };
 });
 
-const fetchClientDelta = (id, patchId) => {
-  return callApi({action: 'getClientStoreDelta', id, patchId});
+const fetchBgStoreDelta = ({id, patchId}) => {
+  return callApi({action: 'getBgStoreDelta', id, patchId});
 };
 
 const fetchConfig = () => {
