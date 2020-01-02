@@ -10,9 +10,9 @@ const serializeError = require('serialize-error');
 const logger = getLogger('background');
 
 const notificationIcons = {
-  complete: require('!file-loader!../assets/img/notification_done.png'),
-  add: require('!file-loader!../assets/img/notification_add.png'),
-  error: require('!file-loader!../assets/img/notification_error.png')
+  complete: require('!file-loader!../assets/img/notification_done.png').default,
+  add: require('!file-loader!../assets/img/notification_add.png').default,
+  error: require('!file-loader!../assets/img/notification_error.png').default,
 };
 
 class Bg {

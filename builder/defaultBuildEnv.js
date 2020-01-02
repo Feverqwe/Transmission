@@ -7,14 +7,14 @@ const version = require('../src/manifest').version;
 
 const browser = getArgvValue('--BROWSER') || 'chrome';
 
-let targets = null;
+let targets;
 if (browser === 'firefox') {
   targets = {
-    firefox: mode === 'development' ? '66' : '48',
+    firefox: mode === 'development' ? '71' : '48',
   };
 } else {
   targets = {
-    chrome: mode === 'development' ? '74' : '49',
+    chrome: mode === 'development' ? '79' : '49',
   };
 }
 
@@ -28,6 +28,7 @@ global.BUILD_ENV = {
   babelEnvOptions: {
     targets: targets,
     useBuiltIns: mode === 'development' ? false : 'usage',
+    corejs: 2,
   },
   FLAG_ENABLE_LOGGER: true,
 };
