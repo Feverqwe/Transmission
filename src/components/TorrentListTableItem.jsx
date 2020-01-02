@@ -1,19 +1,20 @@
-import {inject, observer} from "mobx-react";
+import {observer} from "mobx-react";
 import React from "react";
 import PropTypes from "prop-types";
 import {contextMenu} from 'react-contexify';
+import RootStoreCtx from "../tools/RootStoreCtx";
 
-@inject('rootStore')
 @observer
 class TorrentListTableItem extends React.Component {
   static propTypes = {
     torrent: PropTypes.object.isRequired,
-    rootStore: PropTypes.object,
   };
+
+  static contextType = RootStoreCtx;
 
   /**@return {RootStore}*/
   get rootStore() {
-    return this.props.rootStore;
+    return this.context;
   }
 
   /**@return {TorrentStore}*/

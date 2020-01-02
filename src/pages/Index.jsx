@@ -3,7 +3,7 @@ import "rc-select/assets/index.css";
 import "../assets/css/stylesheet.less";
 import React from "react";
 import Menu from "../components/Menu";
-import {inject, observer, Provider} from "mobx-react";
+import {observer} from "mobx-react";
 import PropTypes from "prop-types";
 import ReactDOM from "react-dom";
 import RootStore from "../stores/RootStore";
@@ -18,15 +18,13 @@ import getLogger from "../tools/getLogger";
 import RenameDialog from "../components/RenameDialog";
 import CopyMagnetUrlDialog from "../components/CopyMagnetUrlDialog";
 import MoveDialog from "../components/MoveDialog";
+import RootStoreCtx from "../tools/RootStoreCtx";
 
 const logger = getLogger('Index');
 
-@inject('rootStore')
 @observer
 class Index extends React.Component {
-  static propTypes = {
-    rootStore: PropTypes.object,
-  };
+  static contextType = RootStoreCtx;
 
   constructor(props) {
     super(props);
@@ -40,7 +38,7 @@ class Index extends React.Component {
 
   /**@return {RootStore}*/
   get rootStore() {
-    return this.props.rootStore;
+    return this.context;
   }
 
   onIntervalInit = () => {
@@ -107,16 +105,13 @@ class Index extends React.Component {
   }
 }
 
-@inject('rootStore')
 @observer
 class Dialogs extends React.Component {
-  static propTypes = {
-    rootStore: PropTypes.object,
-  };
+  static contextType = RootStoreCtx;
 
   /**@return {RootStore}*/
   get rootStore() {
-    return this.props.rootStore;
+    return this.context;
   }
 
   render() {
@@ -206,8 +201,8 @@ class GoInOptions extends React.PureComponent {
 const rootStore = window.rootStore = RootStore.create();
 
 ReactDOM.render(
-  <Provider rootStore={rootStore}>
+  <RootStoreCtx.Provider value={rootStore}>
     <Index/>
-  </Provider>,
+  </RootStoreCtx.Provider>,
   document.getElementById('root')
 );

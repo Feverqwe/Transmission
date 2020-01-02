@@ -1,19 +1,20 @@
 import React from "react";
-import {inject, observer} from "mobx-react";
+import {observer} from "mobx-react";
 import PropTypes from "prop-types";
 import Dialog from "./Dialog";
+import RootStoreCtx from "../tools/RootStoreCtx";
 
-@inject('rootStore')
 @observer
 class PutUrlDialog extends React.Component {
   static propTypes = {
-    rootStore: PropTypes.object,
     dialogStore: PropTypes.object.isRequired,
   };
 
+  static contextType = RootStoreCtx;
+
   /**@return {RootStore}*/
   get rootStore() {
-    return this.props.rootStore;
+    return this.context;
   }
 
   /**@return {PutUrlDialogStore}*/

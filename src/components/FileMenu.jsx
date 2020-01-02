@@ -1,4 +1,4 @@
-import {inject, observer} from "mobx-react";
+import {observer} from "mobx-react";
 import React from "react";
 import {Item, Separator} from "react-contexify";
 import ContextMenuBody from "./ContextMenuBody";
@@ -17,14 +17,8 @@ const FileMenu = React.memo(() => {
   )
 });
 
-@inject('rootStore')
 @observer
 class FileMenuBody extends ContextMenuBody {
-  /**@return {RootStore}*/
-  get rootStore() {
-    return this.props.rootStore;
-  }
-
   /**@return {FileListStore}*/
   get fileListStore() {
     return this.rootStore.fileList;

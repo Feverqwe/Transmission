@@ -2,7 +2,7 @@ import "../assets/css/options.less";
 import React from "react";
 import RootStore from "../stores/RootStore";
 import ReactDOM from "react-dom";
-import {inject, observer, Provider} from "mobx-react";
+import {observer} from "mobx-react";
 import {HashRouter, NavLink, Redirect, Route, Switch, withRouter} from "react-router-dom";
 import PropTypes from "prop-types";
 import {SketchPicker} from "react-color";
@@ -12,15 +12,13 @@ import storageGet from "../tools/storageGet";
 import storageSet from "../tools/storageSet";
 import storageRemove from "../tools/storageRemove";
 import {migrateConfig} from "../tools/loadConfig";
+import RootStoreCtx from "../tools/RootStoreCtx";
 
 const logger = getLogger('Options');
 
-@inject('rootStore')
 @observer
 class Options extends React.Component {
-  static propTypes = {
-    rootStore: PropTypes.object,
-  };
+  static contextType = RootStoreCtx;
 
   constructor(props) {
     super(props);
@@ -34,7 +32,7 @@ class Options extends React.Component {
 
   /**@return {RootStore}*/
   get rootStore() {
-    return this.props.rootStore;
+    return this.context;
   }
 
   render() {
@@ -87,13 +85,13 @@ class Options extends React.Component {
 }
 
 @withRouter
-@inject('rootStore')
 @observer
 class ClientOptions extends React.Component {
   static propTypes = {
-    rootStore: PropTypes.object,
     location: PropTypes.object,
   };
+
+  static contextType = RootStoreCtx;
 
   state = {
     clientStatus: null, // pending, done, error
@@ -102,12 +100,12 @@ class ClientOptions extends React.Component {
 
   /**@return {RootStore}*/
   get rootStore() {
-    return this.props.rootStore;
+    return this.context;
   }
 
   /**@return {ConfigStore}*/
   get configStore() {
-    return this.props.rootStore.config;
+    return this.rootStore.config;
   }
 
   handleSubmit = (e) => {
@@ -239,18 +237,16 @@ class ClientOptions extends React.Component {
 }
 
 class OptionsPage extends React.Component {
-  static propTypes = {
-    rootStore: PropTypes.object,
-  };
+  static contextType = RootStoreCtx;
 
   /**@return {RootStore}*/
   get rootStore() {
-    return this.props.rootStore;
+    return this.context;
   }
 
   /**@return {ConfigStore}*/
   get configStore() {
-    return this.props.rootStore.config;
+    return this.rootStore.config;
   }
 
   handleChange = (e) => {
@@ -278,7 +274,6 @@ class OptionsPage extends React.Component {
   };
 }
 
-@inject('rootStore')
 @observer
 class UiOptions extends OptionsPage {
   render() {
@@ -318,7 +313,6 @@ class UiOptions extends OptionsPage {
   }
 }
 
-@inject('rootStore')
 @observer
 class NotifyOptions extends OptionsPage {
   state = {
@@ -383,7 +377,6 @@ class NotifyOptions extends OptionsPage {
   }
 }
 
-@inject('rootStore')
 @observer
 class CtxOptions extends OptionsPage {
   render() {
@@ -400,7 +393,6 @@ class CtxOptions extends OptionsPage {
   }
 }
 
-@inject('rootStore')
 @observer
 class CtxOptionsDirs extends OptionsPage {
   handleSubmit = (e) => {
@@ -693,8 +685,8 @@ class NotFound extends React.Component {
 const rootStore = window.rootStore = RootStore.create();
 
 ReactDOM.render(
-  <Provider rootStore={rootStore}>
+  <RootStoreCtx.Provider value={rootStore}>
     <Options/>
-  </Provider>,
+  </RootStoreCtx.Provider>,
   document.getElementById('root')
 );

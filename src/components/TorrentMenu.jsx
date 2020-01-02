@@ -1,6 +1,6 @@
 import React from "react";
 import {Item, Separator, Submenu} from "react-contexify";
-import {inject, observer} from "mobx-react";
+import {observer} from "mobx-react";
 import ContextMenuBody from "./ContextMenuBody";
 import {FixedMenu} from "./FixedReactContexify";
 
@@ -18,14 +18,8 @@ const TorrentMenu = React.memo(() => {
   )
 });
 
-@inject('rootStore')
 @observer
 class TorrentMenuBody extends ContextMenuBody {
-  /**@return {RootStore}*/
-  get rootStore() {
-    return this.props.rootStore;
-  }
-
   /**@return {TorrentListStore}*/
   get torrentListStore() {
     return this.rootStore.torrentList;

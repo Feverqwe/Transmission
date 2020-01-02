@@ -1,5 +1,5 @@
 import React from "react";
-import {inject, observer} from "mobx-react";
+import {observer} from "mobx-react";
 import TableHeadColumn from "./TableHeadColumn";
 import PropTypes from "prop-types";
 import FileListTableItem from "./FileListTableItem";
@@ -8,15 +8,13 @@ import FileColumnMenu from "./FileColumnMenu";
 import {contextMenu} from "react-contexify";
 import Interval from "./Interval";
 import getLogger from "../tools/getLogger";
+import RootStoreCtx from "../tools/RootStoreCtx";
 
 const logger = getLogger('FileListTable');
 
-@inject('rootStore')
 @observer
 class FileListTable extends React.Component {
-  static propTypes = {
-    rootStore: PropTypes.object,
-  };
+  static contextType = RootStoreCtx;
 
   componentDidMount() {
     if (!this.rootStore.torrentList.isSelectedId(this.fileListStore.id)) {
@@ -42,7 +40,7 @@ class FileListTable extends React.Component {
 
   /**@return {RootStore}*/
   get rootStore() {
-    return this.props.rootStore;
+    return this.context;
   }
 
   /**@return {FileListStore}*/
@@ -139,17 +137,17 @@ class CloseFileList extends React.PureComponent {
   }
 }
 
-@inject('rootStore')
 @observer
 class FileListTableHead extends React.Component {
   static propTypes = {
-    rootStore: PropTypes.object,
     withStyle: PropTypes.bool,
   };
 
+  static contextType = RootStoreCtx;
+
   /**@return {RootStore}*/
   get rootStore() {
-    return this.props.rootStore;
+    return this.context;
   }
 
   handleSort = (column, directoin) => {
@@ -192,15 +190,9 @@ class FileListTableHead extends React.Component {
   }
 }
 
-@inject('rootStore')
 @observer
 class FileListTableHeadColumn extends TableHeadColumn {
   type = 'fl';
-
-  /**@return {RootStore}*/
-  get rootStore() {
-    return this.props.rootStore;
-  }
 
   /**@return {FileListStore}*/
   get fileListStore() {
@@ -280,16 +272,13 @@ class FileListTableHeadColumn extends TableHeadColumn {
   }
 }
 
-@inject('rootStore')
 @observer
 class FileListTableFiles extends React.Component {
-  static propTypes = {
-    rootStore: PropTypes.object,
-  };
+  static contextType = RootStoreCtx;
 
   /**@return {RootStore}*/
   get rootStore() {
-    return this.props.rootStore;
+    return this.context;
   }
 
   render() {

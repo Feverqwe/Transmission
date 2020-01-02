@@ -1,9 +1,10 @@
 import React from "react";
 import {Item, Separator} from "react-contexify";
-import {inject, observer} from "mobx-react";
+import {observer} from "mobx-react";
 import PropTypes from "prop-types";
 import speedToStr from "../tools/speedToStr";
 import {FixedMenu} from "./FixedReactContexify";
+import RootStoreCtx from "../tools/RootStoreCtx";
 
 const SpeedMenu = React.memo(() => {
   return (
@@ -13,17 +14,17 @@ const SpeedMenu = React.memo(() => {
   )
 });
 
-@inject('rootStore')
 @observer
 class SpeedMenuBody extends React.Component {
   static propTypes = {
-    rootStore: PropTypes.object,
     propsFromTrigger: PropTypes.object,
   };
 
+  static contextType = RootStoreCtx;
+
   /**@return {RootStore}*/
   get rootStore() {
-    return this.props.rootStore;
+    return this.context;
   }
 
   get menuType() {
