@@ -4,7 +4,11 @@ import RootStoreCtx from "../tools/RootStoreCtx";
 
 class ContextMenuBody extends React.Component {
   static propTypes = {
-    propsFromTrigger: PropTypes.object.isRequired,
+    propsFromTrigger: PropTypes.object,
+  };
+
+  static defaultProps = {
+    propsFromTrigger: {},
   };
 
   static contextType = RootStoreCtx;

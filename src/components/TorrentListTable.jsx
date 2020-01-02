@@ -12,15 +12,13 @@ import RootStoreCtx from "../tools/RootStoreCtx";
 class TorrentListTable extends React.Component {
   static contextType = RootStoreCtx;
 
-  constructor(props) {
-    super(props);
-
-    this.rootStore.flushTorrentList();
-  }
-
   /**@return {RootStore}*/
   get rootStore() {
     return this.context;
+  }
+
+  componentDidMount() {
+    this.rootStore.flushTorrentList();
   }
 
   handleScroll = (e) => {

@@ -26,19 +26,17 @@ const logger = getLogger('Index');
 class Index extends React.Component {
   static contextType = RootStoreCtx;
 
-  constructor(props) {
-    super(props);
+  /**@return {RootStore}*/
+  get rootStore() {
+    return this.context;
+  }
 
+  componentDidMount() {
     this.rootStore.init();
 
     if (this.rootStore.isPopup) {
       document.body.classList.add('popup');
     }
-  }
-
-  /**@return {RootStore}*/
-  get rootStore() {
-    return this.context;
   }
 
   onIntervalInit = () => {

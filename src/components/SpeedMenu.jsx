@@ -20,6 +20,10 @@ class SpeedMenuBody extends React.Component {
     propsFromTrigger: PropTypes.object,
   };
 
+  static defaultProps = {
+    propsFromTrigger: {},
+  };
+
   static contextType = RootStoreCtx;
 
   /**@return {RootStore}*/
