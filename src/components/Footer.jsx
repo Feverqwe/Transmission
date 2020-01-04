@@ -6,7 +6,7 @@ import SpaceWatcher from "./SpaceWatcher";
 import RootStoreCtx from "../tools/RootStoreCtx";
 
 @observer
-class Footer extends React.Component {
+class Footer extends React.PureComponent {
   static contextType = RootStoreCtx;
 
   /**@return {RootStore}*/

@@ -5,7 +5,7 @@ import Dialog from "./Dialog";
 import RootStoreCtx from "../tools/RootStoreCtx";
 
 @observer
-class CopyMagnetUrlDialog extends React.Component {
+class CopyMagnetUrlDialog extends React.PureComponent {
   static propTypes = {
     dialogStore: PropTypes.object.isRequired,
   };

@@ -23,7 +23,7 @@ import RootStoreCtx from "../tools/RootStoreCtx";
 const logger = getLogger('Index');
 
 @observer
-class Index extends React.Component {
+class Index extends React.PureComponent {
   static contextType = RootStoreCtx;
 
   /**@return {RootStore}*/
@@ -104,7 +104,7 @@ class Index extends React.Component {
 }
 
 @observer
-class Dialogs extends React.Component {
+class Dialogs extends React.PureComponent {
   static contextType = RootStoreCtx;
 
   /**@return {RootStore}*/

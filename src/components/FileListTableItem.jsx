@@ -5,7 +5,7 @@ import {contextMenu} from "react-contexify";
 import RootStoreCtx from "../tools/RootStoreCtx";
 
 @observer
-class FileListTableItem extends React.Component {
+class FileListTableItem extends React.PureComponent {
   static propTypes = {
     file: PropTypes.object.isRequired,
   };
@@ -142,7 +142,7 @@ class FileListTableItem extends React.Component {
 }
 
 @observer
-class FileName extends React.Component {
+class FileName extends React.PureComponent {
   static propTypes = {
     fileStore: PropTypes.object.isRequired,
     fileListStore: PropTypes.object.isRequired,

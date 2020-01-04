@@ -9,7 +9,7 @@ import RootStoreCtx from "../tools/RootStoreCtx";
 const logger = getLogger('Menu');
 
 @observer
-class Menu extends React.Component {
+class Menu extends React.PureComponent {
   state = {
     showDropLayer: false,
     isDropped: false
@@ -198,7 +198,7 @@ class Menu extends React.Component {
 }
 
 @observer
-class LabelSelect extends React.Component {
+class LabelSelect extends React.PureComponent {
   static contextType = RootStoreCtx;
 
   /**@return {RootStore}*/

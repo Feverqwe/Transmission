@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import {Item} from "react-contexify";
 
 @observer
-class ColumnMenuItem extends React.Component {
+class ColumnMenuItem extends React.PureComponent {
   static propTypes = {
     column: PropTypes.object.isRequired,
     onToggleColumn: PropTypes.func.isRequired,

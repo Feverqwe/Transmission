@@ -5,7 +5,7 @@ import Dialog from "./Dialog";
 import RootStoreCtx from "../tools/RootStoreCtx";
 
 @observer
-class PutUrlDialog extends React.Component {
+class PutUrlDialog extends React.PureComponent {
   static propTypes = {
     dialogStore: PropTypes.object.isRequired,
   };

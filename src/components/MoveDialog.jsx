@@ -5,7 +5,7 @@ import Dialog from "./Dialog";
 import RootStoreCtx from "../tools/RootStoreCtx";
 
 @observer
-class MoveDialog extends React.Component {
+class MoveDialog extends React.PureComponent {
   static propTypes = {
     dialogStore: PropTypes.object.isRequired,
   };

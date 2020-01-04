@@ -13,7 +13,7 @@ import RootStoreCtx from "../tools/RootStoreCtx";
 const logger = getLogger('FileListTable');
 
 @observer
-class FileListTable extends React.Component {
+class FileListTable extends React.PureComponent {
   static contextType = RootStoreCtx;
 
   componentDidMount() {
@@ -138,7 +138,7 @@ class CloseFileList extends React.PureComponent {
 }
 
 @observer
-class FileListTableHead extends React.Component {
+class FileListTableHead extends React.PureComponent {
   static propTypes = {
     withStyle: PropTypes.bool,
   };
@@ -273,7 +273,7 @@ class FileListTableHeadColumn extends TableHeadColumn {
 }
 
 @observer
-class FileListTableFiles extends React.Component {
+class FileListTableFiles extends React.PureComponent {
   static contextType = RootStoreCtx;
 
   /**@return {RootStore}*/

@@ -15,7 +15,7 @@ const SpeedMenu = React.memo(() => {
 });
 
 @observer
-class SpeedMenuBody extends React.Component {
+class SpeedMenuBody extends React.PureComponent {
   static propTypes = {
     propsFromTrigger: PropTypes.object,
   };

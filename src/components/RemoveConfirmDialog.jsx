@@ -5,7 +5,7 @@ import Dialog from "./Dialog";
 import RootStoreCtx from "../tools/RootStoreCtx";
 
 @observer
-class RemoveConfirmDialog extends React.Component {
+class RemoveConfirmDialog extends React.PureComponent {
   static propTypes = {
     dialogStore: PropTypes.object.isRequired,
   };

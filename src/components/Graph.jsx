@@ -5,7 +5,7 @@ import {curveBasis, easeQuadOut, line, scaleLinear, select, transition} from "d3
 import RootStoreCtx from "../tools/RootStoreCtx";
 
 @observer
-class Graph extends React.Component {
+class Graph extends React.PureComponent {
   static contextType = RootStoreCtx;
 
   /**@return {RootStore}*/

@@ -4,7 +4,7 @@ import Interval from "./Interval";
 import RootStoreCtx from "../tools/RootStoreCtx";
 
 @observer
-class SpaceWatcher extends React.Component {
+class SpaceWatcher extends React.PureComponent {
   static contextType = RootStoreCtx;
 
   /**@return {RootStore}*/

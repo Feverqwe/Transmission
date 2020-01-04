@@ -13,7 +13,7 @@ const FileColumnMenu = React.memo(() => {
 });
 
 @observer
-class FileColumnMenuBody extends React.Component {
+class FileColumnMenuBody extends React.PureComponent {
   static contextType = RootStoreCtx;
 
   /**@return {RootStore}*/

@@ -5,7 +5,7 @@ import {contextMenu} from 'react-contexify';
 import RootStoreCtx from "../tools/RootStoreCtx";
 
 @observer
-class TorrentListTableItem extends React.Component {
+class TorrentListTableItem extends React.PureComponent {
   static propTypes = {
     torrent: PropTypes.object.isRequired,
   };

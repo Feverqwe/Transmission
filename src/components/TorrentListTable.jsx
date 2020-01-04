@@ -9,7 +9,7 @@ import {contextMenu} from "react-contexify";
 import RootStoreCtx from "../tools/RootStoreCtx";
 
 @observer
-class TorrentListTable extends React.Component {
+class TorrentListTable extends React.PureComponent {
   static contextType = RootStoreCtx;
 
   /**@return {RootStore}*/
@@ -44,7 +44,7 @@ class TorrentListTable extends React.Component {
 }
 
 @observer
-class TorrentListTableHead extends React.Component {
+class TorrentListTableHead extends React.PureComponent {
   static propTypes = {
     withStyle: PropTypes.bool,
   };
@@ -177,7 +177,7 @@ class TorrentListTableHeadColumn extends TableHeadColumn {
 }
 
 @observer
-class TorrentListTableTorrents extends React.Component {
+class TorrentListTableTorrents extends React.PureComponent {
   static contextType = RootStoreCtx;
 
   /**@return {RootStore}*/

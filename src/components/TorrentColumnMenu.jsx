@@ -13,7 +13,7 @@ const TorrentColumnMenu = React.memo(() => {
 });
 
 @observer
-class TorrentColumnMenuBody extends React.Component {
+class TorrentColumnMenuBody extends React.PureComponent {
   static contextType = RootStoreCtx;
 
   /**@return {RootStore}*/

@@ -17,7 +17,7 @@ import RootStoreCtx from "../tools/RootStoreCtx";
 const logger = getLogger('Options');
 
 @observer
-class Options extends React.Component {
+class Options extends React.PureComponent {
   static contextType = RootStoreCtx;
 
   /**@return {RootStore}*/
@@ -84,7 +84,7 @@ class Options extends React.Component {
 
 @withRouter
 @observer
-class ClientOptions extends React.Component {
+class ClientOptions extends React.PureComponent {
   static propTypes = {
     location: PropTypes.object,
   };
@@ -490,7 +490,7 @@ class CtxOptionsDirs extends OptionsPage {
   }
 }
 
-class BackupOptions extends React.Component {
+class BackupOptions extends React.PureComponent {
   state = {
     state: 'idle', // idle, pending, done, error
     saveState: 'idle', // idle, pending, done, error
@@ -585,7 +585,7 @@ class BackupOptions extends React.Component {
   }
 }
 
-class RestoreOptions extends React.Component {
+class RestoreOptions extends React.PureComponent {
   state = {
     cloudData: null,
     hasCloudData: false,
@@ -672,7 +672,7 @@ class RestoreOptions extends React.Component {
   }
 }
 
-class NotFound extends React.Component {
+class NotFound extends React.PureComponent {
   render() {
     return (
       <Redirect to={"/"}/>
