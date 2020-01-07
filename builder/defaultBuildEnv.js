@@ -18,17 +18,27 @@ if (browser === 'firefox') {
   };
 }
 
+let babelEnvOptions;
+if (mode === 'development') {
+  babelEnvOptions = {
+    targets,
+    useBuiltIns: false,
+  };
+} else {
+  babelEnvOptions = {
+    targets,
+    useBuiltIns: 'usage',
+    corejs: 2,
+  };
+}
+
 global.BUILD_ENV = {
   distName: `transmissionEasyClient-${browser}-${version}`,
   outputPath: path.join(__dirname, `../dist/${browser}`),
-  mode: mode,
+  mode,
   devtool: mode === 'development' ? 'inline-source-map' : 'none',
-  version: version,
-  browser: browser,
-  babelEnvOptions: {
-    targets: targets,
-    useBuiltIns: mode === 'development' ? false : 'usage',
-    corejs: 2,
-  },
+  version,
+  browser,
+  babelEnvOptions,
   FLAG_ENABLE_LOGGER: true,
 };
