@@ -161,7 +161,7 @@ class ClientOptions extends React.PureComponent {
         case 'pending': {
           status = (
             <div>
-              <img alt="" src={require('../assets/img/loading.gif')}/>
+              <img alt="" src={require('../assets/img/loading.gif').default}/>
             </div>
           );
           break;
