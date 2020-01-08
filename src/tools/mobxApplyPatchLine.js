@@ -39,7 +39,8 @@ const mobxApplyPatchLine = (target, session, delta) => {
 };
 
 function mobxApplySnapshotBranches(target, snapshot, branches) {
-  branches.forEach((key) => {
+  for (let i = 0, len = branches.length; i < len; i++) {
+    const key = branches[i];
     const snapshotBranch = snapshot[key];
     const targetBranch = target[key];
     if (!isObjectOrArray(targetBranch) || !isObjectOrArray(snapshotBranch)) {
@@ -47,7 +48,7 @@ function mobxApplySnapshotBranches(target, snapshot, branches) {
     } else {
       applySnapshot(targetBranch, snapshotBranch);
     }
-  });
+  }
 }
 
 export default mobxApplyPatchLine;
