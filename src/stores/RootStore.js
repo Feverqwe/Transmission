@@ -74,24 +74,22 @@ const RootStore = types.model('RootStore', {
         self.state = 'error';
       }
     }),
-    syncClient: flow(function* () {
-      try {
-        try {
-          const response = yield fetchBgStoreDelta(bgStoreSession);
-          mobxApplyPatchLine(self, bgStoreSession, response);
-        } catch (err) {
+    applyPatchLine(delta) {
+      mobxApplyPatchLine(self, bgStoreSession, delta);
+    },
+    syncClient: function() {
+      return oneLimit(() => {
+        return fetchBgStoreDelta(bgStoreSession).then(self.applyPatchLine).catch((err) => {
           if (err.code === 'APPLY_PATH_ERROR') {
             logger.warn('syncClient: apply_path_error', err);
-            const response = yield fetchBgStoreDelta(bgStoreSession);
-            mobxApplyPatchLine(self, bgStoreSession, response);
-          } else {
-            throw err;
+            return fetchBgStoreDelta(bgStoreSession).then(self.applyPatchLine);
           }
-        }
-      } catch (err) {
-        logger.error('syncClient error', err);
-      }
-    }),
+          throw err;
+        }).catch((err) => {
+          logger.error('syncClient error', err);
+        });
+      });
+    },
     flushTorrentList() {
       return self.torrentList = {};
     },
@@ -125,9 +123,7 @@ const RootStore = types.model('RootStore', {
 });
 
 const fetchBgStoreDelta = ({id, patchId}) => {
-  return oneLimit(() => {
-    return callApi({action: 'getBgStoreDelta', id, patchId});
-  });
+  return callApi({action: 'getBgStoreDelta', id, patchId});
 };
 
 const fetchConfig = () => {
