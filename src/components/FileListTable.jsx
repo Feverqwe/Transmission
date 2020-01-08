@@ -71,7 +71,7 @@ class FileListTable extends React.PureComponent {
 
     if (!torrent) {
       return (
-        <CloseFileList onClose={this.handleClose}/>
+        <DoCloseFileList onClose={this.handleClose}/>
       );
     }
 
@@ -121,21 +121,15 @@ class FileListTable extends React.PureComponent {
   }
 }
 
-class CloseFileList extends React.PureComponent {
-  static propTypes = {
-    onClose: PropTypes.func.isRequired,
-  };
-
-  constructor(props) {
-    super(props);
-
-    this.props.onClose();
-  }
-
-  render() {
-    return null;
-  }
-}
+const DoCloseFileList = React.memo(({onClose}) => {
+  React.useEffect(() => {
+    onClose();
+  }, []);
+  return null;
+});
+DoCloseFileList.propTypes = {
+  onClose: PropTypes.func.isRequired,
+};
 
 @observer
 class FileListTableHead extends React.PureComponent {

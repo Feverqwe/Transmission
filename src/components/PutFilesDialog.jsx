@@ -72,7 +72,7 @@ class PutFilesDialog extends React.PureComponent {
     let submit = null;
     if (!directorySelect) {
       submit = (
-        <Submit onSubmit={this.handleSubmit}/>
+        <DoSubmit onSubmit={this.handleSubmit}/>
       );
     }
 
@@ -94,20 +94,14 @@ class PutFilesDialog extends React.PureComponent {
   }
 }
 
-class Submit extends React.PureComponent {
-  static propTypes = {
-    onSubmit: PropTypes.func.isRequired
-  };
-
-  constructor(props) {
-    super(props);
-
-    props.onSubmit();
-  }
-
-  render() {
-    return null;
-  }
-}
+const DoSubmit = React.memo(({onSubmit}) => {
+  React.useEffect(() => {
+    onSubmit();
+  }, []);
+  return null;
+});
+DoSubmit.propTypes = {
+  onSubmit: PropTypes.func.isRequired
+};
 
 export default PutFilesDialog;
