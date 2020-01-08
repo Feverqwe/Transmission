@@ -3,7 +3,7 @@ import "rc-select/assets/index.css";
 import "../assets/css/stylesheet.less";
 import React from "react";
 import Menu from "../components/Menu";
-import {observer} from "mobx-react";
+import {observer, useObserver} from "mobx-react";
 import PropTypes from "prop-types";
 import ReactDOM from "react-dom";
 import RootStore from "../stores/RootStore";
@@ -103,51 +103,50 @@ class Index extends React.PureComponent {
   }
 }
 
-@observer
-class Dialogs extends React.PureComponent {
-  static contextType = RootStoreCtx;
+const Dialogs = React.memo(() => {
+  const rootStore = React.useContext(RootStoreCtx);
 
-  /**@return {RootStore}*/
-  get rootStore() {
-    return this.context;
-  }
-
-  render() {
-    const dialogs = Array.from(this.rootStore.dialogs.values()).map((dialog) => {
+  return useObserver(() => {
+    const dialogs = [];
+    rootStore.dialogs.forEach((dialog) => {
       switch (dialog.type) {
         case 'putFiles': {
           if (dialog.isReady) {
-            return (
+            dialogs.push(
               <PutFilesDialog key={dialog.id} dialogStore={dialog}/>
             );
-          } else {
-            return null;
           }
+          break;
         }
         case 'putUrl': {
-          return (
+          dialogs.push(
             <PutUrlDialog key={dialog.id} dialogStore={dialog}/>
           );
+          break;
         }
         case 'removeConfirm': {
-          return (
+          dialogs.push(
             <RemoveConfirmDialog key={dialog.id} dialogStore={dialog}/>
           );
+          break;
         }
         case 'rename': {
-          return (
+          dialogs.push(
             <RenameDialog key={dialog.id} dialogStore={dialog}/>
           );
+          break;
         }
         case 'copyMagnetUrl': {
-          return (
+          dialogs.push(
             <CopyMagnetUrlDialog key={dialog.id} dialogStore={dialog}/>
           );
+          break;
         }
         case 'move': {
-          return (
+          dialogs.push(
             <MoveDialog key={dialog.id} dialogStore={dialog}/>
           );
+          break;
         }
       }
     });
@@ -155,46 +154,34 @@ class Dialogs extends React.PureComponent {
     return (
       dialogs
     );
-  }
-}
+  });
+});
 
-class SetPopupHeight extends React.PureComponent {
-  static propTypes = {
-    height: PropTypes.number.isRequired
-  };
-
-  constructor(props) {
-    super(props);
-
+const SetPopupHeight = React.memo(({height}) => {
+  React.useEffect(() => {
     const root = document.getElementById('root');
-    root.style.minHeight = this.props.height + 'px';
-    root.style.maxHeight = this.props.height + 'px';
-  }
+    root.style.minHeight = height + 'px';
+    root.style.maxHeight = height + 'px';
+  }, []);
+  return null;
+});
+SetPopupHeight.propTypes = {
+  height: PropTypes.number.isRequired,
+};
 
-  render() {
-    return null;
-  }
-}
-
-class GoInOptions extends React.PureComponent {
-  static propTypes = {
-    isPopup: PropTypes.bool.isRequired
-  };
-
-  constructor(props) {
-    super(props);
-
-    if (this.props.isPopup) {
+const GoInOptions = React.memo(({isPopup}) => {
+  React.useEffect(() => {
+    if (isPopup) {
       location.href = '/options.html#/#redirectPopup'
     } else {
       location.href = '/options.html#/#redirect'
     }
-  }
-
-  render() {
-    return null;
-  }
-}
+  }, []);
+  return null;
+});
+GoInOptions.propTypes = {
+  isPopup: PropTypes.bool.isRequired,
+};
 
 const rootStore = window.rootStore = RootStore.create();
 

@@ -17,6 +17,7 @@ import mobxApplyPatchLine from "../tools/mobxApplyPatchLine";
 const promiseLimit = require('promise-limit');
 
 const logger = getLogger('RootStore');
+const oneLimit = promiseLimit(1);
 
 let dialogIndex = 0;
 
@@ -31,7 +32,6 @@ let dialogIndex = 0;
  * @property {Map<*,*>} dialogs
  * @property {function:Promise} init
  * @property {function:Promise} syncClient
- * @property {function:Promise} _syncClient
  * @property {function} flushTorrentList
  * @property {function} createFileList
  * @property {function} destroyFileList
@@ -53,8 +53,6 @@ const RootStore = types.model('RootStore', {
     RenameDialogStore, CopyMagnetUrlDialogStore, MoveDialogStore
   )),
 }).actions((self) => {
-  const oneLimit = promiseLimit(1);
-
   const bgStoreSession = {
     id: null,
     patchId: null
@@ -65,26 +63,33 @@ const RootStore = types.model('RootStore', {
       if (self.state === 'pending') return;
       self.state = 'pending';
       try {
-        self.config = yield fetchConfig();
-        yield self.syncClient();
+        const [config] = yield Promise.all([
+          fetchConfig(),
+          self.syncClient()
+        ]);
+        self.config = config;
         self.state = 'done';
       } catch (err) {
         logger.error('init error', err);
         self.state = 'error';
       }
     }),
-    syncClient: flow(function* (isForce) {
-      return yield oneLimit(() => self._syncClient(isForce));
-    }),
-    _syncClient: flow(function* (isForce) {
+    syncClient: flow(function* () {
       try {
-        const response = yield fetchBgStoreDelta(bgStoreSession);
-        mobxApplyPatchLine(self, bgStoreSession, response);
-      } catch (err) {
-        logger.error('_syncClient error', err);
-        if (err.code === 'APPLY_PATH_ERROR' && !isForce) {
-          self.syncClient(true);
+        try {
+          const response = yield fetchBgStoreDelta(bgStoreSession);
+          mobxApplyPatchLine(self, bgStoreSession, response);
+        } catch (err) {
+          if (err.code === 'APPLY_PATH_ERROR') {
+            logger.warn('syncClient: apply_path_error', err);
+            const response = yield fetchBgStoreDelta(bgStoreSession);
+            mobxApplyPatchLine(self, bgStoreSession, response);
+          } else {
+            throw err;
+          }
         }
+      } catch (err) {
+        logger.error('syncClient error', err);
       }
     }),
     flushTorrentList() {
@@ -120,7 +125,9 @@ const RootStore = types.model('RootStore', {
 });
 
 const fetchBgStoreDelta = ({id, patchId}) => {
-  return callApi({action: 'getBgStoreDelta', id, patchId});
+  return oneLimit(() => {
+    return callApi({action: 'getBgStoreDelta', id, patchId});
+  });
 };
 
 const fetchConfig = () => {
