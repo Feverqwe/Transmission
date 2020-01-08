@@ -11,7 +11,7 @@ const Interval = React.memo(({interval, onFire}) => {
     return () => {
       clearInterval(intervalId);
     };
-  }, []);
+  }, [interval]);
   return null;
 });
 Interval.propTypes = {

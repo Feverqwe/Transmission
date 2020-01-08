@@ -3,7 +3,7 @@ import "rc-select/assets/index.css";
 import "../assets/css/stylesheet.less";
 import React from "react";
 import Menu from "../components/Menu";
-import {observer, useObserver} from "mobx-react";
+import {useObserver} from "mobx-react";
 import PropTypes from "prop-types";
 import ReactDOM from "react-dom";
 import RootStore from "../stores/RootStore";
@@ -22,71 +22,65 @@ import RootStoreCtx from "../tools/RootStoreCtx";
 
 const logger = getLogger('Index');
 
-@observer
-class Index extends React.PureComponent {
-  static contextType = RootStoreCtx;
+const Index = React.memo(() => {
+  const rootStore = React.useContext(RootStoreCtx);
 
-  /**@return {RootStore}*/
-  get rootStore() {
-    return this.context;
-  }
+  React.useEffect(() => {
+    rootStore.init();
 
-  componentDidMount() {
-    this.rootStore.init();
-
-    if (this.rootStore.isPopup) {
+    if (rootStore.isPopup) {
       document.body.classList.add('popup');
     }
-  }
+  }, []);
 
-  onIntervalFire = (isInit) => {
+  const onIntervalFire = React.useCallback((isInit) => {
     if (isInit) {
-      this.rootStore.client.updateSettings().catch((err) => {
+      rootStore.client.updateSettings().catch((err) => {
         logger.error('onIntervalFire updateSettings error', err);
       });
     }
-    this.rootStore.client.updateTorrentList(isInit).catch((err) => {
+    rootStore.client.updateTorrentList(isInit).catch((err) => {
       logger.error('onIntervalFire updateTorrentList error', err);
     });
-  };
+  }, []);
 
-  render() {
-    if (this.rootStore.state === 'pending') {
+  return useObserver(() => {
+    if (rootStore.state === 'pending') {
       return (
         <div className="loading"/>
       );
     }
 
-    if (this.rootStore.state !== 'done') {
-      return `Loading: ${this.rootStore.state}`;
+    if (rootStore.state !== 'done') {
+      return `Loading: ${rootStore.state}`;
     }
 
     let fileList = null;
-    if (this.rootStore.fileList) {
+    if (rootStore.fileList) {
       fileList = (
-        <FileListTable key={this.rootStore.fileList.id}/>
+        <FileListTable key={rootStore.fileList.id}/>
       );
     }
 
     let setPopupHeight = null;
-    if (this.rootStore.isPopup) {
+    if (rootStore.isPopup) {
       setPopupHeight = (
-        <SetPopupHeight key={'h-' + this.rootStore.config.popupHeight} height={this.rootStore.config.popupHeight}/>
+        <SetPopupHeight height={rootStore.config.popupHeight}/>
       );
     }
 
-    const uiUpdateInterval = this.rootStore.config.uiUpdateInterval;
+    const uiUpdateInterval = rootStore.config.uiUpdateInterval;
 
     let goInOptions = null;
-    if (this.rootStore.config.hostname === '') {
+    if (rootStore.config.hostname === '') {
       goInOptions = (
-        <GoInOptions isPopup={this.rootStore.isPopup}/>
+        <GoInOptions isPopup={rootStore.isPopup}/>
       );
     }
 
     return (
       <>
-        <Interval key={'' + uiUpdateInterval} onFire={this.onIntervalFire} interval={uiUpdateInterval}/>
+        <Interval onFire={onIntervalFire} interval={uiUpdateInterval}/>
         <Menu/>
         <TorrentListTable/>
         <Footer/>
@@ -96,8 +90,8 @@ class Index extends React.PureComponent {
         {goInOptions}
       </>
     );
-  }
-}
+  });
+});
 
 const Dialogs = React.memo(() => {
   const rootStore = React.useContext(RootStoreCtx);
@@ -158,7 +152,7 @@ const SetPopupHeight = React.memo(({height}) => {
     const root = document.getElementById('root');
     root.style.minHeight = height + 'px';
     root.style.maxHeight = height + 'px';
-  }, []);
+  }, [height]);
   return null;
 });
 SetPopupHeight.propTypes = {

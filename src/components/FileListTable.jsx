@@ -95,7 +95,7 @@ class FileListTable extends React.PureComponent {
       <>
         <div className="file-list-warpper">
           <div className="file-list">
-            <Interval interval={uiUpdateInterval} onInit={this.onIntervalFire} onFire={this.onIntervalFire}/>
+            <Interval interval={uiUpdateInterval} onFire={this.onIntervalFire}/>
             <div onScroll={this.handleScroll} className="fl-layer">
               {spinner}
               <table ref={this.refFixedHead} className="fl-table-head" border="0" cellSpacing="0" cellPadding="0">
