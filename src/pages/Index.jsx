@@ -39,17 +39,13 @@ class Index extends React.PureComponent {
     }
   }
 
-  onIntervalInit = () => {
-    this.rootStore.client.updateTorrentList(true).catch((err) => {
-      logger.error('onIntervalInit updateTorrentList error', err);
-    });
-    this.rootStore.client.updateSettings().catch((err) => {
-      logger.error('onIntervalInit updateSettings error', err);
-    });
-  };
-
-  onIntervalFire = () => {
-    this.rootStore.client.updateTorrentList().catch((err) => {
+  onIntervalFire = (isInit) => {
+    if (isInit) {
+      this.rootStore.client.updateSettings().catch((err) => {
+        logger.error('onIntervalFire updateSettings error', err);
+      });
+    }
+    this.rootStore.client.updateTorrentList(isInit).catch((err) => {
       logger.error('onIntervalFire updateTorrentList error', err);
     });
   };
@@ -90,7 +86,7 @@ class Index extends React.PureComponent {
 
     return (
       <>
-        <Interval key={'' + uiUpdateInterval} onInit={this.onIntervalInit} onFire={this.onIntervalFire} interval={uiUpdateInterval}/>
+        <Interval key={'' + uiUpdateInterval} onFire={this.onIntervalFire} interval={uiUpdateInterval}/>
         <Menu/>
         <TorrentListTable/>
         <Footer/>

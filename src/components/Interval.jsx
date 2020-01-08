@@ -1,13 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-const Interval = React.memo(({interval, onFire, onInit}) => {
+const Interval = React.memo(({interval, onFire}) => {
   React.useEffect(() => {
     const intervalId = setInterval(() => {
-      onFire();
+      onFire(false);
     }, interval);
 
-    onInit && onInit();
+    onFire(true);
     return () => {
       clearInterval(intervalId);
     };
@@ -17,7 +17,6 @@ const Interval = React.memo(({interval, onFire, onInit}) => {
 Interval.propTypes = {
   interval: PropTypes.number.isRequired,
   onFire: PropTypes.func.isRequired,
-  onInit: PropTypes.func,
 };
 
 export default Interval;
