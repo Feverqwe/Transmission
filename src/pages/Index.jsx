@@ -45,7 +45,7 @@ const Index = React.memo(() => {
   }, []);
 
   return useObserver(() => {
-    if (rootStore.state === 'pending') {
+    if (['idle', 'pending'].includes(rootStore.state)) {
       return (
         <div className="loading"/>
       );
