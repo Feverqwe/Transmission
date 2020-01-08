@@ -160,17 +160,6 @@ const TorrentStore = types.model('TorrentStore', {
       }
     },
     get stateText() {
-      if (self.errorCode > 0 && [1, 2].indexOf(self.statusCode) === -1) {
-        let errorString = self.errorString;
-        if (/^Error: /.test(errorString)) {
-          errorString = errorString.substr(7);
-        }
-        if (errorString) {
-          return chrome.i18n.getMessage('OV_FL_ERROR') + ': ' + errorString;
-        }
-        return chrome.i18n.getMessage('OV_FL_ERROR');
-      }
-
       switch (self.statusCode) {
         case 0: { // StatusStopped
           if (self.percentDone === 1) {
@@ -199,6 +188,19 @@ const TorrentStore = types.model('TorrentStore', {
           return `Unknown (${self.statusCode})`;
         }
       }
+    },
+    get errorMessage() {
+      if (self.errorCode > 0) {
+        let errorString = self.errorString;
+        if (/^Error: /.test(errorString)) {
+          errorString = errorString.substr(7);
+        }
+        if (errorString) {
+          return chrome.i18n.getMessage('OV_FL_ERROR') + ': ' + errorString;
+        }
+        return chrome.i18n.getMessage('OV_FL_ERROR');
+      }
+      return '';
     },
     get selected() {
       /**@type RootStore*/const rootStore = getRoot(self);

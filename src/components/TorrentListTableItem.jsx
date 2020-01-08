@@ -144,9 +144,16 @@ class TorrentListTableItem extends React.PureComponent {
           break;
         }
         case 'status': {
+          let errorIcon = null;
+          const errorMessage = torrent.errorMessage;
+          if (errorMessage) {
+            errorIcon = (
+              <i className={'error_icon'} title={errorMessage}/>
+            );
+          }
           columns.push(
             <td key={name} className={name}>
-              <div title={torrent.stateText}>{torrent.stateText}</div>
+              <div title={torrent.stateText}>{errorIcon}{torrent.stateText}</div>
             </td>
           );
           break;
