@@ -10,6 +10,7 @@ const byColumnMap = {
   upped: 'uploaded',
   added: 'addedTime',
   completed: 'completedTime',
+  status: 'statusCode',
 };
 
 /**
