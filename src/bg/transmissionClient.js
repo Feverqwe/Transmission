@@ -14,7 +14,7 @@ HeadersPolyfill.prototype.append = ((append) => {
     try {
       return append.apply(this, arguments);
     } catch (err) {
-      if (err.message === 'Invalid character in header field name') {
+      if (/Invalid character in header field name/.test(err.message)) {
         logger.warn('Skip invalid header field name', JSON.stringify(name));
       } else {
         throw err;
