@@ -13,7 +13,6 @@
     "release": "npm run _releaseCh && npm run _releaseFf && npm run _releaseOp"
   },
   "dependencies": {
-    "babel-polyfill": "^6.26.0",
     "d3": "^5.15.0",
     "escape-string-regexp": "^2.0.0",
     "fecha": "^3.0.3",
@@ -46,7 +45,6 @@
     "babel-loader": "^8.0.6",
     "clean-webpack-plugin": "^3.0.0",
     "copy-webpack-plugin": "^5.1.1",
-    "core-js": "^2.6.11",
     "css-loader": "^3.4.0",
     "cssnano": "^4.1.10",
     "file-loader": "^5.0.2",

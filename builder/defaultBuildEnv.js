@@ -10,11 +10,11 @@ const browser = getArgvValue('--BROWSER') || 'chrome';
 let targets;
 if (browser === 'firefox') {
   targets = {
-    firefox: mode === 'development' ? '71' : '48',
+    firefox: mode === 'development' ? '88' : '88',
   };
 } else {
   targets = {
-    chrome: mode === 'development' ? '79' : '49',
+    chrome: mode === 'development' ? '88' : '88',
   };
 }
 
@@ -22,13 +22,10 @@ let babelEnvOptions;
 if (mode === 'development') {
   babelEnvOptions = {
     targets,
-    useBuiltIns: false,
   };
 } else {
   babelEnvOptions = {
     targets,
-    useBuiltIns: 'usage',
-    corejs: 2,
   };
 }
 
