@@ -1,7 +1,8 @@
 import React from "react";
-import {inject, observer} from "mobx-react";
+import {observer} from "mobx-react";
 import ColumnMenuItem from "./ColumnMenuItem";
 import {FixedMenu} from "./FixedReactContexify";
+import RootStoreCtx from "../tools/RootStoreCtx";
 
 const FileColumnMenu = React.memo(() => {
   return (
@@ -11,12 +12,13 @@ const FileColumnMenu = React.memo(() => {
   )
 });
 
-@inject('rootStore')
 @observer
-class FileColumnMenuBody extends React.Component {
+class FileColumnMenuBody extends React.PureComponent {
+  static contextType = RootStoreCtx;
+
   /**@return {RootStore}*/
   get rootStore() {
-    return this.props.rootStore;
+    return this.context;
   }
 
   handleToggleColumn = ({event: e, props, column}) => {

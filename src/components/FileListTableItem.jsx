@@ -1,19 +1,20 @@
-import {inject, observer} from "mobx-react";
+import {observer} from "mobx-react";
 import React from "react";
 import PropTypes from "prop-types";
 import {contextMenu} from "react-contexify";
+import RootStoreCtx from "../tools/RootStoreCtx";
 
-@inject('rootStore')
 @observer
-class FileListTableItem extends React.Component {
+class FileListTableItem extends React.PureComponent {
   static propTypes = {
     file: PropTypes.object.isRequired,
-    rootStore: PropTypes.object,
   };
+
+  static contextType = RootStoreCtx;
 
   /**@return {RootStore}*/
   get rootStore() {
-    return this.props.rootStore;
+    return this.context;
   }
 
   /**@return {FileListStore}*/
@@ -141,7 +142,7 @@ class FileListTableItem extends React.Component {
 }
 
 @observer
-class FileName extends React.Component {
+class FileName extends React.PureComponent {
   static propTypes = {
     fileStore: PropTypes.object.isRequired,
     fileListStore: PropTypes.object.isRequired,

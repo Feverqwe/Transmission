@@ -1,20 +1,17 @@
 import React from "react";
-import {inject, observer} from "mobx-react";
-import PropTypes from "prop-types";
+import {observer} from "mobx-react";
 import {contextMenu} from "react-contexify";
 import SpeedMenu from "./SpeedMenu";
 import SpaceWatcher from "./SpaceWatcher";
+import RootStoreCtx from "../tools/RootStoreCtx";
 
-@inject('rootStore')
 @observer
-class Footer extends React.Component {
-  static propTypes = {
-    rootStore: PropTypes.object,
-  };
+class Footer extends React.PureComponent {
+  static contextType = RootStoreCtx;
 
   /**@return {RootStore}*/
   get rootStore() {
-    return this.props.rootStore;
+    return this.context;
   }
 
   handleDownloadContextMenu = (e) => {

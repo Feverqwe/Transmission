@@ -1,30 +1,22 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-class Interval extends React.PureComponent {
-  static propTypes = {
-    interval: PropTypes.number.isRequired,
-    onFire: PropTypes.func.isRequired,
-    onInit: PropTypes.func,
-  };
+const Interval = React.memo(({interval, onFire}) => {
+  React.useEffect(() => {
+    const intervalId = setInterval(() => {
+      onFire(false);
+    }, interval);
 
-  constructor(props) {
-    super(props);
-
-    this.intervalId = setInterval(() => {
-      props.onFire();
-    }, this.props.interval);
-
-    props.onInit && props.onInit();
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.intervalId);
-  }
-
-  render() {
-    return null;
-  }
-}
+    onFire(true);
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [interval]);
+  return null;
+});
+Interval.propTypes = {
+  interval: PropTypes.number.isRequired,
+  onFire: PropTypes.func.isRequired,
+};
 
 export default Interval;

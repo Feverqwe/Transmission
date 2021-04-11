@@ -1,19 +1,16 @@
-import {inject, observer} from "mobx-react";
+import {observer} from "mobx-react";
 import {autorun} from "mobx";
 import React from "react";
-import PropTypes from "prop-types";
 import {curveBasis, easeQuadOut, line, scaleLinear, select, transition} from "d3";
+import RootStoreCtx from "../tools/RootStoreCtx";
 
-@inject('rootStore')
 @observer
-class Graph extends React.Component {
-  static propTypes = {
-    rootStore: PropTypes.object,
-  };
+class Graph extends React.PureComponent {
+  static contextType = RootStoreCtx;
 
   /**@return {RootStore}*/
   get rootStore() {
-    return this.props.rootStore;
+    return this.context;
   }
 
   graphAutorun = null;

@@ -1,15 +1,16 @@
 import React from "react";
-import {inject, observer} from "mobx-react";
+import {observer} from "mobx-react";
 import PropTypes from "prop-types";
 import Dialog from "./Dialog";
+import RootStoreCtx from "../tools/RootStoreCtx";
 
-@inject('rootStore')
 @observer
-class MoveDialog extends React.Component {
+class MoveDialog extends React.PureComponent {
   static propTypes = {
-    rootStore: PropTypes.object,
     dialogStore: PropTypes.object.isRequired,
   };
+
+  static contextType = RootStoreCtx;
 
   state = {
     showCustomLocation: true
@@ -17,7 +18,7 @@ class MoveDialog extends React.Component {
 
   /**@return {RootStore}*/
   get rootStore() {
-    return this.props.rootStore;
+    return this.context;
   }
 
   /**@return {MoveDialogStore}*/

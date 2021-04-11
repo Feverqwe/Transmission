@@ -7,7 +7,7 @@ const idComponent = {
   graph: Graph,
 };
 
-class ComponentLoader extends React.Component {
+class ComponentLoader extends React.PureComponent {
   static propTypes = {
     'load-page': PropTypes.string.isRequired,
   };

@@ -7,27 +7,38 @@ const version = require('../src/manifest').version;
 
 const browser = getArgvValue('--BROWSER') || 'chrome';
 
-let targets = null;
+let targets;
 if (browser === 'firefox') {
   targets = {
-    firefox: mode === 'development' ? '66' : '48',
+    firefox: mode === 'development' ? '71' : '48',
   };
 } else {
   targets = {
-    chrome: mode === 'development' ? '74' : '49',
+    chrome: mode === 'development' ? '79' : '49',
+  };
+}
+
+let babelEnvOptions;
+if (mode === 'development') {
+  babelEnvOptions = {
+    targets,
+    useBuiltIns: false,
+  };
+} else {
+  babelEnvOptions = {
+    targets,
+    useBuiltIns: 'usage',
+    corejs: 2,
   };
 }
 
 global.BUILD_ENV = {
   distName: `transmissionEasyClient-${browser}-${version}`,
   outputPath: path.join(__dirname, `../dist/${browser}`),
-  mode: mode,
+  mode,
   devtool: mode === 'development' ? 'inline-source-map' : 'none',
-  version: version,
-  browser: browser,
-  babelEnvOptions: {
-    targets: targets,
-    useBuiltIns: mode === 'development' ? false : 'usage',
-  },
+  version,
+  browser,
+  babelEnvOptions,
   FLAG_ENABLE_LOGGER: true,
 };

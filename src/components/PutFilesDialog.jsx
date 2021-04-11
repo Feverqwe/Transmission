@@ -1,19 +1,20 @@
 import React from "react";
-import {inject, observer} from "mobx-react";
+import {observer} from "mobx-react";
 import PropTypes from "prop-types";
 import Dialog from "./Dialog";
+import RootStoreCtx from "../tools/RootStoreCtx";
 
-@inject('rootStore')
 @observer
-class PutFilesDialog extends React.Component {
+class PutFilesDialog extends React.PureComponent {
   static propTypes = {
-    rootStore: PropTypes.object,
     dialogStore: PropTypes.object.isRequired,
   };
 
+  static contextType = RootStoreCtx;
+
   /**@return {RootStore}*/
   get rootStore() {
-    return this.props.rootStore;
+    return this.context;
   }
 
   /**@return {SpaceWatcher}*/
@@ -71,7 +72,7 @@ class PutFilesDialog extends React.Component {
     let submit = null;
     if (!directorySelect) {
       submit = (
-        <Submit onSubmit={this.handleSubmit}/>
+        <DoSubmit onSubmit={this.handleSubmit}/>
       );
     }
 
@@ -93,20 +94,14 @@ class PutFilesDialog extends React.Component {
   }
 }
 
-class Submit extends React.PureComponent {
-  static propTypes = {
-    onSubmit: PropTypes.func.isRequired
-  };
-
-  constructor(props) {
-    super(props);
-
-    props.onSubmit();
-  }
-
-  render() {
-    return null;
-  }
-}
+const DoSubmit = React.memo(({onSubmit}) => {
+  React.useEffect(() => {
+    onSubmit();
+  }, []);
+  return null;
+});
+DoSubmit.propTypes = {
+  onSubmit: PropTypes.func.isRequired
+};
 
 export default PutFilesDialog;

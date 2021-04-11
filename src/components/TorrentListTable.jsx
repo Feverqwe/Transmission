@@ -1,28 +1,24 @@
 import React from "react";
-import {inject, observer} from "mobx-react";
+import {observer} from "mobx-react";
 import PropTypes from "prop-types";
 import TableHeadColumn from "./TableHeadColumn";
 import TorrentListTableItem from "./TorrentListTableItem";
 import TorrentMenu from "./TorrentMenu";
 import TorrentColumnMenu from "./TorrentColumnMenu";
 import {contextMenu} from "react-contexify";
+import RootStoreCtx from "../tools/RootStoreCtx";
 
-@inject('rootStore')
 @observer
-class TorrentListTable extends React.Component {
-  static propTypes = {
-    rootStore: PropTypes.object,
-  };
-
-  constructor(props) {
-    super(props);
-
-    this.rootStore.flushTorrentList();
-  }
+class TorrentListTable extends React.PureComponent {
+  static contextType = RootStoreCtx;
 
   /**@return {RootStore}*/
   get rootStore() {
-    return this.props.rootStore;
+    return this.context;
+  }
+
+  componentDidMount() {
+    this.rootStore.flushTorrentList();
   }
 
   handleScroll = (e) => {
@@ -47,17 +43,17 @@ class TorrentListTable extends React.Component {
   }
 }
 
-@inject('rootStore')
 @observer
-class TorrentListTableHead extends React.Component {
+class TorrentListTableHead extends React.PureComponent {
   static propTypes = {
-    rootStore: PropTypes.object,
     withStyle: PropTypes.bool,
   };
 
+  static contextType = RootStoreCtx;
+
   /**@return {RootStore}*/
   get rootStore() {
-    return this.props.rootStore;
+    return this.context;
   }
 
   handleSort = (column, directoin) => {
@@ -98,15 +94,9 @@ class TorrentListTableHead extends React.Component {
   }
 }
 
-@inject('rootStore')
 @observer
 class TorrentListTableHeadColumn extends TableHeadColumn {
   type = 'tr';
-
-  /**@return {RootStore}*/
-  get rootStore() {
-    return this.props.rootStore;
-  }
 
   /**@return {TorrentListStore}*/
   get torrentListStore() {
@@ -186,16 +176,13 @@ class TorrentListTableHeadColumn extends TableHeadColumn {
   }
 }
 
-@inject('rootStore')
 @observer
-class TorrentListTableTorrents extends React.Component {
-  static propTypes = {
-    rootStore: PropTypes.object,
-  };
+class TorrentListTableTorrents extends React.PureComponent {
+  static contextType = RootStoreCtx;
 
   /**@return {RootStore}*/
   get rootStore() {
-    return this.props.rootStore;
+    return this.context;
   }
 
   /**@return {TorrentListStore}*/

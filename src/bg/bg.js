@@ -4,20 +4,22 @@ import ContextMenu from "./contextMenu";
 import BgStore from "../stores/BgStore";
 import {autorun} from "mobx";
 import TransmissionClient from "./transmissionClient";
+import MobxPatchLine from "../tools/mobxPatchLine";
 
 const serializeError = require('serialize-error');
 const logger = getLogger('background');
 
 const notificationIcons = {
-  complete: require('!file-loader!../assets/img/notification_done.png'),
-  add: require('!file-loader!../assets/img/notification_add.png'),
-  error: require('!file-loader!../assets/img/notification_error.png')
+  complete: require('!file-loader!../assets/img/notification_done.png').default,
+  add: require('!file-loader!../assets/img/notification_add.png').default,
+  error: require('!file-loader!../assets/img/notification_error.png').default,
 };
 
 class Bg {
   constructor() {
     /**@type BgStore*/
     this.bgStore = BgStore.create();
+    this.bgStorePathLine = new MobxPatchLine(this.bgStore, ['client']);
     this.client = null;
     this.daemon = null;
     this.contextMenu = null;
@@ -106,9 +108,9 @@ class Bg {
     let promise = null;
 
     switch (message && message.action) {
-      case 'getClientStoreDelta': {
+      case 'getBgStoreDelta': {
         promise = this.whenReady().then(() => {
-          return this.bgStore.clientPatchLine.getDelta(message.id, message.patchId);
+          return this.bgStorePathLine.getDelta(message.id, message.patchId);
         });
         break;
       }

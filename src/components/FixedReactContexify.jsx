@@ -4,6 +4,7 @@ import isFirefox from "../tools/isFirefox";
 class FixedMenu extends _Menu {
   constructor(props) {
     super(props);
+
     if (isFirefox()) {
       const prevBindWindowEvent = this.bindWindowEvent;
       this.bindWindowEvent = () => {

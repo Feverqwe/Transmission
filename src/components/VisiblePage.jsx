@@ -1,31 +1,24 @@
 import React from "react";
 
-class VisiblePage extends React.PureComponent {
-  state = {
-    isHidden: document.hidden
-  };
+const VisiblePage = React.memo(({children}) => {
+  const [isHidden, setHidden] = React.useState(document.hidden);
 
-  componentDidMount() {
-    document.addEventListener('visibilitychange', this.handleVisibilityChange);
-  }
+  const handleVisibilityChange = React.useCallback(() => {
+    setHidden(document.hidden);
+  }, []);
 
-  componentWillUnmount() {
-    document.removeEventListener('visibilitychange', this.handleVisibilityChange);
-  }
+  React.useEffect(() => {
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    }
+  }, []);
 
-  handleVisibilityChange = () => {
-    this.setState({
-      isHidden: document.hidden
-    });
-  };
+  if (isHidden) return null;
 
-  render() {
-    if (this.state.isHidden) return null;
-
-    return (
-      this.props.children
-    );
-  }
-}
+  return (
+    children
+  );
+});
 
 export default VisiblePage;

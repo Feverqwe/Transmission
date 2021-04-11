@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from "prop-types";
 
-class Dialog extends React.Component {
+class Dialog extends React.PureComponent {
   static propTypes = {
     onClose: PropTypes.func.isRequired,
     className: PropTypes.string,

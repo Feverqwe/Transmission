@@ -1,19 +1,20 @@
-import {inject, observer} from "mobx-react";
+import {observer} from "mobx-react";
 import React from "react";
 import PropTypes from "prop-types";
 import {contextMenu} from 'react-contexify';
+import RootStoreCtx from "../tools/RootStoreCtx";
 
-@inject('rootStore')
 @observer
-class TorrentListTableItem extends React.Component {
+class TorrentListTableItem extends React.PureComponent {
   static propTypes = {
     torrent: PropTypes.object.isRequired,
-    rootStore: PropTypes.object,
   };
+
+  static contextType = RootStoreCtx;
 
   /**@return {RootStore}*/
   get rootStore() {
-    return this.props.rootStore;
+    return this.context;
   }
 
   /**@return {TorrentStore}*/
@@ -143,9 +144,16 @@ class TorrentListTableItem extends React.Component {
           break;
         }
         case 'status': {
+          let errorIcon = null;
+          const errorMessage = torrent.errorMessage;
+          if (errorMessage) {
+            errorIcon = (
+              <i className={'error_icon'} title={errorMessage}/>
+            );
+          }
           columns.push(
             <td key={name} className={name}>
-              <div title={torrent.stateText}>{torrent.stateText}</div>
+              <div title={torrent.stateText}>{errorIcon}{torrent.stateText}</div>
             </td>
           );
           break;

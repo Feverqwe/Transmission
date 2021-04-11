@@ -1,11 +1,22 @@
 import React from "react";
 import PropTypes from "prop-types";
+import RootStoreCtx from "../tools/RootStoreCtx";
 
 class ContextMenuBody extends React.Component {
   static propTypes = {
-    rootStore: PropTypes.object,
-    propsFromTrigger: PropTypes.object.isRequired,
+    propsFromTrigger: PropTypes.object,
   };
+
+  static defaultProps = {
+    propsFromTrigger: {},
+  };
+
+  static contextType = RootStoreCtx;
+
+  /**@return {RootStore}*/
+  get rootStore() {
+    return this.context;
+  }
 
   state = {
     source: null,

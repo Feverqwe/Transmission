@@ -1,28 +1,25 @@
 import React from "react";
-import {inject, observer} from "mobx-react";
-import PropTypes from "prop-types";
+import {observer} from "mobx-react";
 import Select, {Option} from "rc-select";
 import ComponentLoader from "./ComponentLoader";
 import getLogger from "../tools/getLogger";
 import VisiblePage from "./VisiblePage";
+import RootStoreCtx from "../tools/RootStoreCtx";
 
 const logger = getLogger('Menu');
 
-@inject('rootStore')
 @observer
-class Menu extends React.Component {
-  static propTypes = {
-    rootStore: PropTypes.object,
-  };
-
+class Menu extends React.PureComponent {
   state = {
     showDropLayer: false,
     isDropped: false
   };
 
+  static contextType = RootStoreCtx;
+
   /**@return {RootStore}*/
   get rootStore() {
-    return this.props.rootStore;
+    return this.context;
   }
 
   componentDidMount() {
@@ -200,16 +197,13 @@ class Menu extends React.Component {
   }
 }
 
-@inject('rootStore')
 @observer
-class LabelSelect extends React.Component {
-  static propTypes = {
-    rootStore: PropTypes.object,
-  };
+class LabelSelect extends React.PureComponent {
+  static contextType = RootStoreCtx;
 
   /**@return {RootStore}*/
   get rootStore() {
-    return this.props.rootStore;
+    return this.context;
   }
 
   handleChange = (value) => {

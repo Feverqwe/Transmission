@@ -1,15 +1,18 @@
-import {onPatch} from "mobx-state-tree";
+import {getSnapshot, onPatch} from "mobx-state-tree";
 import ErrorWithCode from "./errorWithCode";
 
+const escapeRegExp = require('escape-string-regexp');
 const INDEX_LIMIT = 1E9;
 
 class MobxPatchLine {
-  constructor(store) {
-    this.id = 'id-' + Math.trunc(Math.random() * 1000);
+  constructor(store, branches) {
+    this.id = Math.trunc(Math.random() * 1000);
 
     this.patchLine = [];
     this.timeLine = [];
     this.idLine = [];
+    this.branches = branches;
+    this.branchesRe = branches && new RegExp(`^/(${branches.map(escapeRegExp).join('|')})(\/|$)`);
 
     this.index = 0;
 
@@ -33,32 +36,47 @@ class MobxPatchLine {
   }
 
   get lastPatchId() {
-    return this.idLine[this.idLine.length - 1];
+    return this.idLine[this.idLine.length - 1] || null;
   }
 
   getDelta(id, fromPatchId) {
     const patchId = this.lastPatchId;
     try {
       if (id !== this.id) {
-        throw new ErrorWithCode('ID_IS_NOT_EQUAL', 'ID_IS_NOT_EQUAL');
+        throw new ErrorWithCode('store id is not equal', 'ID_IS_NOT_EQUAL');
       }
-      return {id: this.id, patchId, type: 'patch', result: this.getPatchAfterId(fromPatchId)};
+      return {id: this.id, branches: this.branches, patchId, type: 'patch', result: this.getPatchAfterId(fromPatchId)};
     } catch (err) {
       if (['ID_IS_NOT_EQUAL', 'PATCH_ID_IS_NOT_FOUND'].indexOf(err.code) !== -1) {
-        return {id: this.id, patchId, type: 'snapshot', result: this.getSnapshot()};
+        return {id: this.id, branches: this.branches, patchId, type: 'snapshot', result: this.getSnapshot()};
       }
       throw err;
     }
   }
 
   getSnapshot() {
-    return this.store.toJSON();
+    let snapshot;
+    if (this.branches) {
+      snapshot = {};
+      this.branches.forEach((key) => {
+        const branch = this.store[key];
+        if (!isObjectOrArray(branch)) {
+          snapshot[key] = branch;
+        } else {
+          snapshot[key] = getSnapshot(branch);
+        }
+      });
+    } else {
+      snapshot = getSnapshot(this.store);
+    }
+    return snapshot;
   }
 
   getPatchAfterId(id) {
+    if (this.lastPatchId === id) return [];
     const pos = this.idLine.indexOf(id);
     if (pos === -1) {
-      throw new ErrorWithCode('PATCH_ID_IS_NOT_FOUND', 'PATCH_ID_IS_NOT_FOUND');
+      throw new ErrorWithCode('Patch is is not found', 'PATCH_ID_IS_NOT_FOUND');
     }
     return this.patchLine.slice(pos + 1);
   }
@@ -72,6 +90,11 @@ class MobxPatchLine {
   }
 
   handlePath = (patch) => {
+    if (this.branchesRe) {
+      if (!this.branchesRe.test(patch.path))
+        return;
+      patch = Object.assign({}, patch, {path: '.' + patch.path});
+    }
     this.patchLine.push(patch);
     this.idLine.push(this.patchId);
     this.timeLine.push(Date.now());
@@ -114,6 +137,10 @@ class MobxPatchLine {
     this.idLine.splice(0);
     this.timeLine.splice(0);
   }
+}
+
+export function isObjectOrArray(value) {
+  return value !== null && typeof value === 'object';
 }
 
 export default MobxPatchLine;

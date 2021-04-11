@@ -3,7 +3,7 @@ import "rc-select/assets/index.css";
 import "../assets/css/stylesheet.less";
 import React from "react";
 import Menu from "../components/Menu";
-import {inject, observer, Provider} from "mobx-react";
+import {useObserver} from "mobx-react";
 import PropTypes from "prop-types";
 import ReactDOM from "react-dom";
 import RootStore from "../stores/RootStore";
@@ -18,83 +18,69 @@ import getLogger from "../tools/getLogger";
 import RenameDialog from "../components/RenameDialog";
 import CopyMagnetUrlDialog from "../components/CopyMagnetUrlDialog";
 import MoveDialog from "../components/MoveDialog";
+import RootStoreCtx from "../tools/RootStoreCtx";
 
 const logger = getLogger('Index');
 
-@inject('rootStore')
-@observer
-class Index extends React.Component {
-  static propTypes = {
-    rootStore: PropTypes.object,
-  };
+const Index = React.memo(() => {
+  const rootStore = React.useContext(RootStoreCtx);
 
-  constructor(props) {
-    super(props);
+  React.useEffect(() => {
+    rootStore.init();
 
-    this.rootStore.init();
-
-    if (this.rootStore.isPopup) {
+    if (rootStore.isPopup) {
       document.body.classList.add('popup');
     }
-  }
+  }, []);
 
-  /**@return {RootStore}*/
-  get rootStore() {
-    return this.props.rootStore;
-  }
-
-  onIntervalInit = () => {
-    this.rootStore.client.updateTorrentList(true).catch((err) => {
-      logger.error('onIntervalInit updateTorrentList error', err);
-    });
-    this.rootStore.client.updateSettings().catch((err) => {
-      logger.error('onIntervalInit updateSettings error', err);
-    });
-  };
-
-  onIntervalFire = () => {
-    this.rootStore.client.updateTorrentList().catch((err) => {
+  const onIntervalFire = React.useCallback((isInit) => {
+    if (isInit) {
+      rootStore.client.updateSettings().catch((err) => {
+        logger.error('onIntervalFire updateSettings error', err);
+      });
+    }
+    rootStore.client.updateTorrentList(isInit).catch((err) => {
       logger.error('onIntervalFire updateTorrentList error', err);
     });
-  };
+  }, []);
 
-  render() {
-    if (this.rootStore.state === 'pending') {
+  return useObserver(() => {
+    if (['idle', 'pending'].includes(rootStore.state)) {
       return (
         <div className="loading"/>
       );
     }
 
-    if (this.rootStore.state !== 'done') {
-      return `Loading: ${this.rootStore.state}`;
+    if (rootStore.state !== 'done') {
+      return `Loading: ${rootStore.state}`;
     }
 
     let fileList = null;
-    if (this.rootStore.fileList) {
+    if (rootStore.fileList) {
       fileList = (
-        <FileListTable key={this.rootStore.fileList.id}/>
+        <FileListTable key={rootStore.fileList.id}/>
       );
     }
 
     let setPopupHeight = null;
-    if (this.rootStore.isPopup) {
+    if (rootStore.isPopup) {
       setPopupHeight = (
-        <SetPopupHeight key={'h-' + this.rootStore.config.popupHeight} height={this.rootStore.config.popupHeight}/>
+        <SetPopupHeight height={rootStore.config.popupHeight}/>
       );
     }
 
-    const uiUpdateInterval = this.rootStore.config.uiUpdateInterval;
+    const uiUpdateInterval = rootStore.config.uiUpdateInterval;
 
     let goInOptions = null;
-    if (this.rootStore.config.hostname === '') {
+    if (rootStore.config.hostname === '') {
       goInOptions = (
-        <GoInOptions isPopup={this.rootStore.isPopup}/>
+        <GoInOptions isPopup={rootStore.isPopup}/>
       );
     }
 
     return (
       <>
-        <Interval key={'' + uiUpdateInterval} onInit={this.onIntervalInit} onFire={this.onIntervalFire} interval={uiUpdateInterval}/>
+        <Interval onFire={onIntervalFire} interval={uiUpdateInterval}/>
         <Menu/>
         <TorrentListTable/>
         <Footer/>
@@ -104,57 +90,53 @@ class Index extends React.Component {
         {goInOptions}
       </>
     );
-  }
-}
+  });
+});
 
-@inject('rootStore')
-@observer
-class Dialogs extends React.Component {
-  static propTypes = {
-    rootStore: PropTypes.object,
-  };
+const Dialogs = React.memo(() => {
+  const rootStore = React.useContext(RootStoreCtx);
 
-  /**@return {RootStore}*/
-  get rootStore() {
-    return this.props.rootStore;
-  }
-
-  render() {
-    const dialogs = Array.from(this.rootStore.dialogs.values()).map((dialog) => {
+  return useObserver(() => {
+    const dialogs = [];
+    rootStore.dialogs.forEach((dialog) => {
       switch (dialog.type) {
         case 'putFiles': {
           if (dialog.isReady) {
-            return (
+            dialogs.push(
               <PutFilesDialog key={dialog.id} dialogStore={dialog}/>
             );
-          } else {
-            return null;
           }
+          break;
         }
         case 'putUrl': {
-          return (
+          dialogs.push(
             <PutUrlDialog key={dialog.id} dialogStore={dialog}/>
           );
+          break;
         }
         case 'removeConfirm': {
-          return (
+          dialogs.push(
             <RemoveConfirmDialog key={dialog.id} dialogStore={dialog}/>
           );
+          break;
         }
         case 'rename': {
-          return (
+          dialogs.push(
             <RenameDialog key={dialog.id} dialogStore={dialog}/>
           );
+          break;
         }
         case 'copyMagnetUrl': {
-          return (
+          dialogs.push(
             <CopyMagnetUrlDialog key={dialog.id} dialogStore={dialog}/>
           );
+          break;
         }
         case 'move': {
-          return (
+          dialogs.push(
             <MoveDialog key={dialog.id} dialogStore={dialog}/>
           );
+          break;
         }
       }
     });
@@ -162,52 +144,40 @@ class Dialogs extends React.Component {
     return (
       dialogs
     );
-  }
-}
+  });
+});
 
-class SetPopupHeight extends React.PureComponent {
-  static propTypes = {
-    height: PropTypes.number.isRequired
-  };
-
-  constructor(props) {
-    super(props);
-
+const SetPopupHeight = React.memo(({height}) => {
+  React.useEffect(() => {
     const root = document.getElementById('root');
-    root.style.minHeight = this.props.height + 'px';
-    root.style.maxHeight = this.props.height + 'px';
-  }
+    root.style.minHeight = height + 'px';
+    root.style.maxHeight = height + 'px';
+  }, [height]);
+  return null;
+});
+SetPopupHeight.propTypes = {
+  height: PropTypes.number.isRequired,
+};
 
-  render() {
-    return null;
-  }
-}
-
-class GoInOptions extends React.PureComponent {
-  static propTypes = {
-    isPopup: PropTypes.bool.isRequired
-  };
-
-  constructor(props) {
-    super(props);
-
-    if (this.props.isPopup) {
+const GoInOptions = React.memo(({isPopup}) => {
+  React.useEffect(() => {
+    if (isPopup) {
       location.href = '/options.html#/#redirectPopup'
     } else {
       location.href = '/options.html#/#redirect'
     }
-  }
-
-  render() {
-    return null;
-  }
-}
+  }, []);
+  return null;
+});
+GoInOptions.propTypes = {
+  isPopup: PropTypes.bool.isRequired,
+};
 
 const rootStore = window.rootStore = RootStore.create();
 
 ReactDOM.render(
-  <Provider rootStore={rootStore}>
+  <RootStoreCtx.Provider value={rootStore}>
     <Index/>
-  </Provider>,
+  </RootStoreCtx.Provider>,
   document.getElementById('root')
 );

@@ -1,23 +1,20 @@
-import {inject, observer} from "mobx-react";
+import {observer} from "mobx-react";
 import React from "react";
-import PropTypes from "prop-types";
 import Interval from "./Interval";
+import RootStoreCtx from "../tools/RootStoreCtx";
 
-@inject('rootStore')
 @observer
-class SpaceWatcher extends React.Component {
-  static propTypes = {
-    rootStore: PropTypes.object,
-  };
+class SpaceWatcher extends React.PureComponent {
+  static contextType = RootStoreCtx;
 
   /**@return {RootStore}*/
   get rootStore() {
-    return this.props.rootStore;
+    return this.context;
   }
 
   /**@return {SpaceWatcherStore}*/
   get spaceWatcherStore() {
-    return this.props.rootStore.spaceWatcher;
+    return this.rootStore.spaceWatcher;
   }
 
   componentDidMount() {
@@ -64,7 +61,7 @@ class SpaceWatcher extends React.Component {
     return (
       <>
         <td className="space disk" onClick={this.handleUpdate} title={title}>{body}</td>
-        <Interval interval={60 * 1000} onFire={this.onIntervalFire} onInit={this.onIntervalFire}/>
+        <Interval interval={60 * 1000} onFire={this.onIntervalFire}/>
       </>
     );
   }

@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import RootStoreCtx from "../tools/RootStoreCtx";
 
 class TableHeadColumn extends React.Component {
   static propTypes = {
@@ -11,6 +12,13 @@ class TableHeadColumn extends React.Component {
     onSaveColumns: PropTypes.func.isRequired,
     withStyle: PropTypes.bool,
   };
+
+  static contextType = RootStoreCtx;
+
+  /**@return {RootStore}*/
+  get rootStore() {
+    return this.context;
+  }
 
   type = null;
 
