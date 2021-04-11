@@ -21,7 +21,7 @@
         "48": "assets/icons/icon_48.png",
         "128": "assets/icons/icon_128.png"
     },
-    "permissions": [ "http://*/*", "https://*/*", "storage", "notifications", "tabs", "contextMenus" ],
+    "permissions": [ "http://*/*", "https://*/*", "storage", "notifications", "contextMenus" ],
     "name": "__MSG_appName__",
     "description": "__MSG_appDesc__",
     "default_locale": "en",
