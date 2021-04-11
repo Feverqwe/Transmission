@@ -4,7 +4,7 @@ import getLogger from "./tools/getLogger";
 import ErrorWithCode from "./tools/errorWithCode";
 import promiseFinally from "./tools/promiseFinally";
 
-const serializeError = require('serialize-error');
+const {serializeError} = require('serialize-error');
 
 const logger = getLogger('tabUrlFetch');
 
