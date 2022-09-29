@@ -13,7 +13,7 @@
     "release": "npm run _releaseCh && npm run _releaseFf && npm run _releaseOp"
   },
   "dependencies": {
-    "d3": "^5.15.0",
+    "d3": "^7.6.1",
     "escape-string-regexp": "^2.0.0",
     "fecha": "^3.0.3",
     "filesize": "^6.0.1",
